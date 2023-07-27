@@ -59,6 +59,7 @@ class Vehicle:
             "change_threshold": self.change_threshold
         }
 
+        # Init DriverModel to this Vehicle class
         self.driver = DM(model_params=model_params)
 
     def _variation(self,avg, dev):
@@ -280,7 +281,6 @@ class Vehicle:
         self.loc = list(self.local_loc)
         self.loc_front = self.loc[0] - self.veh_length / 2
         self.loc_back = self.loc[0] - self.veh_length / 2
-
 
 
 
