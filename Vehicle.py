@@ -1,5 +1,7 @@
 import uuid
 import numpy as np
+
+from common.config import driving_params, window_params
 from DriverModel import DriverModel as DM
 
 class Vehicle:
@@ -19,24 +21,21 @@ class Vehicle:
         politeness: politeness <1
         fail_p: Probability of failure per step
         right_bias: Bias to switch to the right lane
-        start_v: Starging speed when spawned
-        fail_steps: Steps the vehicle will be stationary
-        spawn_weight: Defines the weighted probability that this vehicle will spawn
     """
-    def __iniit__(self, param_dict, logic_dict, road, spawn_loc):
-        self.v_0 = param_dict.get('desired_velocity')
-        self.s_0 = param_dict.get('safety_threshold')
-        self.a = param_dict.get('max_acceleration')
-        self.b = param_dict.get('comfortable_deceleration')
-        self.delta = param_dict.get('acceleration_component')
-        self.veh_length = param_dict.get('vehicle_length') # in window params
-        self.left_bias = param_dict.get('left_bias')
-        self.change_threshold = param_dict.get('lane_change_threshold')
+    def __iniit__(self, logic_params, road, spawn_loc):
+        self.v_0 = driving_params['desired_velocity']
+        self.s_0 = driving_params['safety_threshold']
+        self.a = driving_params['max_acceleration']
+        self.b = driving_params['comfortable_deceleration']
+        self.delta = driving_params['acceleration_component']
+        self.veh_length = window_params['vehicle_length'] # in window params
+        self.left_bias = driving_params['left_bias']
+        self.change_threshold = driving_params['lane_change_threshold']
 
-        # Driving Logic Dependent
-        self.v_var = logic_dict.get('speed_variation')
-        self.T = logic_dict.get('safe_headway')
-        self.politeness = logic_dict.get('politeness_factor')
+        # Driving Logic Dependent Params
+        self.T = logic_params['safe_headway']
+        self.v_var = logic_params['speed_variation']
+        self.politeness = logic_params['politeness_factor']
 
         self.v = self._variation(self.v_0, self.v_var)
 

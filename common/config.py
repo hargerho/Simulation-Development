@@ -30,7 +30,7 @@ road_params = {
     "vehicle_inflow": 4000,
 }
 
-vehicle_params = {
+driving_params = {
     "desired_velocity": 70,
     "safety_threshold": 1.5,
     "max_acceleration": 0.73, # IDM Paper
@@ -38,6 +38,8 @@ vehicle_params = {
     "acceleration_component": 4, # IDM Paper
     "left_bias": 0.3, # MOBIL Paper
     "lane_change_threshold": 0.1, # MOBIL Paper
+    "acc_logic": 'normal', # toggle normal/irrational
+    "shc_logic": 'normal', # toggle normal/cautious
 }
 
 shc_params = {
