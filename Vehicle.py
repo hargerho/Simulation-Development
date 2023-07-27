@@ -15,12 +15,11 @@ class Vehicle:
         T: Safe time headway
         a: Maximum acceleration
         b: Comfortable deceleration
-        delta: Acceleration exponent
-        length: Vehicle length
-        thr: threshold for lane change
-        politeness: politeness <1
-        fail_p: Probability of failure per step
-        right_bias: Bias to switch to the right lane
+        delta: Acceleration component
+        veh_length: Vehicle length
+        change_threshold: lane_change_threshold
+        politeness: lane change politeness
+        left_bias: Bias to switch to the left lane
     """
     def __iniit__(self, logic_params, road, spawn_loc):
         self.v_0 = driving_params['desired_velocity']
@@ -47,6 +46,20 @@ class Vehicle:
         self.local_loc = list(spawn_loc)
         self.local_v = self.v
         self.local_accel = 0.
+
+        model_params = {
+            "v_0": self.v_0,
+            "s_0": self.s_0,
+            "a": self.a,
+            "b": self.b,
+            "delta": self.delta,
+            "T": self.T,
+            "left_bias": self.left_bias,
+            "politeness": self.politeness,
+            "change_threshold": self.change_threshold
+        }
+
+        self.driver = DM(model_params=model_params)
 
     def _variation(self,avg, dev):
         val = abs(np.random.normal(avg, dev))
@@ -75,9 +88,8 @@ class Vehicle:
             current_front_v = current_front.v
         else:
             # No vehicles infront
-            current_front_dist = self.road.length
+            current_front_dist = self.road.road_length
             current_front_v = self.v
-
 
         # Next timestep
         # Getting distance of new front vehicle
@@ -87,7 +99,7 @@ class Vehicle:
             new_front_v = new_front.v
         else:
             # No vehicles infront
-            new_front_dist = self.road.length
+            new_front_dist = self.road.road_length
             new_front_v = self.v
 
         # Considering the vehicle behind
@@ -100,18 +112,20 @@ class Vehicle:
                 current_back_dist = new_front.loc_back - new_back.loc_front
                 current_back_v = new_front.v
             else:
-                current_back_dist = self.road.length
+                current_back_dist = self.road.road_length
                 current_back_v = self.v
 
             new_back_dist = self.loc_back - new_back.loc_front
             new_back_v = self.v
 
-            disadvantage, new_back_accel = new_back.DM.calc_disadvantage(v=new_back.v, new_surrounding_v=new_front_v, new_surrounding_dist=new_front_dist,
+            # Getting the disadvantage in changing
+            # Consider effects to back vehicle
+            disadvantage, new_back_accel = new_back.DM.calc_disadvantage(v=new_back.v, new_surrounding_v=new_back_v, new_surrounding_dist=new_back_dist,
                                                                      old_surrounding_v=current_back_v, old_surrounding_dist=current_back_dist)
 
-        change_incentive = self.DM.calc_incentive(change_direction=change_dir, v=self.v, new_front_v=new_front_v, new_front_dist=new_front_dist, old_front_v=current_front_v,
+        # Considering front vehicle
+        change_incentive = self.driver.calc_incentive(change_direction=change_dir, v=self.v, new_front_v=new_front_v, new_front_dist=new_front_dist, old_front_v=current_front_v,
                                             old_front_dist=current_front_dist, disadvantage=disadvantage, new_back_accel=new_back_accel)
-
 
         # Extra safety check
         if new_front is not None:
@@ -256,7 +270,7 @@ class Vehicle:
             front_v = self.v
 
         # Update local driving parameters
-        self.local_accel = self.DM.calc_acceleration(v=self.v, surrounding_v=front_v, s=dist) * ts
+        self.local_accel = self.driver.calc_acceleration(v=self.v, surrounding_v=front_v, s=dist) * ts
         self.local_v = self.v + self.local_accel
 
     def update_global(self):
