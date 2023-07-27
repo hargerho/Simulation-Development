@@ -1,5 +1,3 @@
-import os
-
 window_params = {
     "window_width": 900,
     "window_height": 500,
