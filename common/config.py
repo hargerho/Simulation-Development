@@ -15,6 +15,9 @@ window_params = {
     "road_border": 'common/assets/road_mask.png',
     "acc_image": 'common/assets/acc.png',
     "shc_image": 'common/assets/shc.png',
+    "play_button": 'common/assets/play_button.png',
+    "pause_button": 'common/assets/pause_button.png',
+    "record_button": 'common/assets/record_button.png'
 }
 
 simulation_params = {
