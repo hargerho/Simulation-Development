@@ -1,37 +1,41 @@
 import numpy as np
-from Road import Road
 from collections import deque
+
+from common.config import simulation_params
+from Road import Road
 
 class SimulationManager:
     """Class to manage the simulation
 
     Args:
-        params_list: List of car params defining the different car types
-        toplane_loc: Position of the top most lane
-        road_length: Road length
-        num_lanes: Amount of lanes
-        lanewidth: Width of the car lanes
         ts: Time step to use when running the simulation
     """
-    def __init__(self, vehicle_models, toplane_loc=(0,0), road_length = 600, num_lanes=2, lanewidth=5, vehicle_inflow=4000, ts=0.1):
-        self.ts = ts
-        self.road = Road(vehicle_models=vehicle_models, num_lanes=num_lanes, toplane_loc=toplane_loc,
-                         lanewidth=lanewidth, road_length=road_length, vehicle_inflow=vehicle_inflow)
+    def __init__(self, record_flag, pause_flag, terminate_flag):
+        self.ts = simulation_params['ts']
+        self.road = Road()
 
         # Simulation Controls
-        self.record_flag = False
-        self.pause_flag = False
-        self.terminate_flag = False
+        # Default values commented
+        self.record_flag = record_flag # False
+        self.pause_flag = pause_flag # False
+        self.terminate_flag = terminate_flag # False
 
-    def frame(self):
+        self.simulation_record = []
+    def timestep(self):
+        """Single timestep frame
+        """
+
+        if not self.terminate_flag and not self.pause_flag:
+            self.road.update_road(ts=self.ts)
+
+        return self.road.vehicle_list
+
+    def run(self):
         while not self.terminate_flag:
             self.road.update_road(ts=self.ts)
             if self.record_flag:
-                # records
-                pass
-            if self.pause_flag:
-                #pause
-                pass
+                # records simulation
+                self.record_simulation.append([vehicle.vehicle_id() for vehicle in self.timestep()]) # List of dict_id
 
-        return self.road.vehicle_list
+        return self.simulation_record
 

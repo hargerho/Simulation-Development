@@ -1,5 +1,7 @@
 import uuid
 import numpy as np
+
+from common.config import driving_params, window_params
 from DriverModel import DriverModel as DM
 
 class Vehicle:
@@ -13,31 +15,26 @@ class Vehicle:
         T: Safe time headway
         a: Maximum acceleration
         b: Comfortable deceleration
-        delta: Acceleration exponent
-        length: Vehicle length
-        thr: threshold for lane change
-        politeness: politeness <1
-        fail_p: Probability of failure per step
-        right_bias: Bias to switch to the right lane
-        start_v: Starging speed when spawned
-        fail_steps: Steps the vehicle will be stationary
-        spawn_weight: Defines the weighted probability that this vehicle will spawn
+        delta: Acceleration component
+        veh_length: Vehicle length
+        change_threshold: lane_change_threshold
+        politeness: lane change politeness
+        left_bias: Bias to switch to the left lane
     """
-    def __iniit__(self, param_dict, logic_dict, road, spawn_loc):
-        self.v_0 = param_dict.get('desired_velocity')
-        self.s_0 = param_dict.get('safety_threshold')
-        self.a = param_dict.get('max_acceleration')
-        self.b = param_dict.get('comfortable_deceleration')
-        self.delta = param_dict.get('acceleration_component')
-        self.veh_length = param_dict.get('vehicle_length')
-        # self.fail_probability = param_dict.get('failure_probability')
-        self.left_bias = param_dict.get('left_bias')
-        self.change_threshold = param_dict.get('lane_change_threshold')
+    def __iniit__(self, logic_params, road, spawn_loc):
+        self.v_0 = driving_params['desired_velocity']
+        self.s_0 = driving_params['safety_threshold']
+        self.a = driving_params['max_acceleration']
+        self.b = driving_params['comfortable_deceleration']
+        self.delta = driving_params['acceleration_component']
+        self.veh_length = window_params['vehicle_length'] # in window params
+        self.left_bias = driving_params['left_bias']
+        self.change_threshold = driving_params['lane_change_threshold']
 
-        # Driving Logic Dependent
-        self.v_var = logic_dict.get('speed_variation')
-        self.T = logic_dict.get('safe_headway')
-        self.politeness = logic_dict.get('politeness_factor')
+        # Driving Logic Dependent Params
+        self.T = logic_params['safe_headway']
+        self.v_var = logic_params['speed_variation']
+        self.politeness = logic_params['politeness_factor']
 
         self.v = self._variation(self.v_0, self.v_var)
 
@@ -45,13 +42,25 @@ class Vehicle:
         self.loc_back = self.loc[0] - self.veh_length / 2
         self.loc_front = self.loc[0] + self.veh_length / 2
 
-        # self.failing = False
-        # self.steps_left = self.params.fail_steps
-
         # Hidden values to not share state
         self.local_loc = list(spawn_loc)
         self.local_v = self.v
         self.local_accel = 0.
+
+        model_params = {
+            "v_0": self.v_0,
+            "s_0": self.s_0,
+            "a": self.a,
+            "b": self.b,
+            "delta": self.delta,
+            "T": self.T,
+            "left_bias": self.left_bias,
+            "politeness": self.politeness,
+            "change_threshold": self.change_threshold
+        }
+
+        # Init DriverModel to this Vehicle class
+        self.driver = DM(model_params=model_params)
 
     def _variation(self,avg, dev):
         val = abs(np.random.normal(avg, dev))
@@ -80,9 +89,8 @@ class Vehicle:
             current_front_v = current_front.v
         else:
             # No vehicles infront
-            current_front_dist = self.road.length
+            current_front_dist = self.road.road_length
             current_front_v = self.v
-
 
         # Next timestep
         # Getting distance of new front vehicle
@@ -92,7 +100,7 @@ class Vehicle:
             new_front_v = new_front.v
         else:
             # No vehicles infront
-            new_front_dist = self.road.length
+            new_front_dist = self.road.road_length
             new_front_v = self.v
 
         # Considering the vehicle behind
@@ -105,18 +113,20 @@ class Vehicle:
                 current_back_dist = new_front.loc_back - new_back.loc_front
                 current_back_v = new_front.v
             else:
-                current_back_dist = self.road.length
+                current_back_dist = self.road.road_length
                 current_back_v = self.v
 
             new_back_dist = self.loc_back - new_back.loc_front
             new_back_v = self.v
 
-            disadvantage, new_back_accel = new_back.DM.calc_disadvantage(v=new_back.v, new_surrounding_v=new_front_v, new_surrounding_dist=new_front_dist,
+            # Getting the disadvantage in changing
+            # Consider effects to back vehicle
+            disadvantage, new_back_accel = new_back.DM.calc_disadvantage(v=new_back.v, new_surrounding_v=new_back_v, new_surrounding_dist=new_back_dist,
                                                                      old_surrounding_v=current_back_v, old_surrounding_dist=current_back_dist)
 
-        change_incentive = self.DM.calc_incentive(change_direction=change_dir, v=self.v, new_front_v=new_front_v, new_front_dist=new_front_dist, old_front_v=current_front_v,
+        # Considering front vehicle
+        change_incentive = self.driver.calc_incentive(change_direction=change_dir, v=self.v, new_front_v=new_front_v, new_front_dist=new_front_dist, old_front_v=current_front_v,
                                             old_front_dist=current_front_dist, disadvantage=disadvantage, new_back_accel=new_back_accel)
-
 
         # Extra safety check
         if new_front is not None:
@@ -261,7 +271,7 @@ class Vehicle:
             front_v = self.v
 
         # Update local driving parameters
-        self.local_accel = self.DM.calc_acceleration(v=self.v, surrounding_v=front_v, s=dist) * ts
+        self.local_accel = self.driver.calc_acceleration(v=self.v, surrounding_v=front_v, s=dist) * ts
         self.local_v = self.v + self.local_accel
 
     def update_global(self):
@@ -271,7 +281,6 @@ class Vehicle:
         self.loc = list(self.local_loc)
         self.loc_front = self.loc[0] - self.veh_length / 2
         self.loc_back = self.loc[0] - self.veh_length / 2
-
 
 
 
