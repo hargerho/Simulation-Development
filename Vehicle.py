@@ -29,8 +29,7 @@ class Vehicle:
         self.a = param_dict.get('max_acceleration')
         self.b = param_dict.get('comfortable_deceleration')
         self.delta = param_dict.get('acceleration_component')
-        self.veh_length = param_dict.get('vehicle_length')
-        # self.fail_probability = param_dict.get('failure_probability')
+        self.veh_length = param_dict.get('vehicle_length') # in window params
         self.left_bias = param_dict.get('left_bias')
         self.change_threshold = param_dict.get('lane_change_threshold')
 
@@ -44,9 +43,6 @@ class Vehicle:
         self.loc = spawn_loc
         self.loc_back = self.loc[0] - self.veh_length / 2
         self.loc_front = self.loc[0] + self.veh_length / 2
-
-        # self.failing = False
-        # self.steps_left = self.params.fail_steps
 
         # Hidden values to not share state
         self.local_loc = list(spawn_loc)
