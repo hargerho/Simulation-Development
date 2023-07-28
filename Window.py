@@ -1,6 +1,7 @@
 import pygame
 
 from common.config import window_params
+from Simulation import Simulation
 
 class Objects:
     def __init__(self, x, y, image, scale):
@@ -44,6 +45,7 @@ class Button(Objects):
 class Window:
     def __init__(self):
         pygame.init()
+        # self.sim = Simulation()
         self.width = window_params["window_width"]
         self.height = window_params["window_height"]
         self.fps = window_params['fps']
@@ -93,24 +95,31 @@ class Window:
         timer_text = font.render(time_str, True, window_params["black"])
         self.win.blit(timer_text, (10, 10))
 
-    def create_vehicle(self):
-        self.shc_vehicle = Objects(10, 450, self.shc_image, 0.05)
-        self.acc_vehicle = Objects(10, 400, self.acc_image, 0.05)
+    def create_vehicle(self, shc_x, shc_y, acc_x, acc_y):
+        self.shc_vehicle = Objects(shc_x, shc_y, self.shc_image, 0.05)
+        self.acc_vehicle = Objects(acc_x, acc_y, self.acc_image, 0.05)
 
-    def create_objects(self):
+    def run_window(self):
+
         self.create_buttons()
-        self.create_vehicle()
-
-    def run_window(self, display_vehicles):
-
-        self.create_objects()
-
-        display_vehicles = display_vehicles
 
         while self.is_running:
             self.win.fill(window_params["white"])
-            self.shc_vehicle.draw(self.win)
-            self.acc_vehicle.draw(self.win)
+
+            # display_vehicles, simulation_record = self.sim.run(is_paused=self.is_paused, is_recording=self.is_recording)
+            # display_vehicles = []
+            # # Drawing the vehicles
+            # for vehicle in display_vehicles:
+            #     vehicle_x = vehicle.vehicle_id['loc'][0]
+            #     vehicle_y = vehicle.vehicle_id['loc'][1]
+
+            #     if vehicle.vehicle_id['vehicle_type'] == 'shc':
+            #         self.shc_vehicle = Objects(vehicle_x, vehicle_y, self.shc_image, 0.05)
+            #         self.shc_vehicle.draw(self.win)
+            #     else:
+            #         self.acc_vehicle = Objects(vehicle_x, vehicle_y, self.acc_image, 0.05)
+            #         self.acc_vehicle.draw(self.win)
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.is_running = False
@@ -139,3 +148,7 @@ class Window:
             self.clock.tick(self.fps)
 
         pygame.quit()
+
+if __name__ == "__main__":
+    window = Window()
+    window.run_window()
