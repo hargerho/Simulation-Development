@@ -15,46 +15,49 @@ class Simulation:
         self.ts = simulation_params['ts']
         self.road = Road()
 
-        self.simulation_record = []
-        self.display_vehicles = [1]
+        # self.simulation_record = []
+        # self.display_vehicles = [1]
 
     def run(self):
         is_paused = False
         is_recording = False
         is_running = True
-
+        display_vehicles = deque()
+        record_simulation = []
+        print("Simulation Running")
         while is_running:
-            print("Simulation Running")
+
             if not is_paused:
-                print("Updating")
                 self.road.update_road(ts=self.ts)
                 for vehicle in self.road.vehicle_list:
-                    self.display_vehicles.append(vehicle.vehicle_id())
+                    display_vehicles.append(vehicle.vehicle_id())
 
                 # Pause Simulation
                 if keyboard.is_pressed('p'):
                     is_paused = True
                     print("Simulation Paused")
 
-                # Continue simulation if previously paused
-                elif is_paused and keyboard.is_pressed('c'):
-                    is_paused = False
-                    print("Simulation Unpaused")
-
                 # Start recording the simulation
-                elif is_recording:
+                if is_recording:
                     # records simulation
-                    self.record_simulation.append([vehicle.vehicle_id() for vehicle in self.road.vehicle_list]) # List of dict_id
+                    record_simulation.append([vehicle.vehicle_id() for vehicle in self.road.vehicle_list]) # List of dict_id
 
                 # Terminate simulation
-                elif keyboard.is_pressed('q'):
+                if keyboard.is_pressed('q'):
                     is_running = False
-                    print("Simulation Quit")
+                    print("Simulation Quits")
 
             # Continue looping if no keyboard command is pressed
+            elif is_paused:
+                if keyboard.is_pressed('c'):
+                    is_paused = False
+                    print("Simulation Unpaused")
+                elif keyboard.is_pressed('q'):
+                    is_running = False
+                    print("Simulation Quited")
             else:
                 continue
 
 
-        return self.display_vehicles, self.simulation_record
+        return display_vehicles, record_simulation
 

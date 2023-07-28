@@ -21,7 +21,7 @@ class Vehicle:
         politeness: lane change politeness
         left_bias: Bias to switch to the left lane
     """
-    def __iniit__(self, logic_params, road, spawn_loc, vehicle_type):
+    def __init__(self, logic_dict, road, spawn_loc, vehicle_type):
         self.road = road
         self.v_0 = driving_params['desired_velocity']
         self.s_0 = driving_params['safety_threshold']
@@ -33,11 +33,11 @@ class Vehicle:
         self.change_threshold = driving_params['lane_change_threshold']
 
         # Driving Logic Dependent Params
-        self.T = logic_params['safe_headway']
-        self.v_var = logic_params['speed_variation']
-        self.politeness = logic_params['politeness_factor']
+        self.T = logic_dict.get('safe_headyway')
+        self.v_var = logic_dict.get('speed_variation')
+        self.politeness = logic_dict.get('politeness_factor')
 
-        self.v = self._variation(self.v_0, self.v_var)
+        self.v = self.variation(self.v_0, self.v_var)
 
         self.loc = spawn_loc
         self.loc_back = self.loc[0] - self.veh_length / 2
@@ -65,14 +65,14 @@ class Vehicle:
         # Init DriverModel to this Vehicle class
         self.driver = DM(model_params=model_params)
 
-    def _variation(self,avg, dev):
+    def variation(self,avg, dev):
         val = abs(np.random.normal(avg, dev))
         if avg - 2 * dev <= val <= avg + 2 * dev:
             return val
         else:
             return avg
 
-    def _calc_lane_change(self, change_dir, current_front, new_front, new_back):
+    def calc_lane_change(self, change_dir, current_front, new_front, new_back):
         """Calculates if a vehicle should change lanes
 
         Args:
@@ -109,7 +109,7 @@ class Vehicle:
         # Considering the vehicle behind
         if new_back is None:
             # If there is no vehicle behind
-            disadvantage, new_back_accel = 0
+            disadvantage, new_back_accel = 0, 0
         else:
             # Current timestep
             if new_front is not None:
@@ -151,7 +151,7 @@ class Vehicle:
         """
 
         dict_id = {
-            'uuid': uuid.uuid4(),
+            'uuid': str(uuid.uuid4()), # unique id for each vehicle
             'vehicle_type': self.vehicle_type,
             'location': self.loc,
             'speed': self.v,
@@ -242,14 +242,14 @@ class Vehicle:
 
         # Lane change flag and update lane location
         # Right change
-        if self.pos[1] != self.road.bottomlane:
-            change_flag = self._calc_lane_change(change_dir='right', current_front=surrounding['front'],
+        if self.loc[1] != self.road.bottomlane:
+            change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
                                                 new_front=surrounding['front_right'], new_back=surrounding['back_right'])
             if change_flag:
                 self.local_loc[1] += self.road.lanewidth
         # Left change
-        if self.pos[1] != self.road.toplane:
-            change_flag = self._calc_lane_change(change_dir='left', current_front=surrounding['front'],
+        if self.loc[1] != self.road.toplane:
+            change_flag = self.calc_lane_change(change_dir='left', current_front=surrounding['front'],
                                                 new_front=surrounding['front_left'], new_back=surrounding['back_left'])
             if change_flag:
                 self.local_loc[1] -= self.road.lanewidth
@@ -259,9 +259,9 @@ class Vehicle:
 
         # Updating local speed
         if surrounding['front'] is not None:
-            dist = surrounding['front'] - self.loc_front
+            dist = surrounding['front'].loc_front - self.loc_front
         else:
-            dist = self.road.length
+            dist = self.road.road_length
 
         # Ensure that distance is non-zero
         if dist != 0:

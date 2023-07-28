@@ -10,10 +10,8 @@ def main():
 
     print("Start")
 
-    display_vehicles, simulation_record = simulation.run(is_paused=is_paused, is_recording=is_recording)
+    display_vehicles, record_simulation = simulation.run()
+    print(display_vehicles)
 
-    for vehicle in display_vehicles:
-        id = vehicle.vehicle_id['uuid']
-        print(id)
 if __name__ == "__main__":
     main()

@@ -1,7 +1,7 @@
 import numpy as np
 import random
 
-from common.config import road_params, driving_params
+from common.config import road_params, driving_params, vehicle_models
 from Vehicle import Vehicle
 
 class Road:
@@ -9,7 +9,6 @@ class Road:
     """
 
     def __init__(self):
-        self.vehicle_models = road_params['vehicle_models']
         self.num_lanes = road_params['num_lanes']
         self.toplane_loc = road_params['toplane_loc']
         self.lanewidth = road_params['lanewidth']
@@ -17,7 +16,7 @@ class Road:
 
         # Spawn frequency
         self.vehicle_frequency = road_params['vehicle_inflow'] / 3600 # per/hour -> per second
-        self.spawn_interval = 1.0/self.vehicle_frequency
+        self.spawn_interval = round(1.0/self.vehicle_frequency, 1) # Round to 1dp since ts is 1dp
 
         # Initial spawn timer
         self.spawn_timer = self.spawn_interval
@@ -27,30 +26,33 @@ class Road:
         self.bottomlane = self.toplane + self.lanewidth * (self.num_lanes-1)
 
         self.vehicle_list: list[Vehicle] = []
+        self.spawn_counter = 0
 
-    def spawn_flag(self):
-        """Boolean flag to determine if a vehicle should be spawn
+    def spawn_vehicle(self):
+        """Spawns a car when internval is met with additional checks
         """
         # Choosing a spawn lane
         lane = int(np.random.choice(range(self.num_lanes)) * self.lanewidth)
 
         # Choosing spawned vehicle type
         random_vehicle = random.random()
-        acc_spawnrate = self.vehicle_models[1]['acc_spawnrate']
+        # acc_dict = self.vehicle_models[1]
+        # acc_spawnrate = acc_dict["acc_spawnrate"]
+        acc_spawnrate = vehicle_models[1].get("acc_spawnrate")
         if random_vehicle <= acc_spawnrate:
             # Spawn ACC, get acc_params from config
             logic_level = driving_params["acc_logic"]
-            spawn_params = self.vehicle_models[1][logic_level]
+            logic_dict = vehicle_models[1][logic_level]
             vehicle_type = 'acc'
         else:
             # Spawn SHC, get shc_params from config
             logic_level = driving_params["shc_logic"]
-            spawn_params = self.vehicle_models[0][logic_level]
+            logic_dict = vehicle_models[0][logic_level]
             vehicle_type = 'shc'
 
         spawn_loc = [self.toplane_loc[0], self.toplane_loc[1] + self.num_lanes]
 
-        tmp_vehicle = Vehicle(vehicle_params=spawn_params, road=self, spawn_loc=spawn_loc, vehicle_type=vehicle_type)
+        tmp_vehicle = Vehicle(logic_dict=logic_dict, road=self, spawn_loc=spawn_loc, vehicle_type=vehicle_type)
 
         # Check surroundings
         tmp_front = tmp_vehicle.get_fov()['front']
@@ -62,6 +64,7 @@ class Road:
                 headway = tmp_vehicle.T
             overlap_flag = (tmp_front.loc_back - tmp_vehicle.loc_front) <= 0
         else:
+            # If no vehicles infront
             headway = tmp_vehicle.T
             overlap_flag = False
 
@@ -70,6 +73,8 @@ class Road:
             and headway >= tmp_vehicle.T
             and not overlap_flag):
             # Spawn vehicle
+            self.spawn_counter += 1
+            print("Vehicle Spawned:", self.spawn_counter)
             self.vehicle_list.append(tmp_vehicle)
             # Reset spawn timer
             self.spawn_timer = 0
@@ -89,4 +94,7 @@ class Road:
 
         # Update spawn_timer
         self.spawn_timer += ts
+        if self.spawn_timer >= self.spawn_interval:
+            self.spawn_vehicle()
+        # print("Updating Spawn Timer: ", self.spawn_timer)
 
