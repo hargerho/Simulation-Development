@@ -2,33 +2,44 @@ import pygame
 
 from common.config import window_params
 
-class Button():
-	def __init__(self, x, y, image, scale):
-		width = image.get_width()
-		height = image.get_height()
-		self.image = pygame.transform.scale(image, (int(width * scale), int(height * scale)))
-		self.rect = self.image.get_rect()
-		self.rect.topleft = (x, y)
-		self.clicked = False
+class Objects:
+    def __init__(self, x, y, image, scale):
+        self.width = image.get_width()
+        self.height = image.get_height()
+        self.image = pygame.transform.scale(image, (int(self.width * scale), int(self.height * scale)))
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
 
-	def draw(self, surface):
-		flag = False
+        # x,y = topleft corner coord
+
+    def draw(self, surface):
+        center_x = self.rect.x + self.image.get_width()/2
+        center_y = self.rect.y + self.image.get_height()/2
+        surface.blit(self.image, (center_x, center_y))
+
+class Button(Objects):
+    def __init__ (self, x, y, image, scale):
+        super().__init__(x, y, image, scale)
+        self.clicked = False
+
+    def draw(self, surface):
+        flag = False
 		#get mouse position
-		mouse_loc = pygame.mouse.get_pos()
+        mouse_loc = pygame.mouse.get_pos()
 
 		#check mouseover and clicked conditions
-		if self.rect.collidepoint(mouse_loc):
-			if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
-				self.clicked = True
-				flag = True
+        if self.rect.collidepoint(mouse_loc):
+            if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
+                self.clicked = True
+                flag = True
 
-		if pygame.mouse.get_pressed()[0] == 0:
-			self.clicked = False
+        if pygame.mouse.get_pressed()[0] == 0:
+            self.clicked = False
 
-		#draw button on screen
-		surface.blit(self.image, (self.rect.x, self.rect.y))
+        #draw button on screen
+        surface.blit(self.image, (self.rect.x, self.rect.y))
 
-		return flag
+        return flag
 
 class Window:
     def __init__(self):
@@ -61,9 +72,11 @@ class Window:
         self.last_pause_start = 0
         self.start_time = pygame.time.get_ticks()  # Record the start time of the simulation
 
+        self.is_running = True
+
     def create_buttons(self):
-        self.play_button = Button(750, 10, self.play_image, 0.05)
-        self.pause_button = Button(800, 10, self.pause_image, 0.05)
+        self.pause_button = Button(750, 10, self.pause_image, 0.05)
+        self.play_button = Button(800, 10, self.play_image, 0.05)
         self.record_button = Button(850, 10, self.record_image, 0.05)
 
     def draw_timer(self):
@@ -72,29 +85,35 @@ class Window:
         else:
             elapsed_time = pygame.time.get_ticks() - self.start_time - self.paused_time
 
-        seconds = elapsed_time // 1000
-        minutes = seconds // 60
-        seconds %= 60
-        time_str = f"{minutes:02d}:{seconds:02d}"
+        milliseconds = elapsed_time % 1000
+        seconds = (elapsed_time // 1000) % 60
+        minutes = (elapsed_time // 60000) % 60
+        time_str = f"{minutes:02d}:{seconds:02d}.{milliseconds:02d}"
         font = pygame.font.Font(None, 36)
         timer_text = font.render(time_str, True, window_params["black"])
-        self.win.blit(timer_text, (10, self.height - 50))
+        self.win.blit(timer_text, (10, 10))
 
-    def run_window(self):
+    def create_vehicle(self):
+        self.shc_vehicle = Objects(10, 450, self.shc_image, 0.05)
+        self.acc_vehicle = Objects(10, 400, self.acc_image, 0.05)
 
-        # acc = pygame.Rect(700, 300, self.vehicle_width, self.vehicle_length)
-        # shc = pygame.Rect(100, 300, self.vehicle_width, self.vehicle_length)
-
+    def create_objects(self):
         self.create_buttons()
+        self.create_vehicle()
 
-        is_running = True
+    def run_window(self, display_vehicles):
 
-        while is_running:
+        self.create_objects()
+
+        display_vehicles = display_vehicles
+
+        while self.is_running:
             self.win.fill(window_params["white"])
-
+            self.shc_vehicle.draw(self.win)
+            self.acc_vehicle.draw(self.win)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    is_running = False
+                    self.is_running = False
 
             self.draw_timer()  # Draw the timer
             if self.pause_button.draw(self.win):
@@ -115,8 +134,6 @@ class Window:
                 # Records Simulation
                 # TODO
                 print("Simulation Recording")
-
-
 
             pygame.display.update()
             self.clock.tick(self.fps)
