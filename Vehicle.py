@@ -21,7 +21,8 @@ class Vehicle:
         politeness: lane change politeness
         left_bias: Bias to switch to the left lane
     """
-    def __iniit__(self, logic_params, road, spawn_loc):
+    def __iniit__(self, logic_params, road, spawn_loc, vehicle_type):
+        self.road = road
         self.v_0 = driving_params['desired_velocity']
         self.s_0 = driving_params['safety_threshold']
         self.a = driving_params['max_acceleration']
@@ -46,6 +47,8 @@ class Vehicle:
         self.local_loc = list(spawn_loc)
         self.local_v = self.v
         self.local_accel = 0.
+
+        self.vehicle_type = vehicle_type
 
         model_params = {
             "v_0": self.v_0,
@@ -149,6 +152,7 @@ class Vehicle:
 
         dict_id = {
             'uuid': uuid.uuid4(),
+            'vehicle_type': self.vehicle_type,
             'location': self.loc,
             'speed': self.v,
             'acceleration': self.local_accel,
