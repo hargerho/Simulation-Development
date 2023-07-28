@@ -23,7 +23,6 @@ simulation_params = {
 }
 
 road_params = {
-    "vehicle_models": ['shc', 'acc'],
     "toplane_loc": (0,0),
     "road_length": 600,
     "num_lanes": 2,
