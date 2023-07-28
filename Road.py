@@ -22,10 +22,11 @@ class Road:
         # Initial spawn timer
         self.spawn_timer = self.spawn_interval
 
+        # Getting y-coord of lanes
         self.toplane = self.toplane_loc[1]
-        self.bottomlane = self.toplane_loc + self.lanewidth * (self.num_lanes-1)
+        self.bottomlane = self.toplane + self.lanewidth * (self.num_lanes-1)
 
-        self.vehicle_list = []
+        self.vehicle_list: list[Vehicle] = []
 
     def spawn_flag(self):
         """Boolean flag to determine if a vehicle should be spawn
@@ -40,14 +41,16 @@ class Road:
             # Spawn ACC, get acc_params from config
             logic_level = driving_params["acc_logic"]
             spawn_params = self.vehicle_models[1][logic_level]
+            vehicle_type = 'acc'
         else:
             # Spawn SHC, get shc_params from config
             logic_level = driving_params["shc_logic"]
             spawn_params = self.vehicle_models[0][logic_level]
+            vehicle_type = 'shc'
 
         spawn_loc = [self.toplane_loc[0], self.toplane_loc[1] + self.num_lanes]
 
-        tmp_vehicle = Vehicle(vehicle_params=spawn_params, road=self, spawn_loc=spawn_loc)
+        tmp_vehicle = Vehicle(vehicle_params=spawn_params, road=self, spawn_loc=spawn_loc, vehicle_type=vehicle_type)
 
         # Check surroundings
         tmp_front = tmp_vehicle.get_fov()['front']
@@ -72,8 +75,6 @@ class Road:
             self.spawn_timer = 0
 
     def update_road(self, ts):
-        destroy_flag = False
-
         # Update vehicle local state
         for vehicle in self.vehicle_list:
             vehicle.update_local(ts)
@@ -81,14 +82,11 @@ class Road:
         for vehicle in self.vehicle_list:
             vehicle.update_global()
 
-            # if vehicle reached the end of the road
+            # If vehicle reached the end of the road
+            # Remove vehicle from road
             if vehicle.loc_back > self.road_length:
                 self.vehicle_list.remove(vehicle)
-                destroy_flag = True
 
         # Update spawn_timer
         self.spawn_timer += ts
-
-        return destroy_flag
-
 
