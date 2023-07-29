@@ -1,16 +1,14 @@
 window_params = {
     "window_width": 800,
     "window_height": 300,
-    "fps": 60,
+    "fps": 120,
     "black": (0,0,0),
     "white": (255,255,255),
     "blue": (0, 0, 255),
     "green": (0,255,0),
+    "red": (255,0,0),
     "vehicle_length": 10,
     "vehicle_width": 5,
-    "road_length": 500,
-    "lanewidth": 100,
-    "num_road": 2,
     "road_image": 'common/assets/road.png',
     "road_border": 'common/assets/road_mask.png',
     "acc_image": 'common/assets/acc.png',
@@ -29,7 +27,7 @@ road_params = {
     "road_length": 500,
     "num_lanes": 2,
     "lanewidth": 10,
-    "vehicle_inflow": 100, # 1000 approx 1veh/3.6sec
+    "vehicle_inflow": 4000, # 1000 approx 1veh/3.6sec
 }
 
 driving_params = {
