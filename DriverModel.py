@@ -1,4 +1,5 @@
 import math
+import time
 class DriverModel:
     """Driver Class to following the Intelligent Driver and MOBIL Models
 
@@ -25,7 +26,12 @@ class DriverModel:
         """
         delta_v = v - surrounding_v
         s_star = self.s_star(v=v, delta_v=delta_v)
-        acceleration = (self.a * (1 - math.pow(v/self.v_0, self.delta) - math.pow(s_star/s, 2)))
+        # if v < 0:
+        #     print(f"AFTER {v}, timestep: {time.time()}")
+        x = math.pow(v/self.v_0, self.delta)
+        # print("x:", x)
+        acceleration = (self.a * (1 - x - math.pow(s_star/s, 2)))
+        # acceleration = (self.a * (1 - math.pow(v/self.v_0, self.delta) - math.pow(s_star/s, 2)))
 
         return acceleration
 
@@ -34,7 +40,7 @@ class DriverModel:
         """
         new_acceleration = self.calc_acceleration(v, new_surrounding_v, new_surrounding_dist)
         old_acceleration = self.calc_acceleration(v, old_surrounding_v, old_surrounding_dist)
-        disadvantage = new_acceleration = old_acceleration
+        disadvantage = new_acceleration - old_acceleration
         return (disadvantage, new_acceleration)
 
     def calc_incentive(self, change_direction, v, new_front_v, new_front_dist, old_front_v, old_front_dist, disadvantage, new_back_accel):

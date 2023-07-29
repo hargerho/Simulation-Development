@@ -36,9 +36,8 @@ class Road:
 
         # Choosing spawned vehicle type
         random_vehicle = random.random()
-        # acc_dict = self.vehicle_models[1]
-        # acc_spawnrate = acc_dict["acc_spawnrate"]
         acc_spawnrate = vehicle_models[1].get("acc_spawnrate")
+
         if random_vehicle <= acc_spawnrate:
             # Spawn ACC, get acc_params from config
             logic_level = driving_params["acc_logic"]
@@ -50,13 +49,16 @@ class Road:
             logic_dict = vehicle_models[0][logic_level]
             vehicle_type = 'shc'
 
-        spawn_loc = [self.toplane_loc[0], self.toplane_loc[1] + self.num_lanes]
+        # Spawn location
+        spawn_loc = [self.toplane_loc[0], self.toplane_loc[1] + lane]
 
+        # Creating the vehicle
         tmp_vehicle = Vehicle(logic_dict=logic_dict, road=self, spawn_loc=spawn_loc, vehicle_type=vehicle_type)
 
-        # Check surroundings
+        # Check vehicle surroundings
         tmp_front = tmp_vehicle.get_fov()['front']
 
+        # If there is a vehicle infront
         if tmp_front is not None:
             if tmp_vehicle.v != 0:
                 headway = (tmp_front.loc_back - tmp_vehicle.loc_front) / tmp_vehicle.v
@@ -73,8 +75,6 @@ class Road:
             and headway >= tmp_vehicle.T
             and not overlap_flag):
             # Spawn vehicle
-            self.spawn_counter += 1
-            print("Vehicle Spawned:", self.spawn_counter)
             self.vehicle_list.append(tmp_vehicle)
             # Reset spawn timer
             self.spawn_timer = 0

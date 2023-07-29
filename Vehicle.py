@@ -1,5 +1,6 @@
 import uuid
 import numpy as np
+import time
 
 from common.config import driving_params, window_params
 from DriverModel import DriverModel as DM
@@ -38,14 +39,15 @@ class Vehicle:
         self.politeness = logic_dict.get('politeness_factor')
 
         self.v = self.variation(self.v_0, self.v_var)
+        print(f"self.v init {self.v}, timestep: {time.time()}")
 
         self.loc = spawn_loc
         self.loc_back = self.loc[0] - self.veh_length / 2
         self.loc_front = self.loc[0] + self.veh_length / 2
 
-        # Hidden values to not share state
+        # Local Values
         self.local_loc = list(spawn_loc)
-        self.local_v = self.v
+        self.local_v = self.v # initial
         self.local_accel = 0.
 
         self.vehicle_type = vehicle_type
@@ -124,7 +126,7 @@ class Vehicle:
 
             # Getting the disadvantage in changing
             # Consider effects to back vehicle
-            disadvantage, new_back_accel = new_back.DM.calc_disadvantage(v=new_back.v, new_surrounding_v=new_back_v, new_surrounding_dist=new_back_dist,
+            disadvantage, new_back_accel = self.driver.calc_disadvantage(v=new_back.v, new_surrounding_v=new_back_v, new_surrounding_dist=new_back_dist,
                                                                      old_surrounding_v=current_back_v, old_surrounding_dist=current_back_dist)
 
         # Considering front vehicle
@@ -191,7 +193,7 @@ class Vehicle:
             not_right_lane = current_y_coord != self.road.bottomlane
             not_left_lane = current_y_coord != self.road.toplane
 
-            if x_diff >0 and y_diff == 0:
+            if x_diff > 0 and y_diff == 0:
                 if front is None or x_coord < front.loc[0]:
                     front = vehicle
                 else:
@@ -257,17 +259,14 @@ class Vehicle:
         # Update road traverse
         self.local_loc[0] += (self.v * ts)
 
-        # Updating local speed
+        # Updating local dist
         if surrounding['front'] is not None:
-            dist = surrounding['front'].loc_front - self.loc_front
+            dist = surrounding['front'].loc_back - self.loc_front
+            # Ensure dist is non-zero
+            if dist <= 0:
+                dist = 1e-9
         else:
             dist = self.road.road_length
-
-        # Ensure that distance is non-zero
-        if dist != 0:
-            dist = dist
-        else:
-            dist = 1e-9
 
         if surrounding['front'] is not None:
             front_v = surrounding['front'].v
@@ -275,14 +274,16 @@ class Vehicle:
             front_v = self.v
 
         # Update local driving parameters
+        self.local_v = self.v
         self.local_accel = self.driver.calc_acceleration(v=self.v, surrounding_v=front_v, s=dist) * ts
-        self.local_v = self.v + self.local_accel
+        self.local_v += self.local_accel
+        self.local_v = max(self.local_v, 0)
 
     def update_global(self):
         """Update global timestep
         """
         self.v = self.local_v
-        self.loc = list(self.local_loc)
+        self.loc = self.local_loc.copy()
         self.loc_front = self.loc[0] - self.veh_length / 2
         self.loc_back = self.loc[0] - self.veh_length / 2
 

@@ -1,6 +1,5 @@
 import numpy as np
 import keyboard
-from collections import deque
 
 from common.config import simulation_params
 from Road import Road
@@ -17,20 +16,23 @@ class Simulation:
 
         # self.simulation_record = []
         # self.display_vehicles = [1]
+        self.display_vehicles = {} # Dict of vehicle_list, key = iteration, value = vehicle_list
 
     def run(self):
         is_paused = False
         is_recording = False
         is_running = True
-        display_vehicles = deque()
+        display_vehicles = []
         record_simulation = []
         print("Simulation Running")
+        iteration = 0
         while is_running:
 
             if not is_paused:
                 self.road.update_road(ts=self.ts)
-                for vehicle in self.road.vehicle_list:
-                    display_vehicles.append(vehicle.vehicle_id())
+                self.display_vehicles[iteration] = self.road.vehicle_list
+                # for vehicle in self.road.vehicle_list:
+                #     display_vehicles.append(vehicle.vehicle_id())
 
                 # Pause Simulation
                 if keyboard.is_pressed('p'):

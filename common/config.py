@@ -4,7 +4,7 @@ window_params = {
     "fps": 30,
     "black": (0,0,0),
     "white": (255,255,255),
-    "vehicle_length": 80,
+    "vehicle_length": 100,
     "vehicle_width": 40,
     "road_length": 900,
     "lanewidth": 100,
@@ -27,11 +27,11 @@ road_params = {
     "road_length": 600,
     "num_lanes": 2,
     "lanewidth": 60,
-    "vehicle_inflow": 4000,
+    "vehicle_inflow": 1000, # 1000 approx 1veh/3.6sec
 }
 
 driving_params = {
-    "desired_velocity": 70,
+    "desired_velocity": 30, # Initially 70
     "safety_threshold": 1.5,
     "max_acceleration": 0.73, # IDM Paper
     "comfortable_deceleration": 1.67, # IDM Paper
