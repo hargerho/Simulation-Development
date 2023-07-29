@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import time
 
 from common.config import road_params, driving_params, vehicle_models
 from Vehicle import Vehicle
@@ -19,14 +20,18 @@ class Road:
         self.spawn_interval = round(1.0/self.vehicle_frequency, 1) # Round to 1dp since ts is 1dp
 
         # Initial spawn timer
-        self.spawn_timer = self.spawn_interval
+        self.timer = 0.0
+        self.last_spawn_time = 0
 
         # Getting y-coord of lanes
         self.toplane = self.toplane_loc[1]
         self.bottomlane = self.toplane + self.lanewidth * (self.num_lanes-1)
 
-        self.vehicle_list: list[Vehicle] = []
+        # self.vehicle_list: list[Vehicle] = []
+        self.vehicle_list = []
         self.spawn_counter = 0
+
+        self.frames = 0
 
     def spawn_vehicle(self):
         """Spawns a car when internval is met with additional checks
@@ -53,10 +58,11 @@ class Road:
         spawn_loc = [self.toplane_loc[0], self.toplane_loc[1] + lane]
 
         # Creating the vehicle
-        tmp_vehicle = Vehicle(logic_dict=logic_dict, road=self, spawn_loc=spawn_loc, vehicle_type=vehicle_type)
+        tmp_vehicle = Vehicle(logic_dict=logic_dict, spawn_loc=spawn_loc, vehicle_type=vehicle_type)
 
-        # Check vehicle surroundings
-        tmp_front = tmp_vehicle.get_fov()['front']
+        # Check vehicle surrounding
+        tmp_front = tmp_vehicle.get_fov(vehicle_list=self.vehicle_list)['front']
+
 
         # If there is a vehicle infront
         if tmp_front is not None:
@@ -70,19 +76,25 @@ class Road:
             headway = tmp_vehicle.T
             overlap_flag = False
 
-        # Spawn check
-        if (self.spawn_timer >= self.spawn_interval
-            and headway >= tmp_vehicle.T
-            and not overlap_flag):
-            # Spawn vehicle
+        # # Spawn safety check
+        if (headway >= tmp_vehicle.T and not overlap_flag):
             self.vehicle_list.append(tmp_vehicle)
+            print(f"list len {len(self.vehicle_list)}")
+
             # Reset spawn timer
-            self.spawn_timer = 0
+            self.last_spawn_time = self.timer
+            print(f"list len {len(self.vehicle_list)}, vehicle_list {self.vehicle_list}")
+
+            self.spawn_counter += 1
+            print(f"Spawn Vehicle {self.spawn_counter}, timer: {self.timer}, spawnINtervale {self.spawn_interval}")
+
+            time.sleep(1)
 
     def update_road(self, ts):
+        updateFlag = False
         # Update vehicle local state
         for vehicle in self.vehicle_list:
-            vehicle.update_local(ts)
+            vehicle.update_local(ts, self.vehicle_list)
 
         for vehicle in self.vehicle_list:
             vehicle.update_global()
@@ -90,11 +102,20 @@ class Road:
             # If vehicle reached the end of the road
             # Remove vehicle from road
             if vehicle.loc_back > self.road_length:
+                print("vehicle.loc_back", vehicle.loc_back)
+                print(f"vehicleLocBack {vehicle.loc_back}, roadLength {self.road_length}")
                 self.vehicle_list.remove(vehicle)
+                print("Vehicle Removed")
 
         # Update spawn_timer
-        self.spawn_timer += ts
-        if self.spawn_timer >= self.spawn_interval:
+        self.timer += ts
+        if self.timer - self.last_spawn_time >= self.spawn_interval:
             self.spawn_vehicle()
-        # print("Updating Spawn Timer: ", self.spawn_timer)
+
+        self.frames += 1
+        # print("Frames: ", self.frames)
+        updateFlag = True
+        if updateFlag:
+            # print("Finish this update frame")
+            return self.vehicle_list # return vehicle list of this frame
 

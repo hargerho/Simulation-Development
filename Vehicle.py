@@ -2,7 +2,7 @@ import uuid
 import numpy as np
 import time
 
-from common.config import driving_params, window_params
+from common.config import driving_params, window_params, road_params
 from DriverModel import DriverModel as DM
 
 class Vehicle:
@@ -22,8 +22,19 @@ class Vehicle:
         politeness: lane change politeness
         left_bias: Bias to switch to the left lane
     """
-    def __init__(self, logic_dict, road, spawn_loc, vehicle_type):
-        self.road = road
+    def __init__(self, logic_dict, spawn_loc, vehicle_type):
+
+        self.id = str(uuid.uuid4()) # unique id for each vehicle
+
+        # Road Params
+        self.num_lanes = road_params['num_lanes']
+        self.toplane_loc = road_params['toplane_loc']
+        self.lanewidth = road_params['lanewidth']
+        self.road_length = road_params['road_length']
+        # Getting y-coord of lanes
+        self.toplane = self.toplane_loc[1]
+        self.bottomlane = self.toplane + self.lanewidth * (self.num_lanes-1)
+
         self.v_0 = driving_params['desired_velocity']
         self.s_0 = driving_params['safety_threshold']
         self.a = driving_params['max_acceleration']
@@ -39,7 +50,6 @@ class Vehicle:
         self.politeness = logic_dict.get('politeness_factor')
 
         self.v = self.variation(self.v_0, self.v_var)
-        print(f"self.v init {self.v}, timestep: {time.time()}")
 
         self.loc = spawn_loc
         self.loc_back = self.loc[0] - self.veh_length / 2
@@ -94,7 +104,7 @@ class Vehicle:
             current_front_v = current_front.v
         else:
             # No vehicles infront
-            current_front_dist = self.road.road_length
+            current_front_dist = self.road_length
             current_front_v = self.v
 
         # Next timestep
@@ -105,7 +115,7 @@ class Vehicle:
             new_front_v = new_front.v
         else:
             # No vehicles infront
-            new_front_dist = self.road.road_length
+            new_front_dist = self.road_length
             new_front_v = self.v
 
         # Considering the vehicle behind
@@ -118,7 +128,7 @@ class Vehicle:
                 current_back_dist = new_front.loc_back - new_back.loc_front
                 current_back_v = new_front.v
             else:
-                current_back_dist = self.road.road_length
+                current_back_dist = self.road_length
                 current_back_v = self.v
 
             new_back_dist = self.loc_back - new_back.loc_front
@@ -153,7 +163,7 @@ class Vehicle:
         """
 
         dict_id = {
-            'uuid': str(uuid.uuid4()), # unique id for each vehicle
+            'uuid': self.id,
             'vehicle_type': self.vehicle_type,
             'location': self.loc,
             'speed': self.v,
@@ -163,7 +173,7 @@ class Vehicle:
 
         return dict_id
 
-    def get_fov(self):
+    def get_fov(self, vehicle_list):
         """
         Get other vehicles around this vehicle
 
@@ -180,18 +190,18 @@ class Vehicle:
         back_left = None
         back_right = None
 
-        for vehicle in self.road.vehicle_list:
+        for vehicle in vehicle_list:
             x_coord = vehicle.loc[0]
             current_y_coord = self.loc[1]
             x_diff = x_coord - self.loc[0]
             y_diff = vehicle.loc[1] - current_y_coord
-            right_check = vehicle.loc[1] == current_y_coord + self.road.lanewidth
-            left_check = vehicle.loc[1] == current_y_coord - self.road.lanewidth
+            right_check = vehicle.loc[1] == current_y_coord + self.lanewidth
+            left_check = vehicle.loc[1] == current_y_coord - self.lanewidth
             front_check = x_coord > self.loc[0]
             back_check = x_coord < self.loc[0]
 
-            not_right_lane = current_y_coord != self.road.bottomlane
-            not_left_lane = current_y_coord != self.road.toplane
+            not_right_lane = current_y_coord != self.bottomlane
+            not_left_lane = current_y_coord != self.toplane
 
             if x_diff > 0 and y_diff == 0:
                 if front is None or x_coord < front.loc[0]:
@@ -231,7 +241,7 @@ class Vehicle:
 
         return surrounding_vehicles
 
-    def update_local(self, ts):
+    def update_local(self, ts, vehicle_list):
         """Update local timestep
 
         Args:
@@ -239,22 +249,22 @@ class Vehicle:
         """
 
         # Get surrounding vehicles
-        surrounding = self.get_fov()
+        surrounding = self.get_fov(vehicle_list)
         change_flag = False
 
         # Lane change flag and update lane location
         # Right change
-        if self.loc[1] != self.road.bottomlane:
+        if self.loc[1] != self.bottomlane:
             change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
                                                 new_front=surrounding['front_right'], new_back=surrounding['back_right'])
             if change_flag:
-                self.local_loc[1] += self.road.lanewidth
+                self.local_loc[1] += self.lanewidth
         # Left change
-        if self.loc[1] != self.road.toplane:
+        if self.loc[1] != self.toplane:
             change_flag = self.calc_lane_change(change_dir='left', current_front=surrounding['front'],
                                                 new_front=surrounding['front_left'], new_back=surrounding['back_left'])
             if change_flag:
-                self.local_loc[1] -= self.road.lanewidth
+                self.local_loc[1] -= self.lanewidth
 
         # Update road traverse
         self.local_loc[0] += (self.v * ts)
@@ -266,7 +276,7 @@ class Vehicle:
             if dist <= 0:
                 dist = 1e-9
         else:
-            dist = self.road.road_length
+            dist = self.road_length
 
         if surrounding['front'] is not None:
             front_v = surrounding['front'].v
@@ -284,8 +294,8 @@ class Vehicle:
         """
         self.v = self.local_v
         self.loc = self.local_loc.copy()
-        self.loc_front = self.loc[0] - self.veh_length / 2
-        self.loc_back = self.loc[0] - self.veh_length / 2
+        self.loc_front = self.loc[0] - (self.veh_length / 2)
+        self.loc_back = self.loc[0] - (self.veh_length / 2)
 
 
 

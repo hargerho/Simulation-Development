@@ -3,7 +3,7 @@ import keyboard
 
 from common.config import simulation_params
 from Road import Road
-
+import time
 class Simulation:
     """Class to manage the simulation
 
@@ -12,7 +12,7 @@ class Simulation:
     """
     def __init__(self):
         self.ts = simulation_params['ts']
-        self.road = Road()
+        self.road = Road() # Create Road class
 
         # self.simulation_record = []
         # self.display_vehicles = [1]
@@ -22,18 +22,25 @@ class Simulation:
         is_paused = False
         is_recording = False
         is_running = True
-        display_vehicles = []
         record_simulation = []
         print("Simulation Running")
-        iteration = 0
+        main_iteration = 0
         while is_running:
-
+            save_list = []
             if not is_paused:
-                self.road.update_road(ts=self.ts)
-                self.display_vehicles[iteration] = self.road.vehicle_list
-                # for vehicle in self.road.vehicle_list:
-                #     display_vehicles.append(vehicle.vehicle_id())
+                # print("Main_iteration: ", main_iteration)
+                vehicle_list_obj = self.road.update_road(ts=self.ts)
 
+                # Iterate through the list of vehicle objects
+                for vehicle_obj in vehicle_list_obj:
+                    # For each vehicle object, obtain its vehicle id Dict
+                    vehicle_list = vehicle_obj.vehicle_id()
+
+                    # Store dict in list
+                    save_list.append(vehicle_list)
+
+                self.display_vehicles[main_iteration]=save_list
+                main_iteration += 1
                 # Pause Simulation
                 if keyboard.is_pressed('p'):
                     is_paused = True
@@ -61,5 +68,5 @@ class Simulation:
                 continue
 
 
-        return display_vehicles, record_simulation
+        return self.display_vehicles, record_simulation
 
