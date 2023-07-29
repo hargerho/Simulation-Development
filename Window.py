@@ -1,4 +1,5 @@
 import pygame
+import sys
 
 from common.config import window_params
 from Simulation import Simulation
@@ -7,7 +8,8 @@ class Objects:
     def __init__(self, x, y, image, scale):
         self.width = image.get_width()
         self.height = image.get_height()
-        self.image = pygame.transform.scale(image, (int(self.width * scale), int(self.height * scale)))
+        self.image = pygame.transform.scale(image, (window_params['vehicle_length'], window_params['vehicle_width']))
+        # self.image = pygame.transform.scale(image, (int(self.width * scale), int(self.height * scale)))
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
 
@@ -65,7 +67,7 @@ class Window:
         self.record_image = pygame.image.load(window_params["record_button"])
 
         # Creating window parameters
-        self.win = pygame.display.set_mode((self.width, self.height))
+        self.win = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
         self.clock = pygame.time.Clock()
         self.is_paused = False
         self.is_recording = False
@@ -99,56 +101,48 @@ class Window:
         self.shc_vehicle = Objects(shc_x, shc_y, self.shc_image, 0.05)
         self.acc_vehicle = Objects(acc_x, acc_y, self.acc_image, 0.05)
 
-    def run_window(self):
+    def run_window(self, filteredDict):
 
         self.create_buttons()
 
-        while self.is_running:
+        for frame, vehicleList in filteredDict.items():
+            # Event check first
+            for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        self.is_running = False
+                        sys.exit()
+
+            # Fill background
             self.win.fill(window_params["white"])
 
-            # display_vehicles, simulation_record = self.sim.run(is_paused=self.is_paused, is_recording=self.is_recording)
-            # display_vehicles = []
-            # # Drawing the vehicles
-            # for vehicle in display_vehicles:
-            #     vehicle_x = vehicle.vehicle_id['loc'][0]
-            #     vehicle_y = vehicle.vehicle_id['loc'][1]
+            # Drawing the vehicles
+            # Iterating through the value-list per frame
+            for vehicle in vehicleList:
+                vehicleType = vehicle['vehicle_type']
+                vehicleLoc = vehicle['location']
+                # vehicle_x = vehicleLoc[0]
+                # vehicle_y = vehicleLoc[1]
 
-            #     if vehicle.vehicle_id['vehicle_type'] == 'shc':
-            #         self.shc_vehicle = Objects(vehicle_x, vehicle_y, self.shc_image, 0.05)
-            #         self.shc_vehicle.draw(self.win)
-            #     else:
-            #         self.acc_vehicle = Objects(vehicle_x, vehicle_y, self.acc_image, 0.05)
-            #         self.acc_vehicle.draw(self.win)
+                # if vehicleType == 'shc':
+                #     self.shc_vehicle = Objects(vehicle_x, vehicle_y, self.shc_image, 0.05)
+                #     self.shc_vehicle.draw(self.win)
+                # else:
+                #     self.acc_vehicle = Objects(vehicle_x, vehicle_y, self.acc_image, 0.05)
+                #     self.acc_vehicle.draw(self.win)
+                if vehicleType == 'shc':
+                    carSurface = pygame.Surface((10,5))
+                    carSurface.fill(window_params['black'])
+                    carRect = carSurface.get_rect()
+                    carRect.center = vehicleLoc
+                    self.win.blit(carSurface, carRect)
+                else:
+                    carSurface = pygame.Surface((10,5))
+                    carSurface.fill(window_params['black'])
+                    carRect = carSurface.get_rect()
+                    carRect.center = vehicleLoc
+                    self.win.blit(carSurface, carRect)
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.is_running = False
-
-            self.draw_timer()  # Draw the timer
-            if self.pause_button.draw(self.win):
-                # Simulation paused
-                # TODO
-                if not self.is_paused:
-                    self.is_paused = True
-                    self.last_pause_start = pygame.time.get_ticks()
-                    print("Simulation Paused")
-            if self.play_button.draw(self.win):
-                # Simulation Resumed
-                # TODO
-                if self.is_paused:
-                    self.is_paused = False
-                    self.paused_time += pygame.time.get_ticks() - self.last_pause_start
-                    print("Simulation Play")
-            if self.record_button.draw(self.win):
-                # Records Simulation
-                # TODO
-                print("Simulation Recording")
-
-            pygame.display.update()
-            self.clock.tick(self.fps)
+                pygame.display.update()
+                self.clock.tick(120)
 
         pygame.quit()
-
-if __name__ == "__main__":
-    window = Window()
-    window.run_window()
