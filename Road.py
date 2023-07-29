@@ -1,7 +1,8 @@
 import numpy as np
 import random
+import time
 
-from common.config import road_params, driving_params
+from common.config import road_params, driving_params, vehicle_models
 from Vehicle import Vehicle
 
 class Road:
@@ -9,7 +10,6 @@ class Road:
     """
 
     def __init__(self):
-        self.vehicle_models = road_params['vehicle_models']
         self.num_lanes = road_params['num_lanes']
         self.toplane_loc = road_params['toplane_loc']
         self.lanewidth = road_params['lanewidth']
@@ -17,41 +17,54 @@ class Road:
 
         # Spawn frequency
         self.vehicle_frequency = road_params['vehicle_inflow'] / 3600 # per/hour -> per second
-        self.spawn_interval = 1.0/self.vehicle_frequency
+        self.spawn_interval = round(1.0/self.vehicle_frequency, 1) # Round to 1dp since ts is 1dp
 
         # Initial spawn timer
-        self.spawn_timer = self.spawn_interval
+        self.timer = 0.0
+        self.last_spawn_time = 0
 
+        # Getting y-coord of lanes
         self.toplane = self.toplane_loc[1]
-        self.bottomlane = self.toplane_loc + self.lanewidth * (self.num_lanes-1)
+        self.bottomlane = self.toplane + self.lanewidth * (self.num_lanes-1)
 
+        # self.vehicle_list: list[Vehicle] = []
         self.vehicle_list = []
+        self.spawn_counter = 0
 
-    def spawn_flag(self):
-        """Boolean flag to determine if a vehicle should be spawn
+        self.frames = 0
+
+    def spawn_vehicle(self):
+        """Spawns a car when internval is met with additional checks
         """
         # Choosing a spawn lane
         lane = int(np.random.choice(range(self.num_lanes)) * self.lanewidth)
 
         # Choosing spawned vehicle type
         random_vehicle = random.random()
-        acc_spawnrate = self.vehicle_models[1]['acc_spawnrate']
+        acc_spawnrate = vehicle_models[1].get("acc_spawnrate")
+
         if random_vehicle <= acc_spawnrate:
             # Spawn ACC, get acc_params from config
             logic_level = driving_params["acc_logic"]
-            spawn_params = self.vehicle_models[1][logic_level]
+            logic_dict = vehicle_models[1][logic_level]
+            vehicle_type = 'acc'
         else:
             # Spawn SHC, get shc_params from config
             logic_level = driving_params["shc_logic"]
-            spawn_params = self.vehicle_models[0][logic_level]
+            logic_dict = vehicle_models[0][logic_level]
+            vehicle_type = 'shc'
 
-        spawn_loc = [self.toplane_loc[0], self.toplane_loc[1] + self.num_lanes]
+        # Spawn location
+        spawn_loc = [self.toplane_loc[0], self.toplane_loc[1] + lane]
 
-        tmp_vehicle = Vehicle(vehicle_params=spawn_params, road=self, spawn_loc=spawn_loc)
+        # Creating the vehicle
+        tmp_vehicle = Vehicle(logic_dict=logic_dict, spawn_loc=spawn_loc, vehicle_type=vehicle_type)
 
-        # Check surroundings
-        tmp_front = tmp_vehicle.get_fov()['front']
+        # Check vehicle surrounding
+        tmp_front = tmp_vehicle.get_fov(vehicle_list=self.vehicle_list)['front']
 
+
+        # If there is a vehicle infront
         if tmp_front is not None:
             if tmp_vehicle.v != 0:
                 headway = (tmp_front.loc_back - tmp_vehicle.loc_front) / tmp_vehicle.v
@@ -59,36 +72,50 @@ class Road:
                 headway = tmp_vehicle.T
             overlap_flag = (tmp_front.loc_back - tmp_vehicle.loc_front) <= 0
         else:
+            # If no vehicles infront
             headway = tmp_vehicle.T
             overlap_flag = False
 
-        # Spawn check
-        if (self.spawn_timer >= self.spawn_interval
-            and headway >= tmp_vehicle.T
-            and not overlap_flag):
-            # Spawn vehicle
+        # # Spawn safety check
+        if (headway >= tmp_vehicle.T and not overlap_flag):
             self.vehicle_list.append(tmp_vehicle)
+            print(f"list len {len(self.vehicle_list)}")
+
             # Reset spawn timer
-            self.spawn_timer = 0
+            self.last_spawn_time = self.timer
+            print(f"list len {len(self.vehicle_list)}, vehicle_list {self.vehicle_list}")
+
+            self.spawn_counter += 1
+            print(f"Spawn Vehicle {self.spawn_counter}, timer: {self.timer}, spawnINtervale {self.spawn_interval}")
+
+            time.sleep(1)
 
     def update_road(self, ts):
-        destroy_flag = False
-
+        updateFlag = False
         # Update vehicle local state
         for vehicle in self.vehicle_list:
-            vehicle.update_local(ts)
+            vehicle.update_local(ts, self.vehicle_list)
 
         for vehicle in self.vehicle_list:
             vehicle.update_global()
 
-            # if vehicle reached the end of the road
+            # If vehicle reached the end of the road
+            # Remove vehicle from road
             if vehicle.loc_back > self.road_length:
+                print("vehicle.loc_back", vehicle.loc_back)
+                print(f"vehicleLocBack {vehicle.loc_back}, roadLength {self.road_length}")
                 self.vehicle_list.remove(vehicle)
-                destroy_flag = True
+                print("Vehicle Removed")
 
         # Update spawn_timer
-        self.spawn_timer += ts
+        self.timer += ts
+        if self.timer - self.last_spawn_time >= self.spawn_interval:
+            self.spawn_vehicle()
 
-        return destroy_flag
-
+        self.frames += 1
+        # print("Frames: ", self.frames)
+        updateFlag = True
+        if updateFlag:
+            # print("Finish this update frame")
+            return self.vehicle_list # return vehicle list of this frame
 

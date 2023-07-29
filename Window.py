@@ -1,12 +1,15 @@
 import pygame
+import sys
 
 from common.config import window_params
+from Simulation import Simulation
 
 class Objects:
     def __init__(self, x, y, image, scale):
         self.width = image.get_width()
         self.height = image.get_height()
-        self.image = pygame.transform.scale(image, (int(self.width * scale), int(self.height * scale)))
+        self.image = pygame.transform.scale(image, (window_params['vehicle_length'], window_params['vehicle_width']))
+        # self.image = pygame.transform.scale(image, (int(self.width * scale), int(self.height * scale)))
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
 
@@ -44,6 +47,7 @@ class Button(Objects):
 class Window:
     def __init__(self):
         pygame.init()
+        # self.sim = Simulation()
         self.width = window_params["window_width"]
         self.height = window_params["window_height"]
         self.fps = window_params['fps']
@@ -63,7 +67,7 @@ class Window:
         self.record_image = pygame.image.load(window_params["record_button"])
 
         # Creating window parameters
-        self.win = pygame.display.set_mode((self.width, self.height))
+        self.win = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
         self.clock = pygame.time.Clock()
         self.is_paused = False
         self.is_recording = False
@@ -93,49 +97,52 @@ class Window:
         timer_text = font.render(time_str, True, window_params["black"])
         self.win.blit(timer_text, (10, 10))
 
-    def create_vehicle(self):
-        self.shc_vehicle = Objects(10, 450, self.shc_image, 0.05)
-        self.acc_vehicle = Objects(10, 400, self.acc_image, 0.05)
+    def create_vehicle(self, shc_x, shc_y, acc_x, acc_y):
+        self.shc_vehicle = Objects(shc_x, shc_y, self.shc_image, 0.05)
+        self.acc_vehicle = Objects(acc_x, acc_y, self.acc_image, 0.05)
 
-    def create_objects(self):
+    def run_window(self, filteredDict):
+
         self.create_buttons()
-        self.create_vehicle()
 
-    def run_window(self, display_vehicles):
-
-        self.create_objects()
-
-        display_vehicles = display_vehicles
-
-        while self.is_running:
-            self.win.fill(window_params["white"])
-            self.shc_vehicle.draw(self.win)
-            self.acc_vehicle.draw(self.win)
+        for frame, vehicleList in filteredDict.items():
+            # Event check first
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.is_running = False
+                    if event.type == pygame.QUIT:
+                        self.is_running = False
+                        sys.exit()
 
-            self.draw_timer()  # Draw the timer
-            if self.pause_button.draw(self.win):
-                # Simulation paused
-                # TODO
-                if not self.is_paused:
-                    self.is_paused = True
-                    self.last_pause_start = pygame.time.get_ticks()
-                    print("Simulation Paused")
-            if self.play_button.draw(self.win):
-                # Simulation Resumed
-                # TODO
-                if self.is_paused:
-                    self.is_paused = False
-                    self.paused_time += pygame.time.get_ticks() - self.last_pause_start
-                    print("Simulation Play")
-            if self.record_button.draw(self.win):
-                # Records Simulation
-                # TODO
-                print("Simulation Recording")
+            # Fill background
+            self.win.fill(window_params["white"])
 
-            pygame.display.update()
-            self.clock.tick(self.fps)
+            # Drawing the vehicles
+            # Iterating through the value-list per frame
+            for vehicle in vehicleList:
+                vehicleType = vehicle['vehicle_type']
+                vehicleLoc = vehicle['location']
+                # vehicle_x = vehicleLoc[0]
+                # vehicle_y = vehicleLoc[1]
+
+                # if vehicleType == 'shc':
+                #     self.shc_vehicle = Objects(vehicle_x, vehicle_y, self.shc_image, 0.05)
+                #     self.shc_vehicle.draw(self.win)
+                # else:
+                #     self.acc_vehicle = Objects(vehicle_x, vehicle_y, self.acc_image, 0.05)
+                #     self.acc_vehicle.draw(self.win)
+                if vehicleType == 'shc':
+                    carSurface = pygame.Surface((10,5))
+                    carSurface.fill(window_params['black'])
+                    carRect = carSurface.get_rect()
+                    carRect.center = vehicleLoc
+                    self.win.blit(carSurface, carRect)
+                else:
+                    carSurface = pygame.Surface((10,5))
+                    carSurface.fill(window_params['black'])
+                    carRect = carSurface.get_rect()
+                    carRect.center = vehicleLoc
+                    self.win.blit(carSurface, carRect)
+
+                pygame.display.update()
+                self.clock.tick(120)
 
         pygame.quit()

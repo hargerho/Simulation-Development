@@ -1,16 +1,26 @@
 from Simulation import Simulation
 from Window import Window
+import json
+
+def save_data(data, filename):
+    print("Saving data, this might take a while...")
+    json.dump(data, open(filename, "w"))
 
 def main():
     # Creating instances
-    # simulation = Simulation()
-    display = Window()
+    simulation = Simulation()
+    # is_running = True
+    is_paused = False
+    is_recording = False
 
-    while display.is_running:
-        # Display
-        # display_vehicles, simulation_record = simulation.run(is_paused=display.is_paused, is_recording=display.is_recording)
-        display_vehicles = []
-        display.run_window(display_vehicles)
+    print("Start")
+
+    display_vehicles, record_simulation = simulation.run()
+
+    # vehicle_data = json.dumps(display_vehicles)
+    # with open("data/vehicle_data.json", "w") as outfile:
+    #     outfile.write(vehicle_data)
+    save_data(display_vehicles, "data/vehicle_data.json")
 
 if __name__ == "__main__":
     main()

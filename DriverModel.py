@@ -1,4 +1,5 @@
 import math
+import time
 class DriverModel:
     """Driver Class to following the Intelligent Driver and MOBIL Models
 
@@ -16,16 +17,21 @@ class DriverModel:
         self.politeness = model_params['politeness']
         self.change_threshold = model_params['change_threshold']
 
-    def _s_star(self, v, delta_v):
-        s_star = (self.s0 + self.T * v + (v + delta_v) / (2 * math.sqrt(self.a * self.b)))
+    def s_star(self, v, delta_v):
+        s_star = (self.s_0 + self.T * v + (v + delta_v) / (2 * math.sqrt(self.a * self.b)))
         return s_star
 
     def calc_acceleration(self, v, surrounding_v, s):
         """Calculates the acceleration of the car based on it's parameters and the surrounding cars
         """
         delta_v = v - surrounding_v
-        s_star = DriverModel._s_star(v=v, delta_v=delta_v)
-        acceleration = (self.a * (1 - math.pow(v/self.v_0, self.delta) - math.pow(s_star/s, 2)))
+        s_star = self.s_star(v=v, delta_v=delta_v)
+        # if v < 0:
+        #     print(f"AFTER {v}, timestep: {time.time()}")
+        x = math.pow(v/self.v_0, self.delta)
+        # print("x:", x)
+        acceleration = (self.a * (1 - x - math.pow(s_star/s, 2)))
+        # acceleration = (self.a * (1 - math.pow(v/self.v_0, self.delta) - math.pow(s_star/s, 2)))
 
         return acceleration
 
@@ -34,7 +40,7 @@ class DriverModel:
         """
         new_acceleration = self.calc_acceleration(v, new_surrounding_v, new_surrounding_dist)
         old_acceleration = self.calc_acceleration(v, old_surrounding_v, old_surrounding_dist)
-        disadvantage = new_acceleration = old_acceleration
+        disadvantage = new_acceleration - old_acceleration
         return (disadvantage, new_acceleration)
 
     def calc_incentive(self, change_direction, v, new_front_v, new_front_dist, old_front_v, old_front_dist, disadvantage, new_back_accel):
@@ -51,7 +57,7 @@ class DriverModel:
         else:
             a_bias = 0 # No lane change
 
-        change_incentive = new_acceleration - old_acceleration + (self.politness * disadvantage) > self.change_threshold + a_bias
+        change_incentive = new_acceleration - old_acceleration + (self.politeness * disadvantage) > self.change_threshold + a_bias
         safety_criterion = new_back_accel > -self.b
 
         return change_incentive & safety_criterion

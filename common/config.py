@@ -1,12 +1,14 @@
 window_params = {
-    "window_width": 900,
-    "window_height": 500,
-    "fps": 30,
+    "window_width": 800,
+    "window_height": 300,
+    "fps": 60,
     "black": (0,0,0),
     "white": (255,255,255),
-    "vehicle_length": 80,
-    "vehicle_width": 40,
-    "road_length": 900,
+    "blue": (0, 0, 255),
+    "green": (0,255,0),
+    "vehicle_length": 10,
+    "vehicle_width": 5,
+    "road_length": 500,
     "lanewidth": 100,
     "num_road": 2,
     "road_image": 'common/assets/road.png',
@@ -19,20 +21,19 @@ window_params = {
 }
 
 simulation_params = {
-    "ts": 0.1,
+    "ts": 0.001,
 }
 
 road_params = {
-    "vehicle_models": ['shc', 'acc'],
-    "toplane_loc": (0,0),
-    "road_length": 600,
+    "toplane_loc": (70,100), #(x, y)
+    "road_length": 500,
     "num_lanes": 2,
-    "lanewidth": 60,
-    "vehicle_inflow": 4000,
+    "lanewidth": 10,
+    "vehicle_inflow": 100, # 1000 approx 1veh/3.6sec
 }
 
 driving_params = {
-    "desired_velocity": 70,
+    "desired_velocity": 60, # Initially 70
     "safety_threshold": 1.5,
     "max_acceleration": 0.73, # IDM Paper
     "comfortable_deceleration": 1.67, # IDM Paper
@@ -49,7 +50,7 @@ shc_params = {
 }
 
 acc_params = {
-    "acc_spawnrate": 0.2,
+    "acc_spawnrate": 0.2, # Init 0.2
     "normal": {"safe_headyway": 3.1, "speed_variation": 0, "politeness_factor": 0.5},
     "cautious": {"safe_headyway": 4, "speed_variation": 0, "politeness_factor": 0.8},
 }
