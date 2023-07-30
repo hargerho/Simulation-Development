@@ -83,81 +83,6 @@ class Vehicle:
             return val
         else:
             return avg
-
-    def calc_lane_change(self, change_dir, current_front, new_front, new_back):
-        """Calculates if a vehicle should change lanes
-
-        Args:
-            change_dir: string of change direction
-            current_front: vehicle that is currently in front
-            new_front: vehicle that will be in front after the change
-            new_back: vehicle that will be in the back after the change
-
-        Returns: True if the lane change should happen
-        """
-
-        # Current timestep
-        # Getting distance of front vehicle
-        if current_front is not None:
-            # If there is a front vehicle
-            current_front_dist = current_front.loc_back - self.loc_front
-            current_front_v = current_front.v
-        else:
-            # No vehicles infront
-            current_front_dist = self.road_length
-            current_front_v = self.v
-
-        # Next timestep
-        # Getting distance of new front vehicle
-        if new_front is not None:
-            # If there is a front vehicle
-            new_front_dist = new_front.loc_back - self.loc_front
-            new_front_v = new_front.v
-        else:
-            # No vehicles infront
-            new_front_dist = self.road_length
-            new_front_v = self.v
-
-        # Considering the vehicle behind
-        if new_back is None:
-            # If there is no vehicle behind
-            disadvantage, new_back_accel = 0, 0
-        else:
-            # Current timestep
-            if new_front is not None:
-                current_back_dist = new_front.loc_back - new_back.loc_front
-                current_back_v = new_front.v
-            else:
-                current_back_dist = self.road_length
-                current_back_v = self.v
-
-            new_back_dist = self.loc_back - new_back.loc_front
-            new_back_v = self.v
-
-            # Getting the disadvantage in changing
-            # Consider effects to back vehicle
-            disadvantage, new_back_accel = self.driver.calc_disadvantage(v=new_back.v, new_surrounding_v=new_back_v, new_surrounding_dist=new_back_dist,
-                                                                     old_surrounding_v=current_back_v, old_surrounding_dist=current_back_dist)
-
-        # Considering front vehicle
-        change_incentive = self.driver.calc_incentive(change_direction=change_dir, v=self.v, new_front_v=new_front_v, new_front_dist=new_front_dist, old_front_v=current_front_v,
-                                            old_front_dist=current_front_dist, disadvantage=disadvantage, new_back_accel=new_back_accel)
-
-        # Extra safety check
-        if new_front is not None:
-            safeFront = new_front.loc_back > self.loc_front
-        else:
-            safeFront = True
-
-        if new_back is not None:
-            safeBack = new_back.loc_front < self.loc_back
-        else:
-            safeBack = True
-
-        changeFlag = change_incentive and safeFront and safeBack
-
-        return changeFlag, change_dir
-
     def vehicle_id(self):
         """Identifies the vehicle by a set of identifications
         """
@@ -240,6 +165,80 @@ class Vehicle:
         }
 
         return surrounding_vehicles
+
+    def calc_lane_change(self, change_dir, current_front, new_front, new_back):
+        """Calculates if a vehicle should change lanes
+
+        Args:
+            change_dir: string of change direction
+            current_front: vehicle that is currently in front
+            new_front: vehicle that will be in front after the change
+            new_back: vehicle that will be in the back after the change
+
+        Returns: True if the lane change should happen
+        """
+
+        # Current timestep
+        # Getting distance of front vehicle
+        if current_front is not None:
+            # If there is a front vehicle
+            current_front_dist = current_front.loc_back - self.loc_front
+            current_front_v = current_front.v
+        else:
+            # No vehicles infront
+            current_front_dist = self.road_length
+            current_front_v = self.v
+
+        # Next timestep
+        # Getting distance of new front vehicle
+        if new_front is not None:
+            # If there is a front vehicle
+            new_front_dist = new_front.loc_back - self.loc_front
+            new_front_v = new_front.v
+        else:
+            # No vehicles infront
+            new_front_dist = self.road_length
+            new_front_v = self.v
+
+        # Considering the vehicle behind
+        if new_back is None:
+            # If there is no vehicle behind
+            disadvantage, new_back_accel = 0, 0
+        else:
+            # Current timestep
+            if new_front is not None:
+                current_back_dist = new_front.loc_back - new_back.loc_front
+                current_back_v = new_front.v
+            else:
+                current_back_dist = self.road_length
+                current_back_v = self.v
+
+            new_back_dist = self.loc_back - new_back.loc_front
+            new_back_v = self.v
+
+            # Getting the disadvantage in changing
+            # Consider effects to back vehicle
+            disadvantage, new_back_accel = new_back.driver.calc_disadvantage(v=new_back.v, new_surrounding_v=new_back_v, new_surrounding_dist=new_back_dist,
+                                                                     old_surrounding_v=current_back_v, old_surrounding_dist=current_back_dist)
+
+        # Considering front vehicle
+        change_incentive = self.driver.calc_incentive(change_direction=change_dir, v=self.v, new_front_v=new_front_v, new_front_dist=new_front_dist, old_front_v=current_front_v,
+                                            old_front_dist=current_front_dist, disadvantage=disadvantage, new_back_accel=new_back_accel)
+
+        # Extra safety check
+        if new_front is not None:
+            safeFront = new_front.loc_back > self.loc_front
+        else:
+            safeFront = True
+
+        if new_back is not None:
+            safeBack = new_back.loc_front < self.loc_back
+        else:
+            safeBack = True
+
+        changeFlag = change_incentive and safeFront and safeBack
+
+        return changeFlag
 
     def update_local(self, ts, vehicle_list):
         """Update local timestep
