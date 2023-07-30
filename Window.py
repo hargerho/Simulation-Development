@@ -1,7 +1,7 @@
 import pygame
 import sys
 
-from common.config import window_params
+from common.config import window_params, road_params
 from Simulation import Simulation
 
 class Objects:
@@ -115,6 +115,14 @@ class Window:
             # Fill background
             self.win.fill(window_params["white"])
 
+            # Drawing the road
+            road_width = road_params['lanewidth'] * road_params['num_lanes'] + 2
+            roadSurface = pygame.Surface((road_params['road_length'], road_width))
+            roadSurface.fill(window_params['black'])
+            roadRect = roadSurface.get_rect()
+            roadRect.topleft = road_params['toplane_loc']
+            self.win.blit(roadSurface, roadRect.topleft)
+
             # Drawing the vehicles
             # Iterating through the value-list per frame
             for vehicle in vehicleList:
@@ -131,13 +139,13 @@ class Window:
                 #     self.acc_vehicle.draw(self.win)
                 if vehicleType == 'shc':
                     carSurface = pygame.Surface((10,5))
-                    carSurface.fill(window_params['black'])
+                    carSurface.fill(window_params['green'])
                     carRect = carSurface.get_rect()
                     carRect.center = vehicleLoc
                     self.win.blit(carSurface, carRect)
                 else:
                     carSurface = pygame.Surface((10,5))
-                    carSurface.fill(window_params['black'])
+                    carSurface.fill(window_params['white'])
                     carRect = carSurface.get_rect()
                     carRect.center = vehicleLoc
                     self.win.blit(carSurface, carRect)
