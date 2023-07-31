@@ -1,7 +1,6 @@
 import numpy as np
 import keyboard
 
-from common.config import simulation_params
 from Road import Road
 import time
 class Simulation:
@@ -11,7 +10,6 @@ class Simulation:
         ts: Time step to use when running the simulation
     """
     def __init__(self):
-        self.ts = simulation_params['ts']
         self.road = Road() # Create Road class
 
         # self.simulation_record = []
@@ -29,7 +27,7 @@ class Simulation:
             save_list = []
             if not is_paused:
                 # print("Main_iteration: ", main_iteration)
-                vehicle_list_obj = self.road.update_road(ts=self.ts)
+                vehicle_list_obj = self.road.update_road()
 
                 # Iterate through the list of vehicle objects
                 for vehicle_obj in vehicle_list_obj:

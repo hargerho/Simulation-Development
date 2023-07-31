@@ -2,7 +2,7 @@ import numpy as np
 import random
 import time
 
-from common.config import road_params, driving_params, vehicle_models
+from common.config import road_params, driving_params, vehicle_models, simulation_params
 from Vehicle import Vehicle
 
 class Road:
@@ -14,6 +14,7 @@ class Road:
         self.toplane_loc = road_params['toplane_loc']
         self.lanewidth = road_params['lanewidth']
         self.road_length = road_params['road_length']
+        self.ts = simulation_params['ts']
 
         # Spawn frequency
         self.vehicle_frequency = road_params['vehicle_inflow'] / 3600 # per/hour -> per second
@@ -90,11 +91,11 @@ class Road:
 
             time.sleep(1)
 
-    def update_road(self, ts):
+    def update_road(self):
         updateFlag = False
         # Update vehicle local state
         for vehicle in self.vehicle_list:
-            vehicle.update_local(ts, self.vehicle_list)
+            vehicle.update_local(self.ts, self.vehicle_list)
 
         for vehicle in self.vehicle_list:
             vehicle.update_global()
@@ -108,7 +109,7 @@ class Road:
                 print("Vehicle Removed")
 
         # Update spawn_timer
-        self.timer += ts
+        self.timer += self.ts
         if self.timer - self.last_spawn_time >= self.spawn_interval:
             self.spawn_vehicle()
 
