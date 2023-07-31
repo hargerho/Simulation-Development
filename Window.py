@@ -166,15 +166,17 @@ class Window:
                     if event.key == pygame.K_p:
                         if self.is_paused:
                             self.is_paused = False
+                            print("Continue Simulation")
                         else:
                             self.is_paused = True
                             print("Simulation Paused")
-                    if event.key == pygame.K_r and not self.is_paused:
-                        self.is_recording == True
-                        print("Recording Simulation")
-                    if event.key == pygame.K_r and not self.is_paused and self.is_recording:
-                        self.is_recording = False
-                        print("Stop Recording Simulation")
+                    if event.key == pygame.K_r:
+                        if self.is_recording:
+                            self.is_recording == False
+                            print("Stop Recording Simulation")
+                        else:
+                            self.is_recording = True
+                            print("Recording Simulation")
 
             # Drawing the landscape
             self.draw_fixed_objects()
@@ -187,7 +189,7 @@ class Window:
 
                 # Display newly updated frame on Window
                 if (len(vehicle_list[0]) != 0):
-                    print("VehicleList", vehicle_list[0])
+                    # print("VehicleList", vehicle_list[0])
                     self.refresh_window(vehicle_list=vehicle_list[0])
 
                 pygame.display.update()
@@ -196,6 +198,6 @@ class Window:
             else:
                 continue
 
-        if not self.is_running:
-            # Saves the vehicle records
-            self.sim.saving_record()
+        # TODO
+        self.sim.saving_record()
+        print("Saving Record")
