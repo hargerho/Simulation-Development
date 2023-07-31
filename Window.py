@@ -154,27 +154,27 @@ class Window:
 
             # Event check first
             for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
+                if event.type == pygame.QUIT:
+                    self.is_running = False
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
                         self.is_running = False
                         pygame.quit()
                         sys.exit()
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_q:
-                            self.is_running = False
-                            pygame.quit()
-                            sys.exit()
-                        if event.key == pygame.K_p and not self.is_paused:
+                    if event.key == pygame.K_p:
+                        if self.is_paused:
+                            self.is_paused = False
+                        else:
                             self.is_paused = True
                             print("Simulation Paused")
-                        if event.key == pygame.K_c and self.is_paused:
-                            self.is_paused == False
-                            print("Continue Simulation")
-                        if event.key == pygame.K_r and not self.is_paused:
-                            self.is_recording == True
-                            print("Recording Simulation")
-                        if event.key == pygame.K_r and not self.is_paused and self.is_recording:
-                            self.is_recording = False
-                            print("Stop Recording Simulation")
+                    if event.key == pygame.K_r and not self.is_paused:
+                        self.is_recording == True
+                        print("Recording Simulation")
+                    if event.key == pygame.K_r and not self.is_paused and self.is_recording:
+                        self.is_recording = False
+                        print("Stop Recording Simulation")
 
             # Drawing the landscape
             self.draw_fixed_objects()
@@ -196,5 +196,6 @@ class Window:
             else:
                 continue
 
-        # Saves the vehicle records
-        self.sim.saving_record()
+        if not self.is_running:
+            # Saves the vehicle records
+            self.sim.saving_record()
