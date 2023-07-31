@@ -2,7 +2,7 @@ import numpy as np
 import random
 import time
 
-from common.config import road_params, driving_params, vehicle_models
+from common.config import road_params, driving_params, vehicle_models, simulation_params
 from Vehicle import Vehicle
 
 class Road:
@@ -14,6 +14,7 @@ class Road:
         self.toplane_loc = road_params['toplane_loc']
         self.lanewidth = road_params['lanewidth']
         self.road_length = road_params['road_length']
+        self.ts = simulation_params['ts']
 
         # Spawn frequency
         self.vehicle_frequency = road_params['vehicle_inflow'] / 3600 # per/hour -> per second
@@ -27,7 +28,6 @@ class Road:
         self.toplane = self.toplane_loc[1]
         self.bottomlane = self.toplane + self.lanewidth * (self.num_lanes-1)
 
-        # self.vehicle_list: list[Vehicle] = []
         self.vehicle_list = []
         self.spawn_counter = 0
 
@@ -79,22 +79,17 @@ class Road:
         # # Spawn safety check
         if (headway >= tmp_vehicle.T and not overlap_flag):
             self.vehicle_list.append(tmp_vehicle)
-            print(f"list len {len(self.vehicle_list)}")
 
             # Reset spawn timer
             self.last_spawn_time = self.timer
-            print(f"list len {len(self.vehicle_list)}, vehicle_list {self.vehicle_list}")
 
-            self.spawn_counter += 1
-            print(f"Spawn Vehicle {self.spawn_counter}, timer: {self.timer}, spawnINtervale {self.spawn_interval}")
+            print("Vehicle Spawned")
+            print("Num Vehicles on Road:", len(self.vehicle_list))
 
-            time.sleep(1)
-
-    def update_road(self, ts):
-        updateFlag = False
+    def update_road(self):
         # Update vehicle local state
         for vehicle in self.vehicle_list:
-            vehicle.update_local(ts, self.vehicle_list)
+            vehicle.update_local(self.ts, self.vehicle_list)
 
         for vehicle in self.vehicle_list:
             vehicle.update_global()
@@ -102,20 +97,15 @@ class Road:
             # If vehicle reached the end of the road
             # Remove vehicle from road
             if vehicle.loc_back > self.road_length:
-                print("vehicle.loc_back", vehicle.loc_back)
-                print(f"vehicleLocBack {vehicle.loc_back}, roadLength {self.road_length}")
                 self.vehicle_list.remove(vehicle)
                 print("Vehicle Removed")
 
         # Update spawn_timer
-        self.timer += ts
+        self.timer += self.ts
         if self.timer - self.last_spawn_time >= self.spawn_interval:
             self.spawn_vehicle()
 
         self.frames += 1
-        # print("Frames: ", self.frames)
-        updateFlag = True
-        if updateFlag:
-            # print("Finish this update frame")
-            return self.vehicle_list # return vehicle list of this frame
+
+        return self.vehicle_list # return vehicle list of this frame
 

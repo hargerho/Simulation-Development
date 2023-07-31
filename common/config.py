@@ -20,6 +20,9 @@ window_params = {
 
 simulation_params = {
     "ts": 0.001,
+    "playback_speed": 1, # realtime = 1
+    "folderpath": "data",
+    "filename": "recordedSimulation"
 }
 
 road_params = {

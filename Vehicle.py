@@ -83,6 +83,7 @@ class Vehicle:
             return val
         else:
             return avg
+
     def vehicle_id(self):
         """Identifies the vehicle by a set of identifications
         """
