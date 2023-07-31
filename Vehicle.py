@@ -31,6 +31,7 @@ class Vehicle:
         self.toplane_loc = road_params['toplane_loc']
         self.lanewidth = road_params['lanewidth']
         self.road_length = road_params['road_length']
+
         # Getting y-coord of lanes
         self.toplane = self.toplane_loc[1]
         self.bottomlane = self.toplane + self.lanewidth * (self.num_lanes-1)
