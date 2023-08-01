@@ -217,8 +217,6 @@ class Vehicle:
 
         return front, front_left, front_right, back_left, back_right
 
-
-
     def calc_lane_change(self, change_dir, current_front, new_front, new_back):
         """Calculates if a vehicle should change lanes
 

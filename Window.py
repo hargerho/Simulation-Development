@@ -205,7 +205,6 @@ class Window:
 
                 # Display newly updated frame on Window
                 if (len(vehicle_list[0]) != 0):
-                    # print("VehicleList", vehicle_list[0])
                     self.refresh_window(vehicle_list=vehicle_list[0])
 
                 pygame.display.update()

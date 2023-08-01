@@ -31,41 +31,56 @@ class Road:
 
         self.vehicle_list = []
         self.spawn_counter = 0
-        self.num_subconvoy = 2 # Queue counter of 3 acc vehicles to form a convoy
+        self.num_convoy_vehicles = road_params['num_convoy_vehicles']  # Queue counter of 3 acc vehicles to form a convoy
         self.acc_spawn_loc = [self.toplane_loc[0], self.toplane_loc[1]] # acc vehicle always spawns in left lane
 
         self.frames = 0
+        self.convoy_spawned = False
 
     def spawn_helper(self, tmp_vehicle, vehicle_type):
 
         if vehicle_type == 'shc':
             # Check vehicle surrounding
             tmp_front = tmp_vehicle.get_fov(vehicle_list=self.vehicle_list)['front']
-        else:
-            tmp_vehicle = tmp_vehicle.lead_vehicle
-            tmp_front = tmp_vehicle.get_fov(vehicle_list=self.vehicle_list)['front']
-
-        # If there is a vehicle infront
-        if tmp_front is not None:
-            if tmp_vehicle.v != 0:
-                headway = (tmp_front.loc_back - tmp_vehicle.loc_front) / tmp_vehicle.v
+            # If there is a vehicle infront
+            if tmp_front is not None:
+                if tmp_vehicle.v != 0:
+                    headway = (tmp_front.loc_back - tmp_vehicle.loc_front) / tmp_vehicle.v
+                else:
+                    headway = tmp_vehicle.T
+                # Check the size of the car
+                overlap_flag = (tmp_front.loc_back - tmp_vehicle.loc_front) <= 0
             else:
+                # If no vehicles infront
                 headway = tmp_vehicle.T
-            # Check the size of the car
-            overlap_flag = (tmp_front.loc_back - tmp_vehicle.loc_front) <= 0
-        else:
-            # If no vehicles infront
-            headway = tmp_vehicle.T
-            overlap_flag = False
+                overlap_flag = False
 
-        headway_flag = headway >= tmp_vehicle.T
+            headway_flag = headway >= tmp_vehicle.T
+
+        else:
+            tmp_lead = tmp_vehicle.convoy_list[0] # Lead ACC vehicle
+            tmp_vehicle_tail = tmp_vehicle.convoy_list[-1]
+            tmp_front = tmp_lead.get_fov(vehicle_list=self.vehicle_list)['front']
+
+            # If there is a vehicle infront
+            if tmp_front is not None:
+                if tmp_lead.v != 0:
+                    headway = (tmp_front.loc_back - tmp_lead.loc_front) / tmp_lead.v
+                else:
+                    headway = tmp_lead.T
+                # Check the size of the car
+                overlap_flag = (tmp_front.loc_back - tmp_vehicle_tail.loc_front) <= 0
+            else:
+                # If no vehicles infront
+                headway = tmp_lead.T
+                overlap_flag = False
+            headway_flag = headway >= tmp_lead.T
 
         return headway_flag, overlap_flag
 
     def spawn_vehicle(self):
         """Spawns a car when internval is met with additional checks
         """
-
         # Choosing spawned vehicle type
         random_vehicle = random.random()
         acc_spawnrate = vehicle_models[1].get("acc_spawnrate")
@@ -88,7 +103,7 @@ class Road:
         if vehicle_type == 'acc':
 
             # Create a tmp convoy
-            tmp_convoy = Convoy(logic_dict=logic_dict, lead_spawn_loc=self.acc_spawn_loc, vehicle_type=vehicle_type, num_subconvoy=self.num_subconvoy)
+            tmp_convoy = Convoy(logic_dict=logic_dict, lead_spawn_loc=self.acc_spawn_loc, vehicle_type=vehicle_type, num_subconvoy=self.num_convoy_vehicles)
             headway_flag, overlap_flag = self.spawn_helper(tmp_vehicle=tmp_convoy,vehicle_type=vehicle_type)
 
         else:
@@ -102,12 +117,15 @@ class Road:
         # Spawn safety check
         if (headway_flag and not overlap_flag):
             if vehicle_type == 'shc':
+                self.convoy_spawned = False
                 self.vehicle_list.append(tmp_vehicle)
             else:
+                self.convoy_spawned = True
                 self.vehicle_list.append(tmp_convoy)
 
             # Reset spawn timer
-            self.last_spawn_time = self.timer
+            if self.convoy_spawned or vehicle_type == 'shc':
+                self.last_spawn_time = self.timer
 
     def update_road(self):
         # Update vehicle local state

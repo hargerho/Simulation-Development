@@ -31,7 +31,7 @@ road_params = {
     "num_lanes": 2,
     "lanewidth": 10,
     "vehicle_inflow": 4000, # 1000 approx 1veh/3.6sec
-    "num_convoy_vehicles": 3
+    "num_convoy_vehicles": 2
 }
 
 driving_params = {
