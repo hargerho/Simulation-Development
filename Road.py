@@ -124,8 +124,8 @@ class Road:
                 self.vehicle_list.append(tmp_convoy)
 
             # Reset spawn timer
-            if self.convoy_spawned or vehicle_type == 'shc':
-                self.last_spawn_time = self.timer
+            if self.convoy_spawned:
+                self.last_spawn_time = self.timer + (3*self.spawn_interval)
 
     def update_road(self):
         # Update vehicle local state
