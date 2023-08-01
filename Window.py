@@ -3,6 +3,7 @@ import sys
 
 from common.config import window_params, road_params, simulation_params
 from Simulation import SimulationManager
+from ACC import Convoy
 
 class Objects:
     def __init__(self, x, y, image, scale):
@@ -113,11 +114,11 @@ class Window:
         self.win.fill(window_params["white"])
 
         # Drawing the road
-        road_width = road_params['lanewidth'] * road_params['num_lanes'] + 2
+        road_width = road_params['lanewidth'] * road_params['num_lanes'] + window_params['vehicle_width']
         roadSurface = pygame.Surface((road_params['road_length'], road_width))
         roadSurface.fill(window_params['black'])
         roadRect = roadSurface.get_rect()
-        roadRect.topleft = road_params['toplane_loc']
+        roadRect.topleft = (road_params['toplane_loc'][0] - window_params['vehicle_length'], road_params['toplane_loc'][1] - window_params['vehicle_width'])
         self.win.blit(roadSurface, roadRect.topleft)
 
         # Draw speed limit
@@ -128,25 +129,40 @@ class Window:
 
         # Drawing the vehicles
         for vehicle in vehicle_list:
-            # Iterating through the value-list per frame
 
-            # Indexing the vehicles
-            vehicle_id = vehicle.vehicle_id()
-            vehicleType = vehicle_id['vehicle_type']
-            vehicleLoc = vehicle_id['location']
+            if not isinstance(vehicle, Convoy):
+                # Iterating through the value-list per frame
 
-            if vehicleType == 'shc':
-                carSurface = pygame.Surface((10,5))
-                carSurface.fill(window_params['green'])
-                carRect = carSurface.get_rect()
-                carRect.center = vehicleLoc
-                self.win.blit(carSurface, carRect)
+                # Indexing the vehicles
+                vehicle_id = vehicle.vehicle_id()
+                vehicleType = vehicle_id['vehicle_type']
+                vehicleLoc = vehicle_id['location']
+
+                if vehicleType == 'shc':
+                    carSurface = pygame.Surface((10,5))
+                    carSurface.fill(window_params['green'])
+                    carRect = carSurface.get_rect()
+                    carRect.center = vehicleLoc
+                    self.win.blit(carSurface, carRect)
+                else:
+                    carSurface = pygame.Surface((10,5))
+                    carSurface.fill(window_params['white'])
+                    carRect = carSurface.get_rect()
+                    carRect.center = vehicleLoc
+                    self.win.blit(carSurface, carRect)
             else:
-                carSurface = pygame.Surface((10,5))
-                carSurface.fill(window_params['white'])
-                carRect = carSurface.get_rect()
-                carRect.center = vehicleLoc
-                self.win.blit(carSurface, carRect)
+                for convoy in vehicle.convoy_list:
+                    # Indexing the convoy
+                    vehicle_id = convoy.vehicle_id()
+                    vehicleLoc = vehicle_id['location']
+
+                    # Drawing the convoy
+                    carSurface = pygame.Surface((10,5))
+                    carSurface.fill(window_params['white'])
+                    carRect = carSurface.get_rect()
+                    carRect.center = vehicleLoc
+                    self.win.blit(carSurface, carRect)
+
 
     def run_window(self): # vehicle_list passed from Simulation
 
