@@ -46,7 +46,7 @@ class Vehicle:
         self.change_threshold = driving_params['lane_change_threshold']
 
         # Driving Logic Dependent Params
-        self.T = logic_dict.get('safe_headyway')
+        self.T = logic_dict.get('safe_headway')
         self.v_var = logic_dict.get('speed_variation')
         self.politeness = logic_dict.get('politeness_factor')
 
@@ -105,11 +105,11 @@ class Vehicle:
         Get other vehicles around this vehicle
 
         Returns: Dictionary with:
-            frontNow: current vehicle in front of this vehicle
-            frontLeft: front left vehicle
-            frontRight: front right vehicle
-            backLeft: back left vehicle
-            backRight: back right vehicle
+            front: current vehicle in front of this vehicle
+            front_left: front left vehicle
+            front_right: front right vehicle
+            back_left: back left vehicle
+            back_right: back right vehicle
         """
         front = None
         front_left = None
@@ -118,45 +118,47 @@ class Vehicle:
         back_right = None
 
         for vehicle in vehicle_list:
-            x_coord = vehicle.loc[0]
-            current_y_coord = self.loc[1]
-            x_diff = x_coord - self.loc[0]
-            y_diff = vehicle.loc[1] - current_y_coord
-            right_check = vehicle.loc[1] == current_y_coord + self.lanewidth
-            left_check = vehicle.loc[1] == current_y_coord - self.lanewidth
-            front_check = x_coord > self.loc[0]
-            back_check = x_coord < self.loc[0]
+            if isinstance(vehicle, Vehicle):
+                x_coord = vehicle.loc[0]
+                current_y_coord = self.loc[1]
+                x_diff = x_coord - self.loc[0]
+                y_diff = vehicle.loc[1] - current_y_coord
+                right_check = vehicle.loc[1] == current_y_coord + self.lanewidth
+                left_check = vehicle.loc[1] == current_y_coord - self.lanewidth
+                front_check = x_coord > self.loc[0]
+                back_check = x_coord < self.loc[0]
 
-            not_right_lane = current_y_coord != self.bottomlane
-            not_left_lane = current_y_coord != self.toplane
+                not_right_lane = current_y_coord != self.bottomlane
+                not_left_lane = current_y_coord != self.toplane
 
-            if x_diff > 0 and y_diff == 0:
-                if front is None or x_coord < front.loc[0]:
-                    front = vehicle
-                else:
-                    front = front
+                if x_diff > 0 and y_diff == 0:
+                    if front is None or x_coord < front.loc[0]:
+                        front = vehicle
+                    else:
+                        front = front
 
-            if not_right_lane and front_check and right_check:
-                # Front right
-                if front_right is None or x_coord < front_right.loc[0]:
-                    front_right = vehicle
+                if not_right_lane and front_check and right_check:
+                    # Front right
+                    if front_right is None or x_coord < front_right.loc[0]:
+                        front_right = vehicle
 
-            if not_right_lane and back_check and right_check:
-                # Back right
-                if back_right is None or x_coord > back_right.loc[0]:
-                    back_right = vehicle
+                if not_right_lane and back_check and right_check:
+                    # Back right
+                    if back_right is None or x_coord > back_right.loc[0]:
+                        back_right = vehicle
 
-            if not_left_lane and front_check and left_check:
-                # Front left
-                if front_left is None or x_coord < front_left.loc[0]:
-                    front_left = vehicle
+                if not_left_lane and front_check and left_check:
+                    # Front left
+                    if front_left is None or x_coord < front_left.loc[0]:
+                        front_left = vehicle
 
-            if not_left_lane and back_check and left_check:
-                # Back left
-                if back_left is None or x_coord > back_left.loc[0]:
-                    back_left = vehicle
+                if not_left_lane and back_check and left_check:
+                    # Back left
+                    if back_left is None or x_coord > back_left.loc[0]:
+                        back_left = vehicle
+
             else:
-                continue
+                front, front_left, front_right, back_left, back_right = self.get_convoy_fov(vehicle, front, front_left, front_right, back_left, back_right)
 
         surrounding_vehicles = {
             "front": front,
@@ -167,6 +169,55 @@ class Vehicle:
         }
 
         return surrounding_vehicles
+
+    def get_convoy_fov(self, convoy, front, front_left, front_right, back_left, back_right):
+
+        # Lead vehicle will be the back of a vehicle POV
+        # Tail vehicle will be front of a vehicle POV
+        lead_vehicle = convoy.convoy_list[0]
+        tail_vehicle = convoy.convoy_list[-1]
+
+        x_coord = tail_vehicle.loc[0]
+        current_y_coord = self.loc[1]
+        x_diff = x_coord - self.loc[0]
+        y_diff = tail_vehicle.loc[1] - current_y_coord
+        right_check = tail_vehicle.loc[1] == current_y_coord + self.lanewidth
+        left_check = tail_vehicle.loc[1] == current_y_coord - self.lanewidth
+        front_check = x_coord > self.loc[0]
+        back_check = lead_vehicle.loc[0] < self.loc[0]
+
+        not_right_lane = current_y_coord != self.bottomlane
+        not_left_lane = current_y_coord != self.toplane
+
+        if x_diff > 0 and y_diff == 0:
+            if front is None or x_coord < front.loc[0]:
+                front = lead_vehicle
+            else:
+                front = front
+
+        if not_right_lane and front_check and right_check:
+            # Front right
+            if front_right is None or x_coord < front_right.loc[0]:
+                front_right = tail_vehicle
+
+        if not_right_lane and back_check and right_check:
+            # Back right
+            if back_right is None or x_coord > back_right.loc[0]:
+                back_right = lead_vehicle
+
+        if not_left_lane and front_check and left_check:
+            # Front left
+            if front_left is None or x_coord < front_left.loc[0]:
+                front_left = tail_vehicle
+
+        if not_left_lane and back_check and left_check:
+            # Back left
+            if back_left is None or x_coord > back_left.loc[0]:
+                back_left = lead_vehicle
+
+        return front, front_left, front_right, back_left, back_right
+
+
 
     def calc_lane_change(self, change_dir, current_front, new_front, new_back):
         """Calculates if a vehicle should change lanes

@@ -31,6 +31,7 @@ road_params = {
     "num_lanes": 2,
     "lanewidth": 10,
     "vehicle_inflow": 4000, # 1000 approx 1veh/3.6sec
+    "num_convoy_vehicles": 3
 }
 
 driving_params = {
@@ -46,14 +47,14 @@ driving_params = {
 }
 
 shc_params = {
-    "normal": {"safe_headyway": 3.1, "speed_variation": 5, "politeness_factor": 0.25},
-    "irrational": {"safe_headyway": 1.5, "speed_variation": 10, "politeness_factor": 0.15},
+    "normal": {"safe_headway": 3.1, "speed_variation": 5, "politeness_factor": 0.25},
+    "irrational": {"safe_headway": 1.5, "speed_variation": 10, "politeness_factor": 0.15},
 }
 
 acc_params = {
-    "acc_spawnrate": 0.2, # Init 0.2
-    "normal": {"safe_headyway": 3.1, "speed_variation": 0, "politeness_factor": 0.5},
-    "cautious": {"safe_headyway": 4, "speed_variation": 0, "politeness_factor": 0.8},
+    "acc_spawnrate": 1, # Init 0.2
+    "normal": {"safe_headway": 3.1, "speed_variation": 0, "politeness_factor": 0.5},
+    "cautious": {"safe_headway": 4, "speed_variation": 0, "politeness_factor": 0.8},
 }
 
 vehicle_models = [shc_params, acc_params]
