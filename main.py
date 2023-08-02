@@ -1,5 +1,4 @@
 from Window import Window
-import json
 
 def main():
     # Creating instances

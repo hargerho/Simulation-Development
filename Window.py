@@ -130,27 +130,7 @@ class Window:
         # Drawing the vehicles
         for vehicle in vehicle_list:
 
-            if not isinstance(vehicle, Convoy):
-                # Iterating through the value-list per frame
-
-                # Indexing the vehicles
-                vehicle_id = vehicle.vehicle_id()
-                vehicleType = vehicle_id['vehicle_type']
-                vehicleLoc = vehicle_id['location']
-
-                if vehicleType == 'shc':
-                    carSurface = pygame.Surface((10,5))
-                    carSurface.fill(window_params['green'])
-                    carRect = carSurface.get_rect()
-                    carRect.center = vehicleLoc
-                    self.win.blit(carSurface, carRect)
-                else:
-                    carSurface = pygame.Surface((10,5))
-                    carSurface.fill(window_params['white'])
-                    carRect = carSurface.get_rect()
-                    carRect.center = vehicleLoc
-                    self.win.blit(carSurface, carRect)
-            else:
+            if isinstance(vehicle, Convoy):
                 for convoy in vehicle.convoy_list:
                     # Indexing the convoy
                     vehicle_id = convoy.vehicle_id()
@@ -162,7 +142,15 @@ class Window:
                     carRect = carSurface.get_rect()
                     carRect.center = vehicleLoc
                     self.win.blit(carSurface, carRect)
+            else:
+                vehicle_id = vehicle.vehicle_id()
+                vehicleLoc = vehicle_id['location']
 
+                carSurface = pygame.Surface((10,5))
+                carSurface.fill(window_params['green'])
+                carRect = carSurface.get_rect()
+                carRect.center = vehicleLoc
+                self.win.blit(carSurface, carRect)
 
     def run_window(self): # vehicle_list passed from Simulation
 
