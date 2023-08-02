@@ -110,53 +110,6 @@ class Vehicle:
 
         return x_coord, x_diff, y_diff, right_check, left_check, front_check, back_check, not_right_lane, not_left_lane
 
-    # def get_fov(self, vehicle_list):
-    #     """
-    #     Get other vehicles around this vehicle
-
-    #     Returns: Dictionary with:
-    #         front: current vehicle in front of this vehicle
-    #         front_left: front left vehicle
-    #         front_right: front right vehicle
-    #         back_left: back left vehicle
-    #         back_right: back right vehicle
-    #     """
-    #     front = None
-    #     front_left = None
-    #     front_right = None
-    #     back_left = None
-    #     back_right = None
-
-    #     for vehicle in vehicle_list:
-    #         if isinstance(vehicle, Vehicle):
-    #             x_coord, x_diff, y_diff, right_check, left_check, front_check, back_check, not_right_lane, not_left_lane = self.get_fov_params(vehicle=vehicle)
-
-    #             if x_diff > 0 and y_diff == 0:
-    #                 front = vehicle if front is None or x_coord < front.loc[0] else front
-
-    #             if not_right_lane and front_check and right_check and (front_right is None or x_coord < front_right.loc[0]):
-    #                 front_right = vehicle
-
-    #             if not_right_lane and back_check and right_check and (back_right is None or x_coord > back_right.loc[0]):
-    #                 back_right = vehicle
-
-    #             if not_left_lane and front_check and left_check and (front_left is None or x_coord < front_left.loc[0]):
-    #                 front_left = vehicle
-
-    #             if not_left_lane and back_check and left_check and (back_left is None or x_coord > back_left.loc[0]):
-    #                 back_left = vehicle
-
-    #         else:
-    #             front, front_left, front_right, back_left, back_right = self.get_convoy_fov(vehicle, front, front_left, front_right, back_left, back_right)
-
-    #     return {
-    #         "front": front,
-    #         "front_left": front_left,
-    #         "front_right": front_right,
-    #         "back_left": back_left,
-    #         "back_right": back_right,
-    #     }
-
     def get_fov(self, vehicle_list):
         front, front_left, front_right, back_left, back_right = None, None, None, None, None
 
