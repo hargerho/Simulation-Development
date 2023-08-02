@@ -159,14 +159,10 @@ class Window:
             # Event check first
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    self.is_running = False
-                    pygame.quit()
-                    sys.exit()
+                    self.close_window()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
-                        self.is_running = False
-                        pygame.quit()
-                        sys.exit()
+                        self.close_window()
                     if event.key == pygame.K_p:
                         if self.is_paused:
                             self.is_paused = False
@@ -185,22 +181,26 @@ class Window:
             # Drawing the landscape
             self.draw_fixed_objects()
 
-            if not self.is_paused:
-                # If window paused, simulation paused, no road updates
-
-                # Updates simulation frame
-                vehicle_list = self.sim.update_frame(self.is_recording)
-
-                # Display newly updated frame on Window
-                if (len(vehicle_list[0]) != 0):
-                    self.refresh_window(vehicle_list=vehicle_list[0])
-
-                pygame.display.update()
-                self.clock.tick(1./self.ts * self.speed)
-
-            else:
+            if self.is_paused:
                 continue
+
+            # If window paused, simulation paused, no road updates
+
+            # Updates simulation frame
+            vehicle_list = self.sim.update_frame(self.is_recording)
+
+            # Display newly updated frame on Window
+            if (len(vehicle_list[0]) != 0):
+                self.refresh_window(vehicle_list=vehicle_list[0])
+
+            pygame.display.update()
+            self.clock.tick(1./self.ts * self.speed)
 
         # TODO
         self.sim.saving_record()
         print("Saving Record")
+
+    def close_window(self):
+        self.is_running = False
+        pygame.quit()
+        sys.exit()
