@@ -24,6 +24,7 @@ class Road:
 
         # Getting y-coord of lanes
         self.toplane = self.toplane_loc[1]
+        # self.middlelane = self.toplane_loc[1]
         self.bottomlane = self.toplane + self.lanewidth * (self.num_lanes-1)
 
         self.vehicle_list = []
