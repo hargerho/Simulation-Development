@@ -6,6 +6,7 @@ window_params = {
     "white": (255,255,255),
     "blue": (0, 0, 255),
     "green": (0,255,0),
+    "grey": (192, 192, 192),
     "red": (255,0,0),
     "vehicle_length": 10,
     "vehicle_width": 5,
@@ -28,7 +29,8 @@ simulation_params = {
 road_params = {
     "toplane_loc": (70,100), #(x, y)
     "road_length": 500,
-    "num_lanes": 2,
+    "onramp_length": 200,
+    "num_lanes": 4, # including an onramp
     "lanewidth": 10,
     "vehicle_inflow": 4000, # 1000 approx 1veh/3.6sec
     "num_convoy_vehicles": 3

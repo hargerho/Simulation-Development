@@ -12,6 +12,7 @@ class Road:
         self.toplane_loc = road_params['toplane_loc']
         self.lanewidth = road_params['lanewidth']
         self.road_length = road_params['road_length']
+        self.onramp_length = road_params['onramp_length']
         self.ts = simulation_params['ts']
 
         # Spawn frequency
@@ -23,14 +24,16 @@ class Road:
         self.last_spawn_time = 0
 
         # Getting y-coord of lanes
-        self.toplane = self.toplane_loc[1]
-        # self.middlelane = self.toplane_loc[1]
+        self.onramp = self.toplane_loc[1]
+        self.toplane = self.toplane_loc[1] + self.lanewidth
+        self.middlelane = self.toplane_loc[1] + (self.lanewidth * 2)
         self.bottomlane = self.toplane + self.lanewidth * (self.num_lanes-1)
 
         self.vehicle_list = []
         self.spawn_counter = 0
         self.num_convoy_vehicles = road_params['num_convoy_vehicles']  # Queue counter of 3 acc vehicles to form a convoy
-        self.acc_spawn_loc = [self.toplane_loc[0], self.toplane_loc[1]] # acc vehicle always spawns in left lane
+        self.acc_spawn_loc = [self.toplane_loc[0], self.toplane] # acc vehicle always spawns in left lane
+        print(self.acc_spawn_loc)
 
         self.frames = 0
         self.convoy_spawned = False
@@ -153,7 +156,9 @@ class Road:
                             vehicle.convoy_list.remove(convoy)
             elif vehicle.loc_back > self.road_length:
                 self.vehicle_list.remove(vehicle)
-                print("Vehicle Removed")
+            # Reach the end of the on-ramp
+            elif (vehicle.loc[1] == self.onramp) and (vehicle.loc_back > self.onramp_length - driving_params['safety_threshold']):
+                vehicle.v = 0 # Stop the vehicle
 
         # Update spawn_timer
         self.timer += self.ts

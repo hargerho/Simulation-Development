@@ -107,17 +107,24 @@ class Window:
         self.shc_vehicle = Objects(shc_x, shc_y, self.shc_image, 0.05)
         self.acc_vehicle = Objects(acc_x, acc_y, self.acc_image, 0.05)
 
-    def draw_fixed_objects(self):
+    def draw_fixed_objects(self):  # sourcery skip: extract-duplicate-method
 
         # Fill background
-        self.win.fill(window_params["white"])
+        self.win.fill(window_params["blue"])
+
+        # Drawing the onramp
+        onrampSurface = pygame.Surface((road_params['onramp_length'], road_params['lanewidth']))
+        onrampSurface.fill(window_params['grey'])
+        rampRect = onrampSurface.get_rect()
+        rampRect.topleft = (road_params['toplane_loc'][0] - window_params['vehicle_length'], road_params['toplane_loc'][1] - window_params['vehicle_width'])
+        self.win.blit(onrampSurface, rampRect.topleft)
 
         # Drawing the road
-        road_width = road_params['lanewidth'] * road_params['num_lanes'] + window_params['vehicle_width']
+        road_width = road_params['lanewidth'] * (road_params['num_lanes'] - 1) + window_params['vehicle_width']
         roadSurface = pygame.Surface((road_params['road_length'], road_width))
         roadSurface.fill(window_params['black'])
         roadRect = roadSurface.get_rect()
-        roadRect.topleft = (road_params['toplane_loc'][0] - window_params['vehicle_length'], road_params['toplane_loc'][1] - window_params['vehicle_width'])
+        roadRect.topleft = (road_params['toplane_loc'][0] - window_params['vehicle_length'], road_params['toplane_loc'][1] - window_params['vehicle_width'] + road_params['lanewidth'])
         self.win.blit(roadSurface, roadRect.topleft)
 
         # Draw speed limit

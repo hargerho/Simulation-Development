@@ -17,7 +17,9 @@ class Vehicle:
         self.road_length = road_params['road_length']
 
         # Getting y-coord of lanes
-        self.toplane = self.toplane_loc[1]
+        self.onramp = self.toplane_loc[1]
+        self.toplane = self.toplane_loc[1] + self.lanewidth
+        self.middlelane = self.toplane_loc[1] + (self.lanewidth * 2)
         self.bottomlane = self.toplane + self.lanewidth * (self.num_lanes-1)
 
         self.v_0 = driving_params['desired_velocity']
@@ -244,14 +246,14 @@ class Vehicle:
         return change_incentive and safeFront and safeBack
 
     def check_lane_change(self, surrounding):
-        if self.loc[1] != self.bottomlane:
-                change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
+        if self.loc[1] == self.bottomlane: # if car is either left or middle lane
+                change_flag = self.calc_lane_change(change_dir='left', current_front=surrounding['front'],
                                                     new_front=surrounding['front_right'], new_back=surrounding['back_right'])
                 if change_flag:
                     self.local_loc[1] += self.lanewidth
-        # Left change
-        if self.loc[1] != self.toplane:
-            change_flag = self.calc_lane_change(change_dir='left', current_front=surrounding['front'],
+        # Right change
+        if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] in [self.toplane, self.onramp, self.middlelane]: # if car is on right
+            change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
                                                 new_front=surrounding['front_left'], new_back=surrounding['back_left'])
             if change_flag:
                 self.local_loc[1] -= self.lanewidth
@@ -274,13 +276,13 @@ class Vehicle:
             self.check_lane_change(surrounding=surrounding)
         else:
             # Change right if front vehicle is stationary and currently on left lane
-            if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] != self.bottomlane:
+            if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] == self.toplane:
                 change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
                                                     new_front=surrounding['front_right'], new_back=surrounding['back_right'])
                 if change_flag:
                     self.local_loc[1] += self.lanewidth
-            # Left change if it is on right lane
-            if self.loc[1] != self.toplane:
+            # Left change if it is on middle or right lane
+            if self.loc[1] in [self.middlelane, self.bottomlane]:
                 change_flag = self.calc_lane_change(change_dir='left', current_front=surrounding['front'],
                                                     new_front=surrounding['front_left'], new_back=surrounding['back_left'])
                 if change_flag:
