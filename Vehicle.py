@@ -6,22 +6,6 @@ from common.config import driving_params, window_params, road_params
 from DriverModel import DriverModel as DM
 
 class Vehicle:
-    """Class to store the vehicle parameters, including IDM parameters
-
-    Kwargs:
-        If arg is passed as tuple, then first value is the average and second is the standard deviation (with cuttof at 2 sigma)
-
-        v_0: Desired velocity
-        s_0: Safety threshold
-        T: Safe time headway
-        a: Maximum acceleration
-        b: Comfortable deceleration
-        delta: Acceleration component
-        veh_length: Vehicle length
-        change_threshold: lane_change_threshold
-        politeness: lane change politeness
-        left_bias: Bias to switch to the left lane
-    """
     def __init__(self, logic_dict, spawn_loc, vehicle_type):
 
         self.id = str(uuid.uuid4()) # unique id for each vehicle

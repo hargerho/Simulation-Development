@@ -7,9 +7,6 @@ from Vehicle import Vehicle
 from ACC import Convoy
 
 class Road:
-    """Keep track, spawn and despawn vehicles on the road
-    """
-
     def __init__(self):
         self.num_lanes = road_params['num_lanes']
         self.toplane_loc = road_params['toplane_loc']

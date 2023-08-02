@@ -1,11 +1,6 @@
 import math
 import time
 class DriverModel:
-    """Driver Class to following the Intelligent Driver and MOBIL Models
-
-    Args:
-        params: vehicle parameters
-    """
     def __init__(self, model_params):
         self.v_0 = model_params['v_0']
         self.s_0 = model_params['s_0']
