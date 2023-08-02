@@ -1,11 +1,6 @@
 import math
 import time
 class DriverModel:
-    """Driver Class to following the Intelligent Driver and MOBIL Models
-
-    Args:
-        params: vehicle parameters
-    """
     def __init__(self, model_params):
         self.v_0 = model_params['v_0']
         self.s_0 = model_params['s_0']
@@ -18,8 +13,11 @@ class DriverModel:
         self.change_threshold = model_params['change_threshold']
 
     def s_star(self, v, delta_v):
-        s_star = (self.s_0 + self.T * v + (v + delta_v) / (2 * math.sqrt(self.a * self.b)))
-        return s_star
+        return (
+            self.s_0
+            + self.T * v
+            + (v + delta_v) / (2 * math.sqrt(self.a * self.b))
+        )
 
     def calc_acceleration(self, v, surrounding_v, s):
         """Calculates the acceleration of the car based on it's parameters and the surrounding cars
@@ -27,9 +25,7 @@ class DriverModel:
         delta_v = v - surrounding_v
         s_star = self.s_star(v=v, delta_v=delta_v)
         x = math.pow(v/self.v_0, self.delta)
-        acceleration = (self.a * (1 - x - math.pow(s_star/s, 2)))
-
-        return acceleration
+        return (self.a * (1 - x - math.pow(s_star/s, 2)))
 
     def calc_disadvantage(self, v, new_surrounding_v, new_surrounding_dist, old_surrounding_v, old_surrounding_dist):
         """Calculates intermediate values to check if a lane change is safe

@@ -5,11 +5,6 @@ from Road import Road
 from common.config import simulation_params
 
 class SimulationManager:
-    """Class to manage the simulation
-
-    Args:
-        ts: Time step to use when running the simulation
-    """
     def __init__(self):
         self.road = Road() # Create Road class
         self.display_vehicles = {}

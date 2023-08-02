@@ -7,9 +7,6 @@ from Vehicle import Vehicle
 from ACC import Convoy
 
 class Road:
-    """Keep track, spawn and despawn vehicles on the road
-    """
-
     def __init__(self):
         self.num_lanes = road_params['num_lanes']
         self.toplane_loc = road_params['toplane_loc']
@@ -27,6 +24,7 @@ class Road:
 
         # Getting y-coord of lanes
         self.toplane = self.toplane_loc[1]
+        # self.middlelane = self.toplane_loc[1]
         self.bottomlane = self.toplane + self.lanewidth * (self.num_lanes-1)
 
         self.vehicle_list = []
@@ -103,7 +101,8 @@ class Road:
         if vehicle_type == 'acc':
 
             # Create a tmp convoy
-            tmp_convoy = Convoy(logic_dict=logic_dict, lead_spawn_loc=self.acc_spawn_loc, vehicle_type=vehicle_type, num_subconvoy=self.num_convoy_vehicles)
+            tmp_convoy = Convoy(logic_dict=logic_dict, lead_spawn_loc=self.acc_spawn_loc, vehicle_type=vehicle_type,
+                                num_subconvoy=self.num_convoy_vehicles)
             headway_flag, overlap_flag = self.spawn_helper(tmp_vehicle=tmp_convoy,vehicle_type=vehicle_type)
 
         else:
@@ -140,9 +139,7 @@ class Road:
                 vehicle.update_local(self.ts, self.vehicle_list, vehicle_type='shc')
 
         for vehicle in self.vehicle_list:
-            if isinstance(vehicle, Convoy):
-                pass
-            else:
+            if not isinstance(vehicle, Convoy):
                 vehicle.update_global()
 
             # If vehicle reached the end of the road
@@ -154,10 +151,9 @@ class Road:
                             self.vehicle_list.remove(vehicle)
                         else: # Remove one vehicle from the convoy
                             vehicle.convoy_list.remove(convoy)
-            else:
-                if vehicle.loc_back > self.road_length:
-                    self.vehicle_list.remove(vehicle)
-                    print("Vehicle Removed")
+            elif vehicle.loc_back > self.road_length:
+                self.vehicle_list.remove(vehicle)
+                print("Vehicle Removed")
 
         # Update spawn_timer
         self.timer += self.ts
