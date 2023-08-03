@@ -42,9 +42,9 @@ class DriverModel:
         old_acceleration = self.calc_acceleration(v, old_front_v, old_front_dist)
 
 
-        if change_direction == 'right': # Left to Right lane check
+        if change_direction == 'right':
             a_bias = self.left_bias
-        elif change_direction == 'left': # Right to Left lane check
+        elif change_direction == 'left':
             a_bias = -self.left_bias
         else:
             a_bias = 0 # No lane change

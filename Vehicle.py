@@ -181,17 +181,6 @@ class Vehicle:
         return front, front_left, front_right, back_left, back_right
 
     def calc_lane_change(self, change_dir, current_front, new_front, new_back):
-        """Calculates if a vehicle should change lanes
-
-        Args:
-            change_dir: string of change direction
-            current_front: vehicle that is currently in front
-            new_front: vehicle that will be in front after the change
-            new_back: vehicle that will be in the back after the change
-
-        Returns: True if the lane change should happen
-        """
-
         # Current timestep
         # Getting distance of front vehicle
         if current_front is not None:
@@ -248,24 +237,23 @@ class Vehicle:
     def check_lane_change(self, surrounding):
         if self.loc[1] == self.bottomlane: # if car is either left or middle lane
                 change_flag = self.calc_lane_change(change_dir='left', current_front=surrounding['front'],
-                                                    new_front=surrounding['front_right'], new_back=surrounding['back_right'])
+                                                    new_front=surrounding['front_left'], new_back=surrounding['back_left'])
                 if change_flag:
-                    self.local_loc[1] += self.lanewidth
+                    self.local_loc[1] -= self.lanewidth
         # Right change
-        if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] in [self.toplane, self.onramp, self.middlelane]: # if car is on right
+        if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] in [self.toplane, self.middlelane]: # if car is on right
             change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
-                                                new_front=surrounding['front_left'], new_back=surrounding['back_left'])
+                                                new_front=surrounding['front_right'], new_back=surrounding['back_right'])
             if change_flag:
-                self.local_loc[1] -= self.lanewidth
+                self.local_loc[1] += self.lanewidth
+        # For special case on-ramp
+        if self.loc[1] == self.onramp:
+            change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
+                                                new_front=surrounding['front_right'], new_back=surrounding['back_right'])
+            if change_flag:
+                self.local_loc[1] += self.lanewidth
 
     def update_local(self, ts, vehicle_list, vehicle_type):
-        # sourcery skip: hoist-similar-statement-from-if, hoist-statement-from-if, merge-else-if-into-elif
-        """Update local timestep
-
-        Args:
-            ts (float): timestep
-        """
-
         # Get surrounding vehicles
         surrounding = self.get_fov(vehicle_list)
         change_flag = False

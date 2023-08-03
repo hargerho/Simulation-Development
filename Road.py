@@ -157,7 +157,7 @@ class Road:
             elif vehicle.loc_back > self.road_length:
                 self.vehicle_list.remove(vehicle)
             # Reach the end of the on-ramp
-            elif (vehicle.loc[1] == self.onramp) and (vehicle.loc_back > self.onramp_length - driving_params['safety_threshold']):
+            elif (vehicle.loc[1] == self.onramp) and (vehicle.loc_front > self.onramp_length):
                 vehicle.v = 0 # Stop the vehicle
 
         # Update spawn_timer
