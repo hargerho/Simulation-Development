@@ -14,6 +14,7 @@ class Road:
         self.road_length = road_params['road_length']
         self.onramp_length = road_params['onramp_length']
         self.ts = simulation_params['ts']
+        self.safety_distance = driving_params['safety_threshold']
 
         # Spawn frequency
         self.vehicle_frequency = road_params['vehicle_inflow'] / 3600 # per/hour -> per second
@@ -50,7 +51,7 @@ class Road:
                 else:
                     headway = tmp_vehicle.T
                 # Check the size of the car
-                overlap_flag = (tmp_front.loc_back - tmp_vehicle.loc_front) <= 0
+                overlap_flag = (tmp_front.loc_back - tmp_vehicle.loc_front - self.safety_distance) < 0
             else:
                 # If no vehicles infront
                 headway = tmp_vehicle.T
@@ -70,7 +71,7 @@ class Road:
                 else:
                     headway = tmp_lead.T
                 # Check the size of the car
-                overlap_flag = (tmp_front.loc_back - tmp_vehicle_tail.loc_front) <= 0
+                overlap_flag = (tmp_front.loc_back - tmp_vehicle_tail.loc_front - self.safety_distance) < 0
             else:
                 # If no vehicles infront
                 headway = tmp_lead.T
@@ -98,7 +99,12 @@ class Road:
             vehicle_type = 'shc'
 
         # Choosing a spawn lane
-        lane = int(np.random.choice(range(self.num_lanes)) * self.lanewidth)
+        # lane = int(np.random.choice(range(self.num_lanes)) * self.lanewidth)
+
+        i = 0
+        while i == 0:
+            i = np.random.choice(range(self.num_lanes))
+            lane = int( i * self.lanewidth)
 
         # Spawn location
         if vehicle_type == 'acc':
@@ -157,7 +163,7 @@ class Road:
             elif vehicle.loc_back > self.road_length:
                 self.vehicle_list.remove(vehicle)
             # Reach the end of the on-ramp
-            elif (vehicle.loc[1] == self.onramp) and (vehicle.loc_front > self.onramp_length):
+            elif (vehicle.loc[1] == self.toplane) and (vehicle.loc_front > self.onramp_length):
                 vehicle.v = 0 # Stop the vehicle
 
         # Update spawn_timer
