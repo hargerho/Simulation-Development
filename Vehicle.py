@@ -276,31 +276,14 @@ class Vehicle:
                 if change_flag:
                     self.local_loc[1] -= self.lanewidth
 
-        # # Update road traverse
-        # self.local_loc[0] += (self.v * ts)
-
-        # if surrounding['front'] is not None:
-        #     dist = surrounding['front'].loc_back - self.loc_front
-        #     # Ensure dist is non-zero
-        #     dist = max(1e-9, dist)
-        #     front_v = surrounding['front'].v
-        # else:
-        #     dist = self.road_length
-
-        #     front_v = self.v
-
-        # # Update local driving parameters
-        # self.local_v = self.v
-        # self.local_accel = self.driver.calc_acceleration(v=self.v, surrounding_v=front_v, s=dist) * ts
-        # self.local_v += self.local_accel
-        # self.local_v = max(0, self.local_v)
-
+        # IDM Updates
         # Update road traverse and velocity
         self.local_v = self.v # Assign global variable to local computations
 
         # If negative velocity (not allowed)
         if self.local_v + self.local_accel * ts < 0:
             self.local_loc[0] -= (1/2) * (self.local_v/self.local_accel) # based on IDM paper
+            self.local_v = 0
         else:
             self.local_v += self.local_accel * ts
             self.local_loc[0] += (self.local_v * ts) + self.local_accel * math.pow(ts,2)/2
@@ -308,11 +291,16 @@ class Vehicle:
         # Updating acceleration
         # If there is a front vehicle
         if surrounding['front'] is not None:
-            dist = max(surrounding['front'].loc_back - self.loc_front + self.s_0, 1e-9)
-            self.local_accel = self.driver.calc_acceleration(v=self.local_v, surrounding_v=surrounding['front'].v, s=dist) * ts
+            dist = max(surrounding['front'].loc_front - self.loc_front - self.veh_length - self.s_0, 1e-9)
+            front_v = surrounding['front'].v
+        else:
+            dist = self.road_length
+            front_v = self.local_v
+
+        self.local_accel = self.driver.calc_acceleration(v=self.local_v, surrounding_v=front_v, s=dist) * ts
 
         # If no vehicle infront
-        self.local_accel = self.a * (1- math.pow(self.local_v/self.v_0, self.delta))
+        # self.local_accel = self.a * (1- math.pow(self.local_v/self.v_0, self.delta))
 
     def update_global(self):
         """Update global timestep

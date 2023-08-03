@@ -14,7 +14,7 @@ class DriverModel:
 
     def s_star(self, v, delta_v):
         return (self.s_0
-            + max(1e-9, self.T * v + (v * delta_v) / (2 * math.sqrt(self.a * self.b)))
+            + max(0, self.T * v + (v * delta_v) / (2 * math.sqrt(self.a * self.b)))
             )
 
     def calc_acceleration(self, v, surrounding_v, s):

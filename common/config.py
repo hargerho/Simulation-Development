@@ -21,7 +21,7 @@ window_params = {
 
 simulation_params = {
     "ts": 1/60, # was 0.001  testing: 1/60
-    "playback_speed": 2, # realtime = 1
+    "playback_speed": 5, # realtime = 1
     "folderpath": "data",
     "filename": "recordedSimulation"
 }
@@ -37,9 +37,9 @@ road_params = {
 }
 
 driving_params = {
-    "desired_velocity": 16, # Initially 70 testing:16.6
-    "safety_threshold": 2, # estimation
-    "max_acceleration": 1.44, # IDM Paper # was 0.73
+    "desired_velocity": 20, # Initially 70 testing:16.6
+    "safety_threshold": 5, # estimation
+    "max_acceleration": 20, # IDM Paper # was 0.73
     "comfortable_deceleration": 4.61, # IDM Paper # was 1.67
     "acceleration_component": 4, # IDM Paper
     "left_bias": 0.3, # MOBIL Paper
