@@ -1,6 +1,6 @@
 import uuid
 import numpy as np
-import time
+import math
 
 from common.config import driving_params, window_params, road_params
 from DriverModel import DriverModel as DM
@@ -17,7 +17,9 @@ class Vehicle:
         self.road_length = road_params['road_length']
 
         # Getting y-coord of lanes
-        self.toplane = self.toplane_loc[1]
+        self.onramp = self.toplane_loc[1]
+        self.toplane = self.toplane_loc[1] + self.lanewidth
+        self.middlelane = self.toplane_loc[1] + (self.lanewidth * 2)
         self.bottomlane = self.toplane + self.lanewidth * (self.num_lanes-1)
 
         self.v_0 = driving_params['desired_velocity']
@@ -179,17 +181,6 @@ class Vehicle:
         return front, front_left, front_right, back_left, back_right
 
     def calc_lane_change(self, change_dir, current_front, new_front, new_back):
-        """Calculates if a vehicle should change lanes
-
-        Args:
-            change_dir: string of change direction
-            current_front: vehicle that is currently in front
-            new_front: vehicle that will be in front after the change
-            new_back: vehicle that will be in the back after the change
-
-        Returns: True if the lane change should happen
-        """
-
         # Current timestep
         # Getting distance of front vehicle
         if current_front is not None:
@@ -244,26 +235,25 @@ class Vehicle:
         return change_incentive and safeFront and safeBack
 
     def check_lane_change(self, surrounding):
-        if self.loc[1] != self.bottomlane:
-                change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
-                                                    new_front=surrounding['front_right'], new_back=surrounding['back_right'])
+        if self.loc[1] == self.bottomlane: # if car is either left or middle lane
+                change_flag = self.calc_lane_change(change_dir='left', current_front=surrounding['front'],
+                                                    new_front=surrounding['front_left'], new_back=surrounding['back_left'])
                 if change_flag:
-                    self.local_loc[1] += self.lanewidth
-        # Left change
-        if self.loc[1] != self.toplane:
-            change_flag = self.calc_lane_change(change_dir='left', current_front=surrounding['front'],
-                                                new_front=surrounding['front_left'], new_back=surrounding['back_left'])
+                    self.local_loc[1] -= self.lanewidth
+        # Right change
+        if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] in [self.toplane, self.middlelane]: # if car is on right
+            change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
+                                                new_front=surrounding['front_right'], new_back=surrounding['back_right'])
             if change_flag:
-                self.local_loc[1] -= self.lanewidth
+                self.local_loc[1] += self.lanewidth
+        # For special case on-ramp
+        if self.loc[1] == self.onramp:
+            change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
+                                                new_front=surrounding['front_right'], new_back=surrounding['back_right'])
+            if change_flag:
+                self.local_loc[1] += self.lanewidth
 
     def update_local(self, ts, vehicle_list, vehicle_type):
-        # sourcery skip: hoist-similar-statement-from-if, hoist-statement-from-if, merge-else-if-into-elif
-        """Update local timestep
-
-        Args:
-            ts (float): timestep
-        """
-
         # Get surrounding vehicles
         surrounding = self.get_fov(vehicle_list)
         change_flag = False
@@ -274,44 +264,50 @@ class Vehicle:
             self.check_lane_change(surrounding=surrounding)
         else:
             # Change right if front vehicle is stationary and currently on left lane
-            if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] != self.bottomlane:
+            if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] == self.toplane:
                 change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
                                                     new_front=surrounding['front_right'], new_back=surrounding['back_right'])
                 if change_flag:
                     self.local_loc[1] += self.lanewidth
-            # Left change if it is on right lane
-            if self.loc[1] != self.toplane:
+            # Left change if it is on middle or right lane
+            if self.loc[1] in [self.middlelane, self.bottomlane]:
                 change_flag = self.calc_lane_change(change_dir='left', current_front=surrounding['front'],
                                                     new_front=surrounding['front_left'], new_back=surrounding['back_left'])
                 if change_flag:
                     self.local_loc[1] -= self.lanewidth
 
-        # Update road traverse
-        self.local_loc[0] += (self.v * ts)
+        # IDM Updates
+        # Update road traverse and velocity
+        self.local_v = self.v # Assign global variable to local computations
 
+        # If negative velocity (not allowed)
+        if self.local_v + self.local_accel * ts < 0:
+            self.local_loc[0] -= (1/2) * (self.local_v/self.local_accel) # based on IDM paper
+            self.local_v = 0
+        else:
+            self.local_v += self.local_accel * ts
+            self.local_loc[0] += (self.local_v * ts) + self.local_accel * math.pow(ts,2)/2
+
+        # Updating acceleration
+        # If there is a front vehicle
         if surrounding['front'] is not None:
-            dist = surrounding['front'].loc_back - self.loc_front
-            # Ensure dist is non-zero
-            if dist <= 0:
-                dist = 1e-9
+            dist = max(surrounding['front'].loc_front - self.loc_front - self.veh_length - self.s_0, 1e-9)
             front_v = surrounding['front'].v
         else:
             dist = self.road_length
+            front_v = self.local_v
 
-            front_v = self.v
+        self.local_accel = self.driver.calc_acceleration(v=self.local_v, surrounding_v=front_v, s=dist) * ts
 
-        # Update local driving parameters
-        self.local_v = self.v
-        self.local_accel = self.driver.calc_acceleration(v=self.v, surrounding_v=front_v, s=dist) * ts
-        self.local_v += self.local_accel
-        self.local_v = max(self.local_v, 0)
+        # If no vehicle infront
+        # self.local_accel = self.a * (1- math.pow(self.local_v/self.v_0, self.delta))
 
     def update_global(self):
         """Update global timestep
         """
         self.v = self.local_v
         self.loc = self.local_loc.copy()
-        self.loc_front = self.loc[0] - (self.veh_length / 2)
+        self.loc_front = self.loc[0] + (self.veh_length / 2)
         self.loc_back = self.loc[0] - (self.veh_length / 2)
 
 
