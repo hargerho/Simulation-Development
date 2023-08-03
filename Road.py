@@ -8,6 +8,7 @@ from ACC import Convoy
 
 class Road:
     def __init__(self):
+        # General params
         self.num_lanes = road_params['num_lanes']
         self.toplane_loc = road_params['toplane_loc']
         self.lanewidth = road_params['lanewidth']
@@ -15,14 +16,19 @@ class Road:
         self.onramp_length = road_params['onramp_length']
         self.ts = simulation_params['ts']
         self.safety_distance = driving_params['safety_threshold']
+        self.vehicle_list = []
 
-        # Spawn frequency
+        # Road Spawning
         self.vehicle_frequency = road_params['vehicle_inflow'] / 3600 # per/hour -> per second
         self.spawn_interval = round(1.0/self.vehicle_frequency, 1) # Round to 1dp since ts is 1dp
-
-        # Initial spawn timer
         self.timer = 0.0
         self.last_spawn_time = 0
+
+        # Onramp frequency
+        self.onramp_frequency = road_params['onramp_inflow']
+        self.onramp_spawn_interval = round(1.0/self.onramp_frequency, 1)
+        self.onramp_timer = 0.0
+        self.onramp_last_spawn_time = 0
 
         # Getting y-coord of lanes
         self.onramp = self.toplane_loc[1]
@@ -30,12 +36,9 @@ class Road:
         self.middlelane = self.toplane_loc[1] + (self.lanewidth * 2)
         self.bottomlane = self.toplane + self.lanewidth * (self.num_lanes-1)
 
-        self.vehicle_list = []
-        self.spawn_counter = 0
+        # Convoy Params
         self.num_convoy_vehicles = road_params['num_convoy_vehicles']  # Queue counter of 3 acc vehicles to form a convoy
         self.acc_spawn_loc = [self.toplane_loc[0], self.toplane] # acc vehicle always spawns in left lane
-        print(self.acc_spawn_loc)
-
         self.frames = 0
         self.convoy_spawned = False
 
@@ -98,13 +101,8 @@ class Road:
             logic_dict = vehicle_models[0][logic_level]
             vehicle_type = 'shc'
 
-        # Choosing a spawn lane
-        # lane = int(np.random.choice(range(self.num_lanes)) * self.lanewidth)
-
-        i = 0
-        while i == 0:
-            i = np.random.choice(range(self.num_lanes))
-            lane = int( i * self.lanewidth)
+        # Choosing a spawn lane from the 3 motorway lanes
+        lane = int(np.random.choice(range(1,self.num_lanes)) * self.lanewidth)
 
         # Spawn location
         if vehicle_type == 'acc':
@@ -138,6 +136,24 @@ class Road:
         else:
             self.last_spawn_time = self.timer
 
+    def spawn_onramp(self):
+        # Spawn SHC, get shc_params from config
+        logic_level = driving_params["shc_logic"]
+        logic_dict = vehicle_models[0][logic_level]
+        vehicle_type = 'shc'
+        spawn_loc = self.toplane_loc
+
+        # Create a tmp Vehicle Object
+        tmp_vehicle = Vehicle(logic_dict=logic_dict, spawn_loc=spawn_loc, vehicle_type=vehicle_type)
+        headway_flag, overlap_flag = self.spawn_helper(tmp_vehicle=tmp_vehicle, vehicle_type=vehicle_type)
+
+        # Spawn safety check
+        if (headway_flag and not overlap_flag):
+            self.vehicle_list.append(tmp_vehicle)
+
+        # Reset spawn timer
+        self.onramp_last_spawn_time = self.onramp_timer
+
     def update_road(self):
         # Update vehicle local state
         for vehicle in self.vehicle_list:
@@ -163,13 +179,18 @@ class Road:
             elif vehicle.loc_back > self.road_length:
                 self.vehicle_list.remove(vehicle)
             # Reach the end of the on-ramp
-            elif (vehicle.loc[1] == self.toplane) and (vehicle.loc_front > self.onramp_length):
+            elif (vehicle.loc[1] == self.onramp) and (vehicle.loc_front > self.onramp_length):
                 vehicle.v = 0 # Stop the vehicle
 
         # Update spawn_timer
         self.timer += self.ts
         if self.timer - self.last_spawn_time >= self.spawn_interval:
             self.spawn_vehicle()
+
+        # Update onramp_spawn_timer
+        self.onramp_timer += self.ts
+        if self.onramp_timer - self.onramp_last_spawn_time >= self.onramp_spawn_interval:
+            self.spawn_onramp()
 
         self.frames += 1
 

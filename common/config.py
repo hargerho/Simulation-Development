@@ -33,6 +33,7 @@ road_params = {
     "num_lanes": 4, # including an onramp
     "lanewidth": 10,
     "vehicle_inflow": 4000, # 1000 approx 1veh/3.6sec testing: 10000
+    "onramp_inflow": 100,
     "num_convoy_vehicles": 3
 }
 
