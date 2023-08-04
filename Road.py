@@ -159,7 +159,7 @@ class Road:
         for vehicle in self.vehicle_list:
 
             if isinstance(vehicle, Convoy):
-                vehicle.update_convoy(self.ts, self.vehicle_list, vehicle_type='acc')
+                vehicle.update_convoy(self.vehicle_list, vehicle_type='acc')
             else:
                 vehicle.update_local(self.vehicle_list, vehicle_type='shc')
 

@@ -9,12 +9,13 @@ class Convoy:
             for _ in range(num_subconvoy)
         ]
         self.convoy_dist = logic_dict.get('safe_headway')
-    def update_convoy(self, global_list):
+
+    def update_convoy(self, global_list, vehicle_type):
 
         self.lead_vehicle = self.convoy_list[0]
 
         # Update the lead_vehicle
-        self.lead_vehicle.update_local(global_list, vehicle_type='acc')
+        self.lead_vehicle.update_local(global_list, vehicle_type=vehicle_type)
         self.lead_vehicle.update_global()
 
         # Updating the subconvoy

@@ -1,5 +1,5 @@
 window_params = {
-    "window_width": 1000,
+    "window_width": 1300,
     "window_height": 500,
     "fps": 120,
     "black": (0,0,0),
@@ -28,7 +28,7 @@ simulation_params = {
 
 road_params = {
     "toplane_loc": (0,100), #(x, y)
-    "road_length": 800,
+    "road_length": 1200,
     "onramp_length": 600,
     "num_lanes": 4, # including an onramp
     "lanewidth": 10,
@@ -55,7 +55,7 @@ shc_params = {
 }
 
 acc_params = {
-    "acc_spawnrate": 0, # Init 0.2
+    "acc_spawnrate": 0.2, # Init 0.2
     "normal": {"safe_headway": 3.1, "speed_variation": 0, "politeness_factor": 0.5},
     "cautious": {"safe_headway": 4, "speed_variation": 0, "politeness_factor": 0.8},
 }
