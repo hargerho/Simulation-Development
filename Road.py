@@ -25,7 +25,7 @@ class Road:
         self.last_spawn_time = 0
 
         # Onramp frequency
-        self.onramp_frequency = road_params['onramp_inflow']
+        self.onramp_frequency = road_params['onramp_inflow'] / 3600
         self.onramp_spawn_interval = round(1.0/self.onramp_frequency, 1)
         self.onramp_timer = 0.0
         self.onramp_last_spawn_time = 0
@@ -151,7 +151,7 @@ class Road:
         if (headway_flag and not overlap_flag):
             self.vehicle_list.append(tmp_vehicle)
 
-        # Reset spawn timer
+        # Reset onramp spawn timer if vehicle is not spawn to prevent upstream overcrowding
         self.onramp_last_spawn_time = self.onramp_timer
 
     def update_road(self):
