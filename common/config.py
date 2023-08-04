@@ -6,7 +6,7 @@ window_params = {
     "white": (255,255,255),
     "blue": (0, 0, 255),
     "green": (0,255,0),
-    "grey": (192, 192, 192),
+    "grey": (128, 128, 128),
     "red": (255,0,0),
     "vehicle_length": 10,
     "vehicle_width": 5,
@@ -21,13 +21,13 @@ window_params = {
 
 simulation_params = {
     "ts": 1/60, # was 0.001  testing: 1/60
-    "playback_speed": 5, # realtime = 1
+    "playback_speed": 8, # realtime = 1
     "folderpath": "data",
     "filename": "recordedSimulation"
 }
 
 road_params = {
-    "toplane_loc": (70,100), #(x, y)
+    "toplane_loc": (0,100), #(x, y)
     "road_length": 800,
     "onramp_length": 600,
     "num_lanes": 4, # including an onramp

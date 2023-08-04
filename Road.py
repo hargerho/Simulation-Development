@@ -171,18 +171,18 @@ class Road:
             # Remove vehicle from road
             if isinstance(vehicle, Convoy):
                 for convoy in vehicle.convoy_list:
-                    if convoy.loc_back > self.road_length:
+                    if convoy.loc_front > self.road_length:
                         if len(vehicle.convoy_list) == 1: # If last convoy in the convoy_list
                             self.vehicle_list.remove(vehicle)
                         else: # Remove one vehicle from the convoy
                             vehicle.convoy_list.remove(convoy)
-            elif vehicle.loc_back > self.road_length:
+            elif vehicle.loc_front > self.road_length:
                 self.vehicle_list.remove(vehicle)
 
         # Update spawn_timer
         self.timer += self.ts
-        # if self.timer - self.last_spawn_time >= self.spawn_interval:
-            # self.spawn_vehicle()
+        if self.timer - self.last_spawn_time >= self.spawn_interval:
+            self.spawn_vehicle()
 
         # Update onramp_spawn_timer
         self.onramp_timer += self.ts

@@ -193,7 +193,7 @@ class Vehicle:
             current_front_dist = current_front.loc_back - self.loc_front
             current_front_v = current_front.v
         else: # No vehicles infront
-            current_front_dist = self.onramp_length - self.loc_front if onramp_flag else self.road_length
+            current_front_dist = self.onramp_length if onramp_flag else self.road_length
             current_front_v = self.v
 
         # Next timestep
@@ -203,7 +203,7 @@ class Vehicle:
             new_front_dist = new_front.loc_back - self.loc_front
             new_front_v = new_front.v
         else: # No vehicles infront
-            new_front_dist = self.onramp_length - self.loc_front if onramp_flag else self.road_length
+            new_front_dist = self.onramp_length if onramp_flag else self.road_length
             new_front_v = self.v
 
         # Considering the vehicle behind
@@ -216,7 +216,7 @@ class Vehicle:
                 current_back_dist = new_front.loc_back - new_back.loc_front
                 current_back_v = new_front.v
             else:
-                current_back_dist = self.onramp_length - self.loc_front if onramp_flag else self.road_length
+                current_back_dist = self.onramp_length if onramp_flag else self.road_length
                 current_back_v = self.v
 
             new_back_dist = self.loc_back - new_back.loc_front
@@ -275,7 +275,7 @@ class Vehicle:
             dist = max(surrounding['front'].loc_front - self.loc_front - self.veh_length - self.s_0, 1e-9)
             front_v = surrounding['front'].v
         elif self.local_loc[1] == self.onramp:
-            dist = max(self.onramp_length - self.loc_front - self.s_0, 1e-9)
+            dist = max(self.onramp_length - self.loc_front - self.veh_length - self.s_0, 1e-9)
             front_v = self.local_v
         else:
             dist = self.road_length
