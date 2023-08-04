@@ -33,14 +33,14 @@ road_params = {
     "num_lanes": 4, # including an onramp
     "lanewidth": 10,
     "vehicle_inflow": 4000, # 1000 approx 1veh/3.6sec testing: 10000
-    "onramp_inflow": 100,
+    "onramp_inflow": 50,
     "num_convoy_vehicles": 3
 }
 
 driving_params = {
     "desired_velocity": 20, # Initially 70 testing:16.6
     "safety_threshold": 5, # estimation
-    "max_acceleration": 20, # IDM Paper # was 0.73
+    "max_acceleration": 250, # IDM Paper # was 0.73
     "comfortable_deceleration": 4.61, # IDM Paper # was 1.67
     "acceleration_component": 4, # IDM Paper
     "left_bias": 0.3, # MOBIL Paper

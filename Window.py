@@ -110,11 +110,11 @@ class Window:
     def draw_fixed_objects(self):  # sourcery skip: extract-duplicate-method
 
         # Fill background
-        self.win.fill(window_params["blue"])
+        self.win.fill(window_params["black"])
 
         # Drawing the onramp
         onrampSurface = pygame.Surface((road_params['onramp_length'], road_params['lanewidth']))
-        onrampSurface.fill(window_params['grey'])
+        onrampSurface.fill(window_params['white'])
         rampRect = onrampSurface.get_rect()
         rampRect.topleft = (road_params['toplane_loc'][0] - window_params['vehicle_length'], road_params['toplane_loc'][1] - window_params['vehicle_width'])
         self.win.blit(onrampSurface, rampRect.topleft)

@@ -2,19 +2,21 @@ import uuid
 import numpy as np
 import math
 
-from common.config import driving_params, window_params, road_params
+from common.config import driving_params, window_params, road_params, simulation_params
 from DriverModel import DriverModel as DM
 
 class Vehicle:
     def __init__(self, logic_dict, spawn_loc, vehicle_type):
 
         self.id = str(uuid.uuid4()) # unique id for each vehicle
+        self.ts = simulation_params['ts']
 
         # Road Params
         self.num_lanes = road_params['num_lanes']
         self.toplane_loc = road_params['toplane_loc']
         self.lanewidth = road_params['lanewidth']
         self.road_length = road_params['road_length']
+        self.onramp_length = road_params['onramp_length']
 
         # Getting y-coord of lanes
         self.onramp = self.toplane_loc[1]
@@ -181,15 +183,17 @@ class Vehicle:
         return front, front_left, front_right, back_left, back_right
 
     def calc_lane_change(self, change_dir, current_front, new_front, new_back):
+        # Checking if onramp
+        onramp_flag = self.loc[1] == self.onramp
+
         # Current timestep
         # Getting distance of front vehicle
         if current_front is not None:
             # If there is a front vehicle
             current_front_dist = current_front.loc_back - self.loc_front
             current_front_v = current_front.v
-        else:
-            # No vehicles infront
-            current_front_dist = self.road_length
+        else: # No vehicles infront
+            current_front_dist = self.onramp_length - self.loc_front if onramp_flag else self.road_length
             current_front_v = self.v
 
         # Next timestep
@@ -198,9 +202,8 @@ class Vehicle:
             # If there is a front vehicle
             new_front_dist = new_front.loc_back - self.loc_front
             new_front_v = new_front.v
-        else:
-            # No vehicles infront
-            new_front_dist = self.road_length
+        else: # No vehicles infront
+            new_front_dist = self.onramp_length - self.loc_front if onramp_flag else self.road_length
             new_front_v = self.v
 
         # Considering the vehicle behind
@@ -209,11 +212,11 @@ class Vehicle:
             disadvantage, new_back_accel = 0, 0
         else:
             # Current timestep
-            if new_front is not None:
+            if new_front is not None: # if there is a car infront after change
                 current_back_dist = new_front.loc_back - new_back.loc_front
                 current_back_v = new_front.v
             else:
-                current_back_dist = self.road_length
+                current_back_dist = self.onramp_length - self.loc_front if onramp_flag else self.road_length
                 current_back_v = self.v
 
             new_back_dist = self.loc_back - new_back.loc_front
@@ -226,10 +229,10 @@ class Vehicle:
 
         # Considering front vehicle
         change_incentive = self.driver.calc_incentive(change_direction=change_dir, v=self.v, new_front_v=new_front_v, new_front_dist=new_front_dist, old_front_v=current_front_v,
-                                            old_front_dist=current_front_dist, disadvantage=disadvantage, new_back_accel=new_back_accel)
+                                            old_front_dist=current_front_dist, disadvantage=disadvantage, new_back_accel=new_back_accel, onramp_flag=onramp_flag)
 
         # Extra safety check
-        safeFront = True if new_front is None else new_front.loc_back > self.loc_front
+        safeFront = new_front.loc_back > self.loc_front if new_front is not None else True
         safeBack = new_back.loc_front < self.loc_back if new_back is not None else True
 
         return change_incentive and safeFront and safeBack
@@ -253,10 +256,36 @@ class Vehicle:
             if change_flag:
                 self.local_loc[1] += self.lanewidth
 
-    def update_local(self, ts, vehicle_list, vehicle_type):
+    def update_driving_params(self, surrounding):
+        # IDM Updates
+        # Update road traverse and velocity
+        self.local_v = self.v # Assign global variable to local computations
+
+        # If negative velocity (not allowed)
+        if self.local_v + self.local_accel * self.ts < 0:
+            self.local_loc[0] -= (1/2) * (self.local_v/self.local_accel) # based on IDM paper
+            self.local_v = 0
+        else:
+            self.local_v += self.local_accel * self.ts
+            self.local_loc[0] += (self.local_v * self.ts) + self.local_accel * math.pow(self.ts,2)/2
+
+        # Updating acceleration
+        # If there is a front vehicle
+        if surrounding['front'] is not None:
+            dist = max(surrounding['front'].loc_front - self.loc_front - self.veh_length - self.s_0, 1e-9)
+            front_v = surrounding['front'].v
+        elif self.local_loc[1] == self.onramp:
+            dist = max(self.onramp_length - self.loc_front - self.s_0, 1e-9)
+            front_v = self.local_v
+        else:
+            dist = self.road_length
+            front_v = self.local_v
+
+        self.local_accel = self.driver.calc_acceleration(v=self.local_v, surrounding_v=front_v, s=dist) * self.ts
+
+    def update_local(self, vehicle_list, vehicle_type):
         # Get surrounding vehicles
         surrounding = self.get_fov(vehicle_list)
-        change_flag = False
 
         if vehicle_type == 'shc':
             # Lane change flag and update lane location
@@ -276,31 +305,7 @@ class Vehicle:
                 if change_flag:
                     self.local_loc[1] -= self.lanewidth
 
-        # IDM Updates
-        # Update road traverse and velocity
-        self.local_v = self.v # Assign global variable to local computations
-
-        # If negative velocity (not allowed)
-        if self.local_v + self.local_accel * ts < 0:
-            self.local_loc[0] -= (1/2) * (self.local_v/self.local_accel) # based on IDM paper
-            self.local_v = 0
-        else:
-            self.local_v += self.local_accel * ts
-            self.local_loc[0] += (self.local_v * ts) + self.local_accel * math.pow(ts,2)/2
-
-        # Updating acceleration
-        # If there is a front vehicle
-        if surrounding['front'] is not None:
-            dist = max(surrounding['front'].loc_front - self.loc_front - self.veh_length - self.s_0, 1e-9)
-            front_v = surrounding['front'].v
-        else:
-            dist = self.road_length
-            front_v = self.local_v
-
-        self.local_accel = self.driver.calc_acceleration(v=self.local_v, surrounding_v=front_v, s=dist) * ts
-
-        # If no vehicle infront
-        # self.local_accel = self.a * (1- math.pow(self.local_v/self.v_0, self.delta))
+        self.update_driving_params(surrounding)
 
     def update_global(self):
         """Update global timestep

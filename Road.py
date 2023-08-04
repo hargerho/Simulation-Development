@@ -130,7 +130,7 @@ class Road:
                 print("Convoy Created")
                 self.vehicle_list.append(tmp_convoy)
 
-        # Reset spawn timer
+        # Reset spawn timer even if vehicle is not spawn to prevent upstream overcrowding
         if self.convoy_spawned:
             self.last_spawn_time = self.timer + (2*self.spawn_interval)
         else:
@@ -161,7 +161,7 @@ class Road:
             if isinstance(vehicle, Convoy):
                 vehicle.update_convoy(self.ts, self.vehicle_list, vehicle_type='acc')
             else:
-                vehicle.update_local(self.ts, self.vehicle_list, vehicle_type='shc')
+                vehicle.update_local(self.vehicle_list, vehicle_type='shc')
 
         for vehicle in self.vehicle_list:
             if not isinstance(vehicle, Convoy):
@@ -178,14 +178,11 @@ class Road:
                             vehicle.convoy_list.remove(convoy)
             elif vehicle.loc_back > self.road_length:
                 self.vehicle_list.remove(vehicle)
-            # Reach the end of the on-ramp
-            elif (vehicle.loc[1] == self.onramp) and (vehicle.loc_front > self.onramp_length):
-                vehicle.v = 0 # Stop the vehicle
 
         # Update spawn_timer
         self.timer += self.ts
-        if self.timer - self.last_spawn_time >= self.spawn_interval:
-            self.spawn_vehicle()
+        # if self.timer - self.last_spawn_time >= self.spawn_interval:
+            # self.spawn_vehicle()
 
         # Update onramp_spawn_timer
         self.onramp_timer += self.ts
