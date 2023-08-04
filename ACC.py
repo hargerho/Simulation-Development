@@ -14,10 +14,10 @@ class Convoy:
         self.lead_vehicle = self.convoy_list[0]
         self.tail_vehicle = self.convoy_list[-1]
 
-        self.convoy_front = self.lead_vehicle.loc_front
-        self.convoy_back = self.tail_vehicle.loc_back
-        self.convoy_loc = self.convoy_back + (self.convoy_front - self.convoy_back)/2
-        self.convoy_v = self.lead_vehicle.v
+        self.loc_front = self.lead_vehicle.loc_front
+        self.loc_back = self.tail_vehicle.loc_back
+        self.loc = lead_spawn_loc # inital
+        self.v = self.lead_vehicle.v
 
     def update_convoy(self, global_list, vehicle_type):
 
@@ -47,7 +47,7 @@ class Convoy:
                 current_vehicle.update_global()
 
         # Update convoy level position
-        self.convoy_front = self.convoy_list[0].loc_front
-        self.convoy_back = self.convoy_list[-1].loc_back
-        self.convoy_loc = self.convoy_back + (self.convoy_front - self.convoy_back)/2
-        self.convoy_v = self.lead_vehicle.v
+        self.loc_front = self.convoy_list[0].loc_front
+        self.loc_back = self.convoy_list[-1].loc_back
+        self.loc = [(self.loc_back + (self.loc_front - self.loc_back)/2), self.lead_vehicle.loc[1]]
+        self.v = self.lead_vehicle.v

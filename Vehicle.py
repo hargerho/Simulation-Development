@@ -154,7 +154,7 @@ class Vehicle:
         # tail_vehicle = convoy.convoy_list[-1]
 
         # x_coord = tail_vehicle.loc[0]
-        x_coord = convoy.convoy_loc
+        x_coord = convoy.loc[0]
         current_y_coord = self.loc[1]
 
         x_diff = x_coord - self.loc[0]
@@ -165,7 +165,7 @@ class Vehicle:
 
         front_check = x_coord > self.loc[0]
         # back_check = lead_vehicle.loc[0] < self.loc[0]
-        back_check = convoy.convoy_back < self.loc[0]
+        back_check = convoy.loc_back < self.loc[0]
 
         not_right_lane = current_y_coord != self.bottomlane
         not_left_lane = current_y_coord != self.toplane
@@ -201,8 +201,8 @@ class Vehicle:
             current_front_dist = current_front.loc_back - self.loc_front
             current_front_v = current_front.v
         else:
-            current_front_dist = current_front.convoy_back - self.loc_front
-            current_front_v = current_front.convoy_v
+            current_front_dist = current_front.loc_back - self.loc_front
+            current_front_v = current_front.v
 
         # Next timestep
         # Getting distance of new front vehicle
@@ -214,8 +214,8 @@ class Vehicle:
             new_front_dist = new_front.loc_back - self.loc_front
             new_front_v = new_front.v
         else:
-            new_front_dist = current_front.convoy_back - self.loc_front
-            new_front_v = current_front.convoy_v
+            new_front_dist = new_front.loc_back - self.loc_front
+            new_front_v = new_front.v
 
         # Considering the vehicle behind
         if new_back is None:
@@ -227,8 +227,9 @@ class Vehicle:
                 new_back_front = new_back.loc_front
                 new_back_v = new_back.v
             else:
-                new_back_front = new_back.convoy_front
-                new_back_v = new_back.convoy_v
+                new_back_front = new_back.loc_front
+                new_back_v = new_back.v
+                new_back = new_back.convoy_list[-1]
 
             # Current timestep
             if new_front is None:
@@ -239,8 +240,8 @@ class Vehicle:
                 current_back_dist = new_front.loc_back - new_back_front
                 current_back_v = new_front.v
             else:
-                current_back_dist = new_front.convoy_back - new_back_front
-                current_back_v = new_front.convoy_v
+                current_back_dist = new_front.loc_back - new_back_front
+                current_back_v = new_front.v
             new_back_dist = self.loc_back - new_back_front
             new_back_v = self.v
 
@@ -254,8 +255,17 @@ class Vehicle:
                                             old_front_dist=current_front_dist, disadvantage=disadvantage, new_back_accel=new_back_accel, onramp_flag=onramp_flag)
 
         # Extra safety check
-        safeFront = new_front.loc_back > self.loc_front if new_front is not None else True
-        safeBack = new_back.loc_front < self.loc_back if new_back is not None else True
+        if new_front is not None:
+            new_front_back = new_front.loc_back if isinstance(new_front, Vehicle) else new_front.loc_back
+            safeFront = new_front_back > self.loc_front
+        else:
+            safeFront = True
+
+        if new_back is not None:
+            new_back_front = new_back.loc_back if isinstance(new_back, Vehicle) else new_back.loc_back
+            safeBack = new_back_front < self.loc_back
+        else:
+            safeBack = True
 
         return change_incentive and safeFront and safeBack
 

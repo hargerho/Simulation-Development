@@ -67,13 +67,14 @@ class Road:
             tmp_vehicle_tail = tmp_vehicle.convoy_list[-1]
             tmp_front = tmp_lead.get_fov(vehicle_list=self.vehicle_list)['front']
 
-            if isinstance(tmp_front, Vehicle):
-                tmp_front_back = tmp_front.loc_back
-            else:
-                tmp_front_back = tmp_front.convoy_back
-
             # If there is a vehicle infront
             if tmp_front is not None:
+
+                if isinstance(tmp_front, Vehicle):
+                    tmp_front_back = tmp_front.loc_back
+                else:
+                    tmp_front_back = tmp_front.loc_back
+
                 if tmp_lead.v != 0:
                     headway = (tmp_front_back - tmp_lead.loc_front) / tmp_lead.v
                 else:
