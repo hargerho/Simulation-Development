@@ -10,6 +10,15 @@ class Convoy:
         ]
         self.convoy_dist = logic_dict.get('safe_headway')
 
+        # Initialize initial positions
+        self.lead_vehicle = self.convoy_list[0]
+        self.tail_vehicle = self.convoy_list[-1]
+
+        self.convoy_front = self.lead_vehicle.loc_front
+        self.convoy_back = self.tail_vehicle.loc_back
+        self.convoy_loc = self.convoy_back + (self.convoy_front - self.convoy_back)/2
+        self.convoy_v = self.lead_vehicle.v
+
     def update_convoy(self, global_list, vehicle_type):
 
         self.lead_vehicle = self.convoy_list[0]
@@ -18,7 +27,7 @@ class Convoy:
         self.lead_vehicle.update_local(global_list, vehicle_type=vehicle_type)
         self.lead_vehicle.update_global()
 
-        # Updating the subconvoy
+        # Updating the subconvoy local params
         if len(self.convoy_list) > 1:
             for i in range(1, len(self.convoy_list)):
 
@@ -36,3 +45,9 @@ class Convoy:
 
                 # Update the sub-convoy_vehicle's global position
                 current_vehicle.update_global()
+
+        # Update convoy level position
+        self.convoy_front = self.convoy_list[0].loc_front
+        self.convoy_back = self.convoy_list[-1].loc_back
+        self.convoy_loc = self.convoy_back + (self.convoy_front - self.convoy_back)/2
+        self.convoy_v = self.lead_vehicle.v

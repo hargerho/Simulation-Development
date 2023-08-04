@@ -21,7 +21,7 @@ window_params = {
 
 simulation_params = {
     "ts": 1/60, # was 0.001  testing: 1/60
-    "playback_speed": 8, # realtime = 1
+    "playback_speed": 2, # realtime = 1
     "folderpath": "data",
     "filename": "recordedSimulation"
 }
@@ -32,14 +32,14 @@ road_params = {
     "onramp_length": 600,
     "num_lanes": 4, # including an onramp
     "lanewidth": 10,
-    "vehicle_inflow": 4000, # 1000 approx 1veh/3.6sec testing: 10000
+    "vehicle_inflow": 8000, # 1000 approx 1veh/3.6sec testing: 10000
     "onramp_inflow": 1000,
-    "num_convoy_vehicles": 3
+    "num_convoy_vehicles": 2
 }
 
 driving_params = {
     "desired_velocity": 20, # Initially 70 testing:16.6
-    "safety_threshold": 5, # estimation
+    "safety_threshold": 20, # estimation
     "max_acceleration": 50, # IDM Paper # was 0.73
     "comfortable_deceleration": 4.61, # IDM Paper # was 1.67
     "acceleration_component": 4, # IDM Paper
@@ -55,7 +55,7 @@ shc_params = {
 }
 
 acc_params = {
-    "acc_spawnrate": 0.2, # Init 0.2
+    "acc_spawnrate": 1, # Init 0.2
     "normal": {"safe_headway": 3.1, "speed_variation": 0, "politeness_factor": 0.5},
     "cautious": {"safe_headway": 4, "speed_variation": 0, "politeness_factor": 0.8},
 }

@@ -43,7 +43,7 @@ class DriverModel:
         elif change_direction == 'left':
             a_bias = -self.left_bias
         elif onramp_flag: # If the vehicle is onramp, decrease threshold for right lane change
-            a_bias = -(self.left_bias * 100)
+            a_bias = -(self.left_bias * 1)
         else:
             a_bias = 0 # No lane change
 

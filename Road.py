@@ -67,14 +67,19 @@ class Road:
             tmp_vehicle_tail = tmp_vehicle.convoy_list[-1]
             tmp_front = tmp_lead.get_fov(vehicle_list=self.vehicle_list)['front']
 
+            if isinstance(tmp_front, Vehicle):
+                tmp_front_back = tmp_front.loc_back
+            else:
+                tmp_front_back = tmp_front.convoy_back
+
             # If there is a vehicle infront
             if tmp_front is not None:
                 if tmp_lead.v != 0:
-                    headway = (tmp_front.loc_back - tmp_lead.loc_front) / tmp_lead.v
+                    headway = (tmp_front_back - tmp_lead.loc_front) / tmp_lead.v
                 else:
                     headway = tmp_lead.T
                 # Check the size of the car
-                overlap_flag = (tmp_front.loc_back - tmp_vehicle_tail.loc_front - self.safety_distance) < 0
+                overlap_flag = (tmp_front_back - tmp_vehicle_tail.loc_front - self.safety_distance) < 0
             else:
                 # If no vehicles infront
                 headway = tmp_lead.T
@@ -127,7 +132,6 @@ class Road:
                 self.vehicle_list.append(tmp_vehicle)
             else:
                 self.convoy_spawned = True
-                print("Convoy Created")
                 self.vehicle_list.append(tmp_convoy)
 
         # Reset spawn timer even if vehicle is not spawn to prevent upstream overcrowding
