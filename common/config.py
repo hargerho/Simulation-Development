@@ -1,12 +1,12 @@
 window_params = {
-    "window_width": 1000,
+    "window_width": 1300,
     "window_height": 500,
     "fps": 120,
     "black": (0,0,0),
     "white": (255,255,255),
     "blue": (0, 0, 255),
     "green": (0,255,0),
-    "grey": (192, 192, 192),
+    "grey": (128, 128, 128),
     "red": (255,0,0),
     "vehicle_length": 10,
     "vehicle_width": 5,
@@ -21,26 +21,26 @@ window_params = {
 
 simulation_params = {
     "ts": 1/60, # was 0.001  testing: 1/60
-    "playback_speed": 5, # realtime = 1
+    "playback_speed": 8, # realtime = 1
     "folderpath": "data",
     "filename": "recordedSimulation"
 }
 
 road_params = {
-    "toplane_loc": (70,100), #(x, y)
-    "road_length": 800,
+    "toplane_loc": (0,100), #(x, y)
+    "road_length": 1200,
     "onramp_length": 600,
     "num_lanes": 4, # including an onramp
     "lanewidth": 10,
-    "vehicle_inflow": 4000, # 1000 approx 1veh/3.6sec testing: 10000
-    "onramp_inflow": 100,
-    "num_convoy_vehicles": 3
+    "vehicle_inflow": 8000, # 1000 approx 1veh/3.6sec testing: 10000
+    "onramp_inflow": 1000,
+    "num_convoy_vehicles": 2
 }
 
 driving_params = {
     "desired_velocity": 20, # Initially 70 testing:16.6
-    "safety_threshold": 5, # estimation
-    "max_acceleration": 20, # IDM Paper # was 0.73
+    "safety_threshold": 20, # estimation
+    "max_acceleration": 50, # IDM Paper # was 0.73
     "comfortable_deceleration": 4.61, # IDM Paper # was 1.67
     "acceleration_component": 4, # IDM Paper
     "left_bias": 0.3, # MOBIL Paper
@@ -55,7 +55,7 @@ shc_params = {
 }
 
 acc_params = {
-    "acc_spawnrate": 0, # Init 0.2
+    "acc_spawnrate": 1, # Init 0.2
     "normal": {"safe_headway": 3.1, "speed_variation": 0, "politeness_factor": 0.5},
     "cautious": {"safe_headway": 4, "speed_variation": 0, "politeness_factor": 0.8},
 }

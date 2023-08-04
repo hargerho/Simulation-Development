@@ -25,7 +25,7 @@ class Road:
         self.last_spawn_time = 0
 
         # Onramp frequency
-        self.onramp_frequency = road_params['onramp_inflow']
+        self.onramp_frequency = road_params['onramp_inflow'] / 3600
         self.onramp_spawn_interval = round(1.0/self.onramp_frequency, 1)
         self.onramp_timer = 0.0
         self.onramp_last_spawn_time = 0
@@ -69,12 +69,18 @@ class Road:
 
             # If there is a vehicle infront
             if tmp_front is not None:
+
+                if isinstance(tmp_front, Vehicle):
+                    tmp_front_back = tmp_front.loc_back
+                else:
+                    tmp_front_back = tmp_front.loc_back
+
                 if tmp_lead.v != 0:
-                    headway = (tmp_front.loc_back - tmp_lead.loc_front) / tmp_lead.v
+                    headway = (tmp_front_back - tmp_lead.loc_front) / tmp_lead.v
                 else:
                     headway = tmp_lead.T
                 # Check the size of the car
-                overlap_flag = (tmp_front.loc_back - tmp_vehicle_tail.loc_front - self.safety_distance) < 0
+                overlap_flag = (tmp_front_back - tmp_vehicle_tail.loc_front - self.safety_distance) < 0
             else:
                 # If no vehicles infront
                 headway = tmp_lead.T
@@ -127,10 +133,9 @@ class Road:
                 self.vehicle_list.append(tmp_vehicle)
             else:
                 self.convoy_spawned = True
-                print("Convoy Created")
                 self.vehicle_list.append(tmp_convoy)
 
-        # Reset spawn timer
+        # Reset spawn timer even if vehicle is not spawn to prevent upstream overcrowding
         if self.convoy_spawned:
             self.last_spawn_time = self.timer + (2*self.spawn_interval)
         else:
@@ -151,7 +156,7 @@ class Road:
         if (headway_flag and not overlap_flag):
             self.vehicle_list.append(tmp_vehicle)
 
-        # Reset spawn timer
+        # Reset onramp spawn timer if vehicle is not spawn to prevent upstream overcrowding
         self.onramp_last_spawn_time = self.onramp_timer
 
     def update_road(self):
@@ -159,9 +164,9 @@ class Road:
         for vehicle in self.vehicle_list:
 
             if isinstance(vehicle, Convoy):
-                vehicle.update_convoy(self.ts, self.vehicle_list, vehicle_type='acc')
+                vehicle.update_convoy(self.vehicle_list, vehicle_type='acc')
             else:
-                vehicle.update_local(self.ts, self.vehicle_list, vehicle_type='shc')
+                vehicle.update_local(self.vehicle_list, vehicle_type='shc')
 
         for vehicle in self.vehicle_list:
             if not isinstance(vehicle, Convoy):
@@ -171,16 +176,13 @@ class Road:
             # Remove vehicle from road
             if isinstance(vehicle, Convoy):
                 for convoy in vehicle.convoy_list:
-                    if convoy.loc_back > self.road_length:
+                    if convoy.loc_front > self.road_length:
                         if len(vehicle.convoy_list) == 1: # If last convoy in the convoy_list
                             self.vehicle_list.remove(vehicle)
                         else: # Remove one vehicle from the convoy
                             vehicle.convoy_list.remove(convoy)
-            elif vehicle.loc_back > self.road_length:
+            elif vehicle.loc_front > self.road_length:
                 self.vehicle_list.remove(vehicle)
-            # Reach the end of the on-ramp
-            elif (vehicle.loc[1] == self.onramp) and (vehicle.loc_front > self.onramp_length):
-                vehicle.v = 0 # Stop the vehicle
 
         # Update spawn_timer
         self.timer += self.ts

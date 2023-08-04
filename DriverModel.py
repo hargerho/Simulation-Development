@@ -29,24 +29,25 @@ class DriverModel:
         """
         new_acceleration = self.calc_acceleration(v, new_surrounding_v, new_surrounding_dist)
         old_acceleration = self.calc_acceleration(v, old_surrounding_v, old_surrounding_dist)
-        disadvantage = new_acceleration - old_acceleration
+        disadvantage = old_acceleration - new_acceleration
         return (disadvantage, new_acceleration)
 
-    def calc_incentive(self, change_direction, v, new_front_v, new_front_dist, old_front_v, old_front_dist, disadvantage, new_back_accel):
+    def calc_incentive(self, change_direction, v, new_front_v, new_front_dist, old_front_v, old_front_dist, disadvantage, new_back_accel, onramp_flag):
         """Calculates if a lane change should happen based on the MOBIL model
         """
         new_acceleration = self.calc_acceleration(v, new_front_v, new_front_dist)
         old_acceleration = self.calc_acceleration(v, old_front_v, old_front_dist)
 
-
         if change_direction == 'right':
             a_bias = self.left_bias
         elif change_direction == 'left':
             a_bias = -self.left_bias
+        elif onramp_flag: # If the vehicle is onramp, decrease threshold for right lane change
+            a_bias = -(self.left_bias * 1)
         else:
             a_bias = 0 # No lane change
 
-        change_incentive = new_acceleration - old_acceleration + (self.politeness * disadvantage) > self.change_threshold + a_bias
+        change_incentive = new_acceleration - old_acceleration - (self.politeness * disadvantage) > self.change_threshold + a_bias
         safety_criterion = new_back_accel > -self.b
 
         return change_incentive & safety_criterion
