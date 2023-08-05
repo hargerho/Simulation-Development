@@ -32,9 +32,9 @@ road_params = {
     "onramp_length": 600,
     "num_lanes": 4, # including an onramp
     "lanewidth": 10,
-    "vehicle_inflow": 8000, # 1000 approx 1veh/3.6sec testing: 10000
+    "vehicle_inflow": 4000, # 1000 approx 1veh/3.6sec testing: 10000
     "onramp_inflow": 1000,
-    "onramp_switch": True, # Toggles onramp on/off
+    "onramp_switch": False, # Toggles onramp on/off
     "num_convoy_vehicles": 3
 }
 
@@ -56,7 +56,7 @@ shc_params = {
 }
 
 acc_params = {
-    "acc_spawnrate": 1, # Init 0.2
+    "acc_spawnrate": 0.5, # Init 0.2
     "normal": {"safe_headway": 3.1, "speed_variation": 0, "politeness_factor": 0.5},
     "cautious": {"safe_headway": 4, "speed_variation": 0, "politeness_factor": 0.8},
 }
