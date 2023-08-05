@@ -125,7 +125,11 @@ class Vehicle:
         front, front_left, front_right, back_left, back_right = None, None, None, None, None
 
         for vehicle in vehicle_list:
-            if isinstance(vehicle, Vehicle):
+            # If convoy left 1 vehicle, treat it like a shc vehicle
+            if isinstance(vehicle, Vehicle) or (len(vehicle.convoy_list) == 1):
+                # get the last acc vehicle in conovy list and treat it like shc vehicle
+                if not isinstance(vehicle, Vehicle):
+                    vehicle = vehicle.convoy_list[0]
                 x_coord, x_diff, y_diff, right_check, left_check, front_check, back_check, not_right_lane, not_left_lane = self.get_fov_params(vehicle)
 
                 if x_diff > 0 and y_diff == 0:
@@ -151,9 +155,7 @@ class Vehicle:
         # Lead vehicle will be the back of a vehicle POV
         # Tail vehicle will be front of a vehicle POV
         lead_vehicle = convoy.convoy_list[0]
-        # tail_vehicle = convoy.convoy_list[-1]
 
-        # x_coord = tail_vehicle.loc[0]
         x_coord = convoy.loc[0]
         current_y_coord = self.loc[1]
 
@@ -164,7 +166,6 @@ class Vehicle:
         left_check = lead_vehicle.loc[1] == current_y_coord - self.lanewidth
 
         front_check = x_coord > self.loc[0]
-        # back_check = lead_vehicle.loc[0] < self.loc[0]
         back_check = convoy.loc_back < self.loc[0]
 
         not_right_lane = current_y_coord != self.bottomlane
@@ -196,49 +197,34 @@ class Vehicle:
         if current_front is None: # No vehicles infront
             current_front_dist = self.onramp_length if onramp_flag else self.road_length
             current_front_v = self.v
-        elif isinstance(current_front, Vehicle):
+        else:
             # If there is a front shc vehicle
             current_front_dist = current_front.loc_back - self.loc_front
             current_front_v = current_front.v
-        else:
-            current_front_dist = current_front.loc_back - self.loc_front
-            current_front_v = current_front.v
-
         # Next timestep
         # Getting distance of new front vehicle
         if new_front is None: # No vehicles infront
             new_front_dist = self.onramp_length if onramp_flag else self.road_length
             new_front_v = self.v
-        elif isinstance(new_front, Vehicle):
+        else:
             # If there is a front shc vehicle
             new_front_dist = new_front.loc_back - self.loc_front
             new_front_v = new_front.v
-        else:
-            new_front_dist = new_front.loc_back - self.loc_front
-            new_front_v = new_front.v
-
         # Considering the vehicle behind
         if new_back is None:
             # If there is no vehicle behind
             disadvantage, new_back_accel = 0, 0
         else:
+            new_back_front = new_back.loc_front
+            new_back_v = new_back.v
             # Getting the correct new_back assignmente
-            if isinstance(new_back, Vehicle):
-                new_back_front = new_back.loc_front
-                new_back_v = new_back.v
-            else:
-                new_back_front = new_back.loc_front
-                new_back_v = new_back.v
+            if not isinstance(new_back, Vehicle):
                 new_back = new_back.convoy_list[-1]
 
             # Current timestep
             if new_front is None:
                 current_back_dist = self.onramp_length if onramp_flag else self.road_length
                 current_back_v = self.v
-            # If new_front is not None
-            elif isinstance(new_front, Vehicle):
-                current_back_dist = new_front.loc_back - new_back_front
-                current_back_v = new_front.v
             else:
                 current_back_dist = new_front.loc_back - new_back_front
                 current_back_v = new_front.v
@@ -255,18 +241,8 @@ class Vehicle:
                                             old_front_dist=current_front_dist, disadvantage=disadvantage, new_back_accel=new_back_accel, onramp_flag=onramp_flag)
 
         # Extra safety check
-        if new_front is not None:
-            new_front_back = new_front.loc_back if isinstance(new_front, Vehicle) else new_front.loc_back
-            safeFront = new_front_back > self.loc_front
-        else:
-            safeFront = True
-
-        if new_back is not None:
-            new_back_front = new_back.loc_back if isinstance(new_back, Vehicle) else new_back.loc_back
-            safeBack = new_back_front < self.loc_back
-        else:
-            safeBack = True
-
+        safeFront = True if new_front is None else new_front.loc_back > self.loc_front
+        safeBack = new_back.loc_back < self.loc_back if new_back is not None else True
         return change_incentive and safeFront and safeBack
 
     def check_lane_change(self, surrounding):

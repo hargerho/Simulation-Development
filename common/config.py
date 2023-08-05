@@ -34,7 +34,8 @@ road_params = {
     "lanewidth": 10,
     "vehicle_inflow": 8000, # 1000 approx 1veh/3.6sec testing: 10000
     "onramp_inflow": 1000,
-    "num_convoy_vehicles": 2
+    "onramp_switch": True, # Toggles onramp on/off
+    "num_convoy_vehicles": 3
 }
 
 driving_params = {
