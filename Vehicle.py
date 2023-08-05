@@ -130,83 +130,78 @@ class Vehicle:
 
         return x_coord, x_diff, y_diff, right_check, left_check, front_check, back_check, not_right_lane, not_left_lane, in_between_check
 
-    def get_convoy_fov(self, convoy, front, front_left, front_right, back_left, back_right, right, left):
+    def get_convoy_fov(self, vehicle, front, front_left, front_right, back_left, back_right, right, left):
 
         # Lead vehicle will be the back of a vehicle POV
         # Tail vehicle will be front of a vehicle POV
-        lead_vehicle = convoy.convoy_list[0]
 
-        x_coord = convoy.loc[0]
+        x_coord = vehicle.loc[0]
         current_y_coord = self.loc[1]
 
         x_diff = x_coord - self.loc[0]
-        y_diff = lead_vehicle.loc[1] - current_y_coord
+        y_diff = vehicle.loc[1] - current_y_coord
 
-        right_check = convoy.loc[1] == current_y_coord + self.lanewidth
-        left_check = convoy.loc[1] == current_y_coord - self.lanewidth
+        right_check = vehicle.loc[1] == current_y_coord + self.lanewidth
+        left_check = vehicle.loc[1] == current_y_coord - self.lanewidth
 
         front_check = x_coord > self.loc[0]
-        back_check = convoy.loc_back < self.loc[0]
+        back_check = vehicle.loc_back < self.loc[0]
 
         not_right_lane = current_y_coord != self.rightlane
         not_left_lane = current_y_coord != self.leftlane
 
-        in_between_check = convoy.loc_front > self.loc_front and convoy.loc_back < self.loc_back
+        in_between_check = vehicle.loc_front > self.loc_front and vehicle.loc_back < self.loc_back
 
         # Right/Left avaliable space check
         if in_between_check and right_check:
-            right = convoy if (right is None) else right
+            right = vehicle if (right is None) else right
 
         if in_between_check and left_check:
-            left = convoy if (left is None) else left
+            left = vehicle if (left is None) else left
 
         if x_diff > 0 and y_diff == 0:
-            front = convoy if front is None or x_coord < front.loc[0] else front
+            front = vehicle if front is None or x_coord < front.loc[0] else front
 
         if not_right_lane and front_check and right_check:
-            front_right = convoy if (front_right is None or x_coord < front_right.loc[0]) else front_right
+            front_right = vehicle if (front_right is None or x_coord < front_right.loc[0]) else front_right
 
         if not_right_lane and back_check and right_check:
-            back_right = convoy if (back_right is None or x_coord > back_right.loc[0]) else back_right
+            back_right = vehicle if (back_right is None or x_coord > back_right.loc[0]) else back_right
 
         if not_left_lane and front_check and left_check:
-            front_left = convoy if (front_left is None or x_coord < front_left.loc[0]) else front_left
+            front_left = vehicle if (front_left is None or x_coord < front_left.loc[0]) else front_left
 
         if not_left_lane and back_check and left_check:
-            back_left = convoy if (back_left is None or x_coord > back_left.loc[0]) else back_left
+            back_left = vehicle if (back_left is None or x_coord > back_left.loc[0]) else back_left
 
         return front, front_left, front_right, back_left, back_right, right, left
 
     def get_fov(self, vehicle_list):
-            front, front_left, front_right, back_left, back_right, right, left = None, None, None, None, None, None, None
+        front, front_left, front_right, back_left, back_right, right, left = None, None, None, None, None, None, None
 
-            for vehicle in vehicle_list:
+        for vehicle in vehicle_list:
                 # If convoy left 1 vehicle, treat it like a shc vehicle
-                if isinstance(vehicle, Vehicle) or (len(vehicle.convoy_list) == 1):
-                    # get the last acc vehicle in conovy list and treat it like shc vehicle
-                    if not isinstance(vehicle, Vehicle):
-                        vehicle = vehicle.convoy_list[0]
-                    x_coord, x_diff, y_diff, right_check, left_check, front_check, back_check, not_right_lane, not_left_lane, in_between_check = self.get_fov_params(vehicle)
+            if not isinstance(vehicle, Vehicle):
+                vehicle = vehicle.convoy_list[0]
+            x_coord, x_diff, y_diff, right_check, left_check, front_check, back_check, not_right_lane, not_left_lane, in_between_check = self.get_fov_params(vehicle)
 
-                    if x_diff > 0 and y_diff == 0:
-                        front = self.get_closest_vehicle(vehicle, front)
+            if x_diff > 0 and y_diff == 0:
+                front = self.get_closest_vehicle(vehicle, front)
 
-                    front_left, front_right, back_left, back_right, right, left = self.update_positions(
-                        vehicle, x_coord, not_left_lane, not_right_lane, front_check, back_check, left_check, right_check,
-                        front_left, front_right, back_left, back_right, in_between_check, right, left
-                    )
-                else:
-                    front, front_left, front_right, back_left, back_right, right, left = self.get_convoy_fov(vehicle, front, front_left, front_right, back_left, back_right, right, left)
+            front_left, front_right, back_left, back_right, right, left = self.update_positions(
+                vehicle, x_coord, not_left_lane, not_right_lane, front_check, back_check, left_check, right_check,
+                front_left, front_right, back_left, back_right, in_between_check, right, left
+            )
 
-            return {
-                "front": front,
-                "front_left": front_left,
-                "front_right": front_right,
-                "back_left": back_left,
-                "back_right": back_right,
-                "right": right,
-                "left": left
-            }
+        return {
+            "front": front,
+            "front_left": front_left,
+            "front_right": front_right,
+            "back_left": back_left,
+            "back_right": back_right,
+            "right": right,
+            "left": left
+        }
 
     def calc_lane_change(self, change_dir, current_front, new_front, new_back, right, left):
         # Checking if onramp
