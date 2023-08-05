@@ -176,8 +176,8 @@ class Road:
                         else: # Remove one vehicle from the convoy
                             vehicle.convoy_list.remove(convoy)
             # Simulate roadblock at left lane
-            elif vehicle.loc_front > self.road_length and vehicle.loc[1] == self.leftlane:
-                vehicle.v = 0
+            # elif vehicle.loc_front > self.road_length and vehicle.loc[1] == self.leftlane:
+            #     vehicle.v = 0
             elif vehicle.loc_front > self.road_length:
                 self.vehicle_list.remove(vehicle)
 
