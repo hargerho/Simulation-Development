@@ -69,18 +69,12 @@ class Road:
 
             # If there is a vehicle infront
             if tmp_front is not None:
-
-                if isinstance(tmp_front, Vehicle):
-                    tmp_front_back = tmp_front.loc_back
-                else:
-                    tmp_front_back = tmp_front.loc_back
-
                 if tmp_lead.v != 0:
-                    headway = (tmp_front_back - tmp_lead.loc_front) / tmp_lead.v
+                    headway = (tmp_front.loc_back - tmp_lead.loc_front) / tmp_lead.v
                 else:
                     headway = tmp_lead.T
                 # Check the size of the car
-                overlap_flag = (tmp_front_back - tmp_vehicle_tail.loc_front - self.safety_distance) < 0
+                overlap_flag = (tmp_front.loc_back - tmp_vehicle_tail.loc_front - self.safety_distance) < 0
             else:
                 # If no vehicles infront
                 headway = tmp_lead.T
@@ -189,10 +183,11 @@ class Road:
         if self.timer - self.last_spawn_time >= self.spawn_interval:
             self.spawn_vehicle()
 
-        # Update onramp_spawn_timer
-        self.onramp_timer += self.ts
-        if self.onramp_timer - self.onramp_last_spawn_time >= self.onramp_spawn_interval:
-            self.spawn_onramp()
+        if road_params['onramp_switch']:
+            # Update onramp_spawn_timer
+            self.onramp_timer += self.ts
+            if self.onramp_timer - self.onramp_last_spawn_time >= self.onramp_spawn_interval:
+                self.spawn_onramp()
 
         self.frames += 1
 

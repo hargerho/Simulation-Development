@@ -125,7 +125,11 @@ class Vehicle:
         front, front_left, front_right, back_left, back_right = None, None, None, None, None
 
         for vehicle in vehicle_list:
-            if isinstance(vehicle, Vehicle):
+            # If convoy left 1 vehicle, treat it like a shc vehicle
+            if isinstance(vehicle, Vehicle) or (len(vehicle.convoy_list) == 1):
+                # get the last acc vehicle in conovy list and treat it like shc vehicle
+                if not isinstance(vehicle, Vehicle):
+                    vehicle = vehicle.convoy_list[0]
                 x_coord, x_diff, y_diff, right_check, left_check, front_check, back_check, not_right_lane, not_left_lane = self.get_fov_params(vehicle)
 
                 if x_diff > 0 and y_diff == 0:
@@ -151,9 +155,7 @@ class Vehicle:
         # Lead vehicle will be the back of a vehicle POV
         # Tail vehicle will be front of a vehicle POV
         lead_vehicle = convoy.convoy_list[0]
-        # tail_vehicle = convoy.convoy_list[-1]
 
-        # x_coord = tail_vehicle.loc[0]
         x_coord = convoy.loc[0]
         current_y_coord = self.loc[1]
 
