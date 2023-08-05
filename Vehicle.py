@@ -91,7 +91,14 @@ class Vehicle:
 
     @staticmethod
     def update_positions(vehicle, x_coord, not_left_lane, not_right_lane, front_check, back_check, left_check, right_check,
-                         front_left, front_right, back_left, back_right):
+                         front_left, front_right, back_left, back_right, in_between_check, right, left):
+
+        if in_between_check and right_check:
+            right = vehicle if (right is None) else right
+
+        if in_between_check and left_check:
+            left = vehicle if (left is None) else left
+
         if not_right_lane and front_check and right_check and (front_right is None or x_coord < front_right.loc[0]):
             front_right = vehicle
 
@@ -104,7 +111,7 @@ class Vehicle:
         if not_left_lane and back_check and left_check and (back_left is None or x_coord > back_left.loc[0]):
             back_left = vehicle
 
-        return front_left, front_right, back_left, back_right
+        return front_left, front_right, back_left, back_right, right, left
 
     def get_fov_params(self, vehicle):
         x_coord = vehicle.loc[0]
@@ -119,38 +126,11 @@ class Vehicle:
         not_right_lane = current_y_coord != self.bottomlane
         not_left_lane = current_y_coord != self.toplane
 
-        return x_coord, x_diff, y_diff, right_check, left_check, front_check, back_check, not_right_lane, not_left_lane
+        in_between_check = vehicle.loc_front > self.loc_front and vehicle.loc_back < self.loc_back
 
-    def get_fov(self, vehicle_list):
-        front, front_left, front_right, back_left, back_right = None, None, None, None, None
+        return x_coord, x_diff, y_diff, right_check, left_check, front_check, back_check, not_right_lane, not_left_lane, in_between_check
 
-        for vehicle in vehicle_list:
-            # If convoy left 1 vehicle, treat it like a shc vehicle
-            if isinstance(vehicle, Vehicle) or (len(vehicle.convoy_list) == 1):
-                # get the last acc vehicle in conovy list and treat it like shc vehicle
-                if not isinstance(vehicle, Vehicle):
-                    vehicle = vehicle.convoy_list[0]
-                x_coord, x_diff, y_diff, right_check, left_check, front_check, back_check, not_right_lane, not_left_lane = self.get_fov_params(vehicle)
-
-                if x_diff > 0 and y_diff == 0:
-                    front = self.get_closest_vehicle(vehicle, front)
-
-                front_left, front_right, back_left, back_right = self.update_positions(
-                    vehicle, x_coord, not_left_lane, not_right_lane, front_check, back_check, left_check, right_check,
-                    front_left, front_right, back_left, back_right
-                )
-            else:
-                front, front_left, front_right, back_left, back_right = self.get_convoy_fov(vehicle, front, front_left, front_right, back_left, back_right)
-
-        return {
-            "front": front,
-            "front_left": front_left,
-            "front_right": front_right,
-            "back_left": back_left,
-            "back_right": back_right,
-        }
-
-    def get_convoy_fov(self, convoy, front, front_left, front_right, back_left, back_right):
+    def get_convoy_fov(self, convoy, front, front_left, front_right, back_left, back_right, right, left):
 
         # Lead vehicle will be the back of a vehicle POV
         # Tail vehicle will be front of a vehicle POV
@@ -162,14 +142,23 @@ class Vehicle:
         x_diff = x_coord - self.loc[0]
         y_diff = lead_vehicle.loc[1] - current_y_coord
 
-        right_check = lead_vehicle.loc[1] == current_y_coord + self.lanewidth
-        left_check = lead_vehicle.loc[1] == current_y_coord - self.lanewidth
+        right_check = convoy.loc[1] == current_y_coord + self.lanewidth
+        left_check = convoy.loc[1] == current_y_coord - self.lanewidth
 
         front_check = x_coord > self.loc[0]
         back_check = convoy.loc_back < self.loc[0]
 
         not_right_lane = current_y_coord != self.bottomlane
         not_left_lane = current_y_coord != self.toplane
+
+        in_between_check = convoy.loc_front > self.loc_front and convoy.loc_back < self.loc_back
+
+        # Right/Left avaliable space check
+        if in_between_check and right_check:
+            right = convoy if (right is None) else right
+
+        if in_between_check and left_check:
+            left = convoy if (left is None) else left
 
         if x_diff > 0 and y_diff == 0:
             front = convoy if front is None or x_coord < front.loc[0] else front
@@ -186,9 +175,40 @@ class Vehicle:
         if not_left_lane and back_check and left_check:
             back_left = convoy if (back_left is None or x_coord > back_left.loc[0]) else back_left
 
-        return front, front_left, front_right, back_left, back_right
+        return front, front_left, front_right, back_left, back_right, right, left
 
-    def calc_lane_change(self, change_dir, current_front, new_front, new_back):
+    def get_fov(self, vehicle_list):
+            front, front_left, front_right, back_left, back_right, right, left = None, None, None, None, None, None, None
+
+            for vehicle in vehicle_list:
+                # If convoy left 1 vehicle, treat it like a shc vehicle
+                if isinstance(vehicle, Vehicle) or (len(vehicle.convoy_list) == 1):
+                    # get the last acc vehicle in conovy list and treat it like shc vehicle
+                    if not isinstance(vehicle, Vehicle):
+                        vehicle = vehicle.convoy_list[0]
+                    x_coord, x_diff, y_diff, right_check, left_check, front_check, back_check, not_right_lane, not_left_lane, in_between_check = self.get_fov_params(vehicle)
+
+                    if x_diff > 0 and y_diff == 0:
+                        front = self.get_closest_vehicle(vehicle, front)
+
+                    front_left, front_right, back_left, back_right, right, left = self.update_positions(
+                        vehicle, x_coord, not_left_lane, not_right_lane, front_check, back_check, left_check, right_check,
+                        front_left, front_right, back_left, back_right, in_between_check, right, left
+                    )
+                else:
+                    front, front_left, front_right, back_left, back_right, right, left = self.get_convoy_fov(vehicle, front, front_left, front_right, back_left, back_right, right, left)
+
+            return {
+                "front": front,
+                "front_left": front_left,
+                "front_right": front_right,
+                "back_left": back_left,
+                "back_right": back_right,
+                "right": right,
+                "left": left
+            }
+
+    def calc_lane_change(self, change_dir, current_front, new_front, new_back, right, left):
         # Checking if onramp
         onramp_flag = self.loc[1] == self.onramp
 
@@ -243,24 +263,31 @@ class Vehicle:
         # Extra safety check
         safeFront = True if new_front is None else new_front.loc_back > self.loc_front
         safeBack = new_back.loc_back < self.loc_back if new_back is not None else True
-        return change_incentive and safeFront and safeBack
+        safeSide = True
+
+        if change_dir == 'left':
+            safeSide = not bool(left)
+        elif change_dir == 'right':
+            safeSide = not bool(right)
+
+        return change_incentive and safeFront and safeBack and safeSide
 
     def check_lane_change(self, surrounding):
         if self.loc[1] == self.bottomlane: # if car is either left or middle lane
                 change_flag = self.calc_lane_change(change_dir='left', current_front=surrounding['front'],
-                                                    new_front=surrounding['front_left'], new_back=surrounding['back_left'])
+                                                    new_front=surrounding['front_left'], new_back=surrounding['back_left'], right=surrounding['right'], left=surrounding['left'])
                 if change_flag:
                     self.local_loc[1] -= self.lanewidth
         # Right change
         if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] in [self.toplane, self.middlelane]: # if car is on right
             change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
-                                                new_front=surrounding['front_right'], new_back=surrounding['back_right'])
+                                                new_front=surrounding['front_right'], new_back=surrounding['back_right'], right=surrounding['right'], left=surrounding['left'])
             if change_flag:
                 self.local_loc[1] += self.lanewidth
         # For special case on-ramp
         if self.loc[1] == self.onramp:
             change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
-                                                new_front=surrounding['front_right'], new_back=surrounding['back_right'])
+                                                new_front=surrounding['front_right'], new_back=surrounding['back_right'], right=surrounding['right'], left=surrounding['left'])
             if change_flag:
                 self.local_loc[1] += self.lanewidth
 
@@ -303,13 +330,13 @@ class Vehicle:
             # Change right if front vehicle is stationary and currently on left lane
             if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] == self.toplane:
                 change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
-                                                    new_front=surrounding['front_right'], new_back=surrounding['back_right'])
+                                                    new_front=surrounding['front_right'], new_back=surrounding['back_right'], right=surrounding['right'], left=surrounding['left'])
                 if change_flag:
                     self.local_loc[1] += self.lanewidth
             # Left change if it is on middle or right lane
             if self.loc[1] in [self.middlelane, self.bottomlane]:
                 change_flag = self.calc_lane_change(change_dir='left', current_front=surrounding['front'],
-                                                    new_front=surrounding['front_left'], new_back=surrounding['back_left'])
+                                                    new_front=surrounding['front_left'], new_back=surrounding['back_left'], right=surrounding['right'], left=surrounding['left'])
                 if change_flag:
                     self.local_loc[1] -= self.lanewidth
 
