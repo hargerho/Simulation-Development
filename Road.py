@@ -32,13 +32,13 @@ class Road:
 
         # Getting y-coord of lanes
         self.onramp = self.toplane_loc[1]
-        self.toplane = self.toplane_loc[1] + self.lanewidth
+        self.leftlane = self.toplane_loc[1] + self.lanewidth
         self.middlelane = self.toplane_loc[1] + (self.lanewidth * 2)
-        self.bottomlane = self.toplane + self.lanewidth * (self.num_lanes-1)
+        self.rightlane = self.leftlane + self.lanewidth * (self.num_lanes-1)
 
         # Convoy Params
         self.num_convoy_vehicles = road_params['num_convoy_vehicles']  # Queue counter of 3 acc vehicles to form a convoy
-        self.acc_spawn_loc = [self.toplane_loc[0], self.toplane] # acc vehicle always spawns in left lane
+        self.acc_spawn_loc = [self.toplane_loc[0], self.leftlane] # acc vehicle always spawns in left lane
         self.frames = 0
         self.convoy_spawned = False
 
@@ -176,7 +176,7 @@ class Road:
                         else: # Remove one vehicle from the convoy
                             vehicle.convoy_list.remove(convoy)
             # Simulate roadblock at left lane
-            elif vehicle.loc_front > self.road_length and vehicle.loc[1] == self.toplane:
+            elif vehicle.loc_front > self.road_length and vehicle.loc[1] == self.leftlane:
                 vehicle.v = 0
             elif vehicle.loc_front > self.road_length:
                 self.vehicle_list.remove(vehicle)
