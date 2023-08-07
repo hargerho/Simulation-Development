@@ -1,6 +1,6 @@
 window_params = {
-    "window_width": 1300,
-    "window_height": 500,
+    "window_width": 1500,
+    "window_height": 600,
     "fps": 120,
     "black": (0,0,0),
     "white": (255,255,255),
@@ -28,7 +28,7 @@ simulation_params = {
 
 road_params = {
     "toplane_loc": (0,100), #(x, y)
-    "road_length": 1200,
+    "road_length": 1400,
     "onramp_length": 600,
     "num_lanes": 4, # including an onramp
     "lanewidth": 10,
