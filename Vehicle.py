@@ -22,7 +22,7 @@ class Vehicle:
         self.onramp = self.toplane_loc[1]
         self.leftlane = self.toplane_loc[1] + self.lanewidth
         self.middlelane = self.toplane_loc[1] + (self.lanewidth * 2)
-        self.rightlane = self.leftlane + self.lanewidth * (self.num_lanes-1)
+        self.rightlane = self.toplane_loc[1] + self.lanewidth * (self.num_lanes - 1)
 
         self.v_0 = driving_params['desired_velocity']
         self.s_0 = driving_params['safety_threshold']
@@ -224,13 +224,13 @@ class Vehicle:
         return change_incentive and is_safe
 
     def check_lane_change(self, surrounding):
-        if self.loc[1] == self.rightlane: # if car is either left or middle lane
-                change_flag = self.calc_lane_change(change_dir='left', current_front=surrounding['front'],
-                                                    new_front=surrounding['front_left'], new_back=surrounding['back_left'], right=surrounding['right'], left=surrounding['left'])
-                if change_flag:
-                    self.local_loc[1] -= self.lanewidth
+        if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] == self.rightlane: # Right change
+            change_flag = self.calc_lane_change(change_dir='left', current_front=surrounding['front'],
+                                                new_front=surrounding['front_left'], new_back=surrounding['back_left'], right=surrounding['right'], left=surrounding['left'])
+            if change_flag:
+                self.local_loc[1] -= self.lanewidth
         # Right change
-        if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] in [self.leftlane, self.middlelane]: # if car is on right
+        if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] in [self.leftlane, self.middlelane]: # Left change
             change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
                                                 new_front=surrounding['front_right'], new_back=surrounding['back_right'], right=surrounding['right'], left=surrounding['left'])
             if change_flag:
