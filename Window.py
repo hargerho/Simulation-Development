@@ -35,6 +35,7 @@ class Window:
         self.restart_image = pygame.image.load(window_params["restart_button"])
         self.pause_image = pygame.image.load(window_params["pause_button"])
         self.record_image = pygame.image.load(window_params["record_button"])
+        self.play_image = pygame.image.load(window_params["play_button"])
 
         # Creating window parameters
         self.win = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
@@ -48,8 +49,8 @@ class Window:
         self.start_time = pygame.time.get_ticks()  # Record the start time of the simulation
 
     def create_buttons(self):
-        self.pause_button = Button(1200, 100, self.pause_image, 0.05)
-        self.is_paused = self.pause_button.draw(self.win)
+        self.pause_button = Button(1100, 100, self.pause_image, 0.05)
+        self.play_button = Button(1200, 100, self.play_image, 0.05)
 
         self.restart_button = Button(1300, 100, self.restart_image, 0.05)
         self.restart = self.restart_button.draw(self.win)
@@ -125,9 +126,18 @@ class Window:
     def run_window(self): # vehicle_list passed from Simulation
 
         while self.is_running:
-
              # Drawing the landscape
             self.draw_fixed_objects()
+
+             # If window paused, simulation paused, no road updates
+            if self.pause_button.draw(self.win):
+                self.is_paused = True
+                print("Pause")
+            if self.play_button.draw(self.win):
+                self.is_paused = False
+                print("Resume")
+            if self.record_button.draw(self.win):
+                self.is_recording = True
 
             # Event check first
             for event in pygame.event.get():
@@ -151,20 +161,16 @@ class Window:
                             self.is_recording = True
                             print("Recording Simulation")
 
-            if self.is_paused:
-                continue
+            if not self.is_paused:
+                # Updates simulation frame
+                vehicle_list = self.sim.update_frame(self.is_recording)
 
-            # If window paused, simulation paused, no road updates
+                # Display newly updated frame on Window
+                if (len(vehicle_list[0]) != 0):
+                    self.refresh_window(vehicle_list=vehicle_list[0])
 
-            # Updates simulation frame
-            vehicle_list = self.sim.update_frame(self.is_recording)
-
-            # Display newly updated frame on Window
-            if (len(vehicle_list[0]) != 0):
-                self.refresh_window(vehicle_list=vehicle_list[0])
-
-            pygame.display.update()
-            self.clock.tick(1./self.ts * self.speed)
+                pygame.display.update()
+                self.clock.tick(1./self.ts * self.speed)
 
         # TODO
         self.sim.saving_record()
