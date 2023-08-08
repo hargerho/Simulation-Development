@@ -1,7 +1,6 @@
 window_params = {
     "window_width": 1500,
     "window_height": 600,
-    "fps": 120,
     "black": (0,0,0),
     "white": (255,255,255),
     "blue": (0, 0, 255),
@@ -14,20 +13,20 @@ window_params = {
     "road_border": 'common/assets/road_mask.png',
     "acc_image": 'common/assets/acc.png',
     "shc_image": 'common/assets/shc.png',
-    "play_button": 'common/assets/play_button.png',
+    "restart_button": 'common/assets/restart.png',
     "pause_button": 'common/assets/pause_button.png',
     "record_button": 'common/assets/record_button.png'
 }
 
 simulation_params = {
     "ts": 1/60, # was 0.001  testing: 1/60
-    "playback_speed": 8, # realtime = 1
+    "playback_speed": 2, # realtime = 1
     "folderpath": "data",
     "filename": "recordedSimulation"
 }
 
 road_params = {
-    "toplane_loc": (0,100), #(x, y)
+    "toplane_loc": (0,500), #(x, y)
     "road_length": 1400,
     "onramp_length": 600,
     "num_lanes": 4, # including an onramp
@@ -39,7 +38,7 @@ road_params = {
 }
 
 driving_params = {
-    "desired_velocity": 20, # Initially 70 testing:16.6
+    "desired_velocity": 70, # Initially 70 testing:16.6
     "safety_threshold": 20, # estimation
     "max_acceleration": 50, # IDM Paper # was 0.73
     "comfortable_deceleration": 4.61, # IDM Paper # was 1.67
