@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import time
+from tqdm import tqdm
 
 from common.config import road_params, driving_params, vehicle_models, simulation_params
 from Vehicle import Vehicle
@@ -53,9 +54,10 @@ class Road:
         self.convoy_spawned = False
 
         # Testing Controls
-        self.vehicle_spawns = 0
         self.vehicle_despawn = 0
         self.run_flag = True
+        self.total_vehicles = simulation_params['num_vehicles']
+        self.progress_bar = tqdm(total=self.total_vehicles, desc="Despawning Vehicles")
 
     def spawn_helper(self, tmp_vehicle, vehicle_type):
 
@@ -198,16 +200,12 @@ class Road:
             elif vehicle.loc_front > self.road_length:
                 self.vehicle_list.remove(vehicle)
                 self.vehicle_despawn += 1
-                if self.vehicle_despawn%50 == 0:
-                    print(f"Vehicle Despawned: {self.vehicle_despawn}/simulation_params['num_vehicles'] at {time.time()}")
+                self.progress_bar.update(1)
 
         # Update spawn_timer
         self.timer += self.ts
         if self.timer - self.last_spawn_time >= self.spawn_interval:
             self.spawn_vehicle()
-            self.vehicle_spawns += 1
-            if self.vehicle_spawns%50 == 0:
-                print(f"Vehicle Spawned: {self.vehicle_spawns}/simulation_params['num_vehicles'] at {time.time()}")
 
         if road_params['onramp_inflow'] > 0:
             # Update onramp_spawn_timer
@@ -217,7 +215,7 @@ class Road:
 
         self.frames += 1
 
-        if self.vehicle_despawn > simulation_params['num_vehicles']:
+        if self.vehicle_despawn > self.total_vehicles:
             self.run_flag = False
 
         return self.vehicle_list, self.run_flag # return vehicle list of this frame

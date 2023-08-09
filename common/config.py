@@ -92,5 +92,5 @@ simulation_params = {
     "folderpath": "data",
     "filename": baseline,
     "record": True,
-    "num_vehicles": 20
+    "num_vehicles": 500
 }
