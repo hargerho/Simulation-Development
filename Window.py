@@ -54,8 +54,7 @@ class Window:
         self.restart_button = Button(1300, 100, self.restart_image, 0.05)
         self.restart = self.restart_button.draw(self.win)
 
-        # self.record_button = Button(1400, 100, self.record_image, 0.05)
-        # self.is_recording = self.record_button.draw(self.win)
+        self.record_button = Button(1400, 100, self.record_image, 0.05)
 
     def draw_timer(self):
         if self.is_paused:
@@ -131,12 +130,13 @@ class Window:
              # If window paused, simulation paused, no road updates
             if self.pause_button.draw(self.win):
                 self.is_paused = True
-                print("Pause")
+            if not self.is_paused:
+                if self.pause_button.draw(self.win):
+                    self.is_paused = False
             if self.play_button.draw(self.win):
                 self.is_paused = False
-                print("Resume")
-            # if self.record_button.draw(self.win):
-            #     self.is_recording = True
+            if self.record_button.draw(self.win):
+                self.is_recording = True
 
             # Event check first
             for event in pygame.event.get():
@@ -153,8 +153,8 @@ class Window:
                 if (len(vehicle_list) != 0):
                     self.refresh_window(vehicle_list=vehicle_list)
 
-                pygame.display.update()
                 frame += 1
+                pygame.display.update()
                 self.clock.tick(1./self.ts * self.speed)
         time_taken = time.time() - self.start
         print("Time Taken for 500 vehicle to despawnn: ", time_taken)

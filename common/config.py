@@ -87,10 +87,10 @@ filename = f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_R
 baseline = f"ACCNo_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}"
 
 simulation_params = {
-    "ts": 0.4, # was 0.001  testing: 1/60 # Ts < 0.5 same results
+    "ts": 0.1, # was 0.001  testing: 1/60 # Ts < 0.5 same results
     "playback_speed": 10, # realtime = 1
     "folderpath": "data",
     "filename": baseline,
-    "record": True,
+    "record": False,
     "num_vehicles": 500
 }
