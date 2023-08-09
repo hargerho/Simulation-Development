@@ -80,7 +80,6 @@ class Vehicle:
             'vehicle_type': self.vehicle_type,
             'location': self.loc,
             'speed': self.v,
-            'acceleration': self.local_accel,
             'timestamp': time.time(),
         }
 

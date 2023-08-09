@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import time
+from tqdm import tqdm
 
 from common.config import road_params, driving_params, vehicle_models, simulation_params
 from Vehicle import Vehicle
@@ -55,6 +56,8 @@ class Road:
         # Testing Controls
         self.vehicle_despawn = 0
         self.run_flag = True
+        self.total_vehicles = simulation_params['num_vehicles']
+        self.progress_bar = tqdm(total=self.total_vehicles, desc="Despawning Vehicles")
 
     def spawn_helper(self, tmp_vehicle, vehicle_type):
 
@@ -191,11 +194,13 @@ class Road:
                             vehicle.convoy_list.remove(convoy)
             # Simulate roadblock by setting a SHC vehicle to 0m/s
             elif self.road_closed is not None:
+                print("Closure")
                 if vehicle.loc_front > self.road_length/2 and vehicle.loc[1] == self.road_closed:
                     vehicle.v = 0
             elif vehicle.loc_front > self.road_length:
                 self.vehicle_list.remove(vehicle)
                 self.vehicle_despawn += 1
+                self.progress_bar.update(1)
 
         # Update spawn_timer
         self.timer += self.ts
@@ -210,8 +215,8 @@ class Road:
 
         self.frames += 1
 
-        if self.vehicle_despawn > 5:
-            self.run_flag = False
+        # if self.vehicle_despawn > self.total_vehicles:
+        #     self.run_flag = False
 
         return self.vehicle_list, self.run_flag # return vehicle list of this frame
 

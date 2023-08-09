@@ -40,7 +40,7 @@ testing_list = testing_params.get("Baseline")
 
 road_params = {
     "toplane_loc": (0,500), #(x, y)
-    "road_length": 500, #16000m 32000
+    "road_length": 32000, #16000m 32000
     "onramp_length": 280, # 140m
     "num_lanes": 4, # including an onramp
     "lanewidth": 10,
@@ -87,9 +87,10 @@ filename = f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_R
 baseline = f"ACCNo_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}"
 
 simulation_params = {
-    "ts": 1/60, # was 0.001  testing: 1/60
-    "playback_speed": 2, # realtime = 1
+    "ts": 0.1, # was 0.001  testing: 1/60 # Ts < 0.5 same results
+    "playback_speed": 10, # realtime = 1
     "folderpath": "data",
     "filename": baseline,
-    "Record": True
+    "record": False,
+    "num_vehicles": 500
 }

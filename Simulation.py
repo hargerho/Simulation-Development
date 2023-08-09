@@ -36,4 +36,5 @@ class SimulationManager:
 
         with open(filepath, "w") as file:
             json.dump(self.record_dict, file, indent=4)
+        print("Data Saved!")
 
