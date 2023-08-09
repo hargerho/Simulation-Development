@@ -53,6 +53,7 @@ class Road:
         self.convoy_spawned = False
 
         # Testing Controls
+        self.vehicle_spawns = 0
         self.vehicle_despawn = 0
         self.run_flag = True
 
@@ -191,18 +192,22 @@ class Road:
                             vehicle.convoy_list.remove(convoy)
             # Simulate roadblock by setting a SHC vehicle to 0m/s
             elif self.road_closed is not None:
+                print("Closure")
                 if vehicle.loc_front > self.road_length/2 and vehicle.loc[1] == self.road_closed:
                     vehicle.v = 0
             elif vehicle.loc_front > self.road_length:
                 self.vehicle_list.remove(vehicle)
                 self.vehicle_despawn += 1
                 if self.vehicle_despawn%50 == 0:
-                    print(f"Vehicle Despawned: {self.vehicle_despawn}/simulation_params['num_vehicles']")
+                    print(f"Vehicle Despawned: {self.vehicle_despawn}/simulation_params['num_vehicles'] at {time.time()}")
 
         # Update spawn_timer
         self.timer += self.ts
         if self.timer - self.last_spawn_time >= self.spawn_interval:
             self.spawn_vehicle()
+            self.vehicle_spawns += 1
+            if self.vehicle_spawns%50 == 0:
+                print(f"Vehicle Spawned: {self.vehicle_spawns}/simulation_params['num_vehicles'] at {time.time()}")
 
         if road_params['onramp_inflow'] > 0:
             # Update onramp_spawn_timer
