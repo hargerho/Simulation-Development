@@ -11,8 +11,6 @@ class Window:
         pygame.init()
 
         # Setting up the Simulation
-        self.is_paused = False
-        self.is_recording = False
         self.is_running = True
         self.sim = SimulationManager() # Create the simulation
 
@@ -41,7 +39,7 @@ class Window:
         self.win = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
         self.clock = pygame.time.Clock()
         self.is_paused = False
-        self.is_recording = False
+        self.is_recording = simulation_params['Record']
         self.restart = False
 
         self.paused_time = 0
@@ -55,8 +53,8 @@ class Window:
         self.restart_button = Button(1300, 100, self.restart_image, 0.05)
         self.restart = self.restart_button.draw(self.win)
 
-        self.record_button = Button(1400, 100, self.record_image, 0.05)
-        self.is_recording = self.record_button.draw(self.win)
+        # self.record_button = Button(1400, 100, self.record_image, 0.05)
+        # self.is_recording = self.record_button.draw(self.win)
 
     def draw_timer(self):
         if self.is_paused:
@@ -108,7 +106,7 @@ class Window:
                     vehicleLoc = vehicle_id['location']
 
                     # Drawing the convoy
-                    carSurface = pygame.Surface((10,5))
+                    carSurface = pygame.Surface((self.vehicle_length,self.vehicle_width))
                     carSurface.fill(window_params['white'])
                     carRect = carSurface.get_rect()
                     carRect.center = vehicleLoc
@@ -117,14 +115,14 @@ class Window:
                 vehicle_id = vehicle.vehicle_id()
                 vehicleLoc = vehicle_id['location']
 
-                carSurface = pygame.Surface((10,5))
+                carSurface = pygame.Surface((self.vehicle_length,self.vehicle_width))
                 carSurface.fill(window_params['green'])
                 carRect = carSurface.get_rect()
                 carRect.center = vehicleLoc
                 self.win.blit(carSurface, carRect)
 
     def run_window(self): # vehicle_list passed from Simulation
-
+        frame = 0
         while self.is_running:
              # Drawing the landscape
             self.draw_fixed_objects()
@@ -136,40 +134,26 @@ class Window:
             if self.play_button.draw(self.win):
                 self.is_paused = False
                 print("Resume")
-            if self.record_button.draw(self.win):
-                self.is_recording = True
+            # if self.record_button.draw(self.win):
+            #     self.is_recording = True
 
             # Event check first
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.close_window()
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_q:
-                        self.close_window()
-                    if event.key == pygame.K_p:
-                        if self.is_paused:
-                            self.is_paused = False
-                            print("Continue Simulation")
-                        else:
-                            self.is_paused = True
-                            print("Simulation Paused")
-                    if event.key == pygame.K_r:
-                        if self.is_recording:
-                            self.is_recording == False
-                            print("Stop Recording Simulation")
-                        else:
-                            self.is_recording = True
-                            print("Recording Simulation")
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
+                    self.close_window()
 
             if not self.is_paused:
                 # Updates simulation frame
-                vehicle_list = self.sim.update_frame(self.is_recording)
+                vehicle_list, self.is_running = self.sim.update_frame(is_recording=self.is_recording, frame=frame)
 
                 # Display newly updated frame on Window
-                if (len(vehicle_list[0]) != 0):
-                    self.refresh_window(vehicle_list=vehicle_list[0])
+                if (len(vehicle_list) != 0):
+                    self.refresh_window(vehicle_list=vehicle_list)
 
                 pygame.display.update()
+                frame += 1
                 self.clock.tick(1./self.ts * self.speed)
 
         # TODO

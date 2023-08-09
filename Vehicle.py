@@ -1,4 +1,5 @@
 import uuid
+import time
 import numpy as np
 import math
 
@@ -80,7 +81,7 @@ class Vehicle:
             'location': self.loc,
             'speed': self.v,
             'acceleration': self.local_accel,
-            'vehicle_length': self.veh_length,
+            'timestamp': time.time(),
         }
 
     @staticmethod

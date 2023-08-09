@@ -25,10 +25,11 @@ class Road:
         self.last_spawn_time = 0
 
         # Onramp frequency
-        self.onramp_frequency = road_params['onramp_inflow'] / 3600
-        self.onramp_spawn_interval = round(1.0/self.onramp_frequency, 1)
-        self.onramp_timer = 0.0
-        self.onramp_last_spawn_time = 0
+        if road_params['onramp_inflow'] > 0:
+            self.onramp_frequency = road_params['onramp_inflow'] / 3600
+            self.onramp_spawn_interval = round(1.0/self.onramp_frequency, 1)
+            self.onramp_timer = 0.0
+            self.onramp_last_spawn_time = 0
 
         # Getting y-coord of lanes
         self.onramp = self.toplane_loc[1]
@@ -36,11 +37,24 @@ class Road:
         self.middlelane = self.toplane_loc[1] + (self.lanewidth * 2)
         self.rightlane = self.toplane_loc[1] + self.lanewidth * (self.num_lanes - 1)
 
+        if road_params["road_closed"] == "left":
+            self.road_closed = self.leftlane
+        elif road_params["road_closed"] == "middle":
+            self.road_closed = self.middlelane
+        elif road_params["road_closed"] == "right":
+            self.road_closed = self.rightlane
+        else:
+            self.road_closed = None
+
         # Convoy Params
         self.num_convoy_vehicles = road_params['num_convoy_vehicles']  # Queue counter of 3 acc vehicles to form a convoy
         self.acc_spawn_loc = [self.toplane_loc[0], self.leftlane] # acc vehicle always spawns in left lane
         self.frames = 0
         self.convoy_spawned = False
+
+        # Testing Controls
+        self.vehicle_despawn = 0
+        self.run_flag = True
 
     def spawn_helper(self, tmp_vehicle, vehicle_type):
 
@@ -175,18 +189,20 @@ class Road:
                             self.vehicle_list.remove(vehicle)
                         else: # Remove one vehicle from the convoy
                             vehicle.convoy_list.remove(convoy)
-            # Simulate roadblock
-            # elif vehicle.loc_front > self.road_length and vehicle.loc[1] == self.rightlane:
-            #     vehicle.v = 0
+            # Simulate roadblock by setting a SHC vehicle to 0m/s
+            elif self.road_closed is not None:
+                if vehicle.loc_front > self.road_length/2 and vehicle.loc[1] == self.road_closed:
+                    vehicle.v = 0
             elif vehicle.loc_front > self.road_length:
                 self.vehicle_list.remove(vehicle)
+                self.vehicle_despawn += 1
 
         # Update spawn_timer
         self.timer += self.ts
         if self.timer - self.last_spawn_time >= self.spawn_interval:
             self.spawn_vehicle()
 
-        if road_params['onramp_switch']:
+        if road_params['onramp_inflow'] > 0:
             # Update onramp_spawn_timer
             self.onramp_timer += self.ts
             if self.onramp_timer - self.onramp_last_spawn_time >= self.onramp_spawn_interval:
@@ -194,5 +210,8 @@ class Road:
 
         self.frames += 1
 
-        return self.vehicle_list # return vehicle list of this frame
+        if self.vehicle_despawn > 5:
+            self.run_flag = False
+
+        return self.vehicle_list, self.run_flag # return vehicle list of this frame
 
