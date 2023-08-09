@@ -18,7 +18,8 @@ window_params = {
     "restart_button": 'common/assets/restart.png',
     "pause_button": 'common/assets/pause_button.png',
     "play_button": 'common/assets/play_button.png',
-    "record_button": 'common/assets/record_button.png'
+    "record_button": 'common/assets/record_button.png',
+    "record_stop_button": 'common/assets/record_stop_button.png'
 }
 
 # List = [ACC Logic, SHC Logic, Road Closure, On-ramp Flow, Vehicle Inflow]
