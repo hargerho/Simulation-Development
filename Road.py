@@ -196,6 +196,8 @@ class Road:
             elif vehicle.loc_front > self.road_length:
                 self.vehicle_list.remove(vehicle)
                 self.vehicle_despawn += 1
+                if self.vehicle_despawn%50 == 0:
+                    print(f"Vehicle Despawned: {self.vehicle_despawn}/simulation_params['num_vehicles']")
 
         # Update spawn_timer
         self.timer += self.ts
@@ -210,7 +212,7 @@ class Road:
 
         self.frames += 1
 
-        if self.vehicle_despawn > 5:
+        if self.vehicle_despawn > simulation_params['num_vehicles']:
             self.run_flag = False
 
         return self.vehicle_list, self.run_flag # return vehicle list of this frame

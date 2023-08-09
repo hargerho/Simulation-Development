@@ -1,5 +1,6 @@
 import pygame
 import sys
+import time
 
 from common.config import window_params, road_params, simulation_params
 from Simulation import SimulationManager
@@ -39,7 +40,7 @@ class Window:
         self.win = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
         self.clock = pygame.time.Clock()
         self.is_paused = False
-        self.is_recording = simulation_params['Record']
+        self.is_recording = simulation_params['record']
         self.restart = False
 
         self.paused_time = 0
@@ -148,15 +149,17 @@ class Window:
                 # Updates simulation frame
                 vehicle_list, self.is_running = self.sim.update_frame(is_recording=self.is_recording, frame=frame)
 
-                # Display newly updated frame on Window
+                # # Display newly updated frame on Window
                 if (len(vehicle_list) != 0):
                     self.refresh_window(vehicle_list=vehicle_list)
 
                 pygame.display.update()
                 frame += 1
                 self.clock.tick(1./self.ts * self.speed)
+        time_taken = time.time() - self.start
+        print("Time Taken for 500 vehicle to despawnn: ", time_taken)
 
-        # TODO
+        # Saves Data
         self.sim.saving_record()
         print("Saving Record")
 
