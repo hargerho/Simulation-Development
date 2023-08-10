@@ -1,4 +1,4 @@
-# Scale -> 1m:2px
+# Scale -> 1m:2px, 1km:2000px
 
 window_params = {
     "window_width": 1500,
@@ -39,12 +39,16 @@ testing_params = {
 # Change here
 testing_list = testing_params.get("Baseline")
 
+def length_conversion(value):
+    # Convert meters to pixels
+    return value*2
+
 road_params = {
     "toplane_loc": (0,500), #(x, y)
-    "road_length": 32000, #16000m 32000
-    "onramp_length": 280, # 140m
+    "road_length": length_conversion(16000), #16000m
+    "onramp_length": length_conversion(140), # 140m
     "num_lanes": 4, # including an onramp
-    "lanewidth": 10,
+    "lanewidth": 10, # arbitary
     "vehicle_inflow": testing_list[4], # 1000 approx 1veh/3.6sec testing: 10000
     "onramp_inflow": testing_list[3],
     "num_convoy_vehicles": 3,
@@ -56,9 +60,15 @@ road_params = {
 # Comfortable deceleration = 1.67m/s2 = 3.34px/s2
 # Left bias = 0.3m/s = 0.6px/s
 # Lane change threshold = 0.1m/s = 0.2px/s
+
+def speed_conversion(value):
+    # 1mph = 1.60934kmh
+    # Converts mph -> pixel/seconds
+    return float((value*1.60934*2000)/3600)
+
 driving_params = {
-    "desired_velocity": 140, # testing: 16.6
-    "safety_threshold": 3, # testing: 20px
+    "desired_velocity": speed_conversion(70), # testing: 16.6
+    "safety_threshold": length_conversion(1.5), # testing: 20px
     "max_acceleration": 1.46, # IDM Paper # was 0.73 # Testing:50
     "comfortable_deceleration": 3.34, # IDM Paper # was 1.67 # Testing: 4.61
     "acceleration_component": 4, # IDM Paper
@@ -93,5 +103,6 @@ simulation_params = {
     "folderpath": "data",
     "filename": baseline,
     "record": False,
-    "num_vehicles": 500
+    "num_vehicles": 2000,
+    "testing": False
 }

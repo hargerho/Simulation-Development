@@ -48,6 +48,7 @@ class Window:
         self.last_pause_start = 0
         self.start_time = pygame.time.get_ticks()  # Record the start time of the simulation
         self.start = time.time()
+        self.has_recorded = False
 
     def create_buttons(self):
         self.pause_button = Button(1200, 100, self.pause_image, 0.05)
@@ -146,6 +147,7 @@ class Window:
                     print(" Start Recording")
             elif self.record_stop.draw(self.win):
                 self.is_recording = not self.is_recording
+                self.has_recorded = True
                 print("Stopped Recording")
 
             # Event check first
@@ -170,11 +172,15 @@ class Window:
                 self.clock.tick(1./self.ts * self.speed)
 
         time_taken = time.time() - self.start
-        print("Time Taken for 500 vehicle to despawn: ", time_taken)
+        print(f"Time taken to despawn {simulation_params['num_vehicles']} vehicles: {time_taken}")
 
         # Saves Data
-        self.sim.saving_record()
-        print("Saving Record")
+        if simulation_params['testing']:
+            self.sim.saving_record()
+            print("Saving Record")
+        elif self.has_recorded:
+            self.sim.saving_record()
+            print("Saving Record")
 
         pygame.quit()
         sys.exit()

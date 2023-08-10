@@ -80,7 +80,7 @@ class Vehicle:
             'vehicle_type': self.vehicle_type,
             'location': self.loc,
             'speed': self.v,
-            'timestamp': time.time(),
+            'timestamp': time.perf_counter(), # higher precision
         }
 
     @staticmethod
