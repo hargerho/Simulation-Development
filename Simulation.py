@@ -1,6 +1,7 @@
 import json
 import os
 
+from Vehicle import Vehicle
 from Road import Road
 from common.config import simulation_params
 
@@ -11,7 +12,15 @@ class SimulationManager:
         self.record_dict = {} # Dict of vehicle_list, key = iteration, value = vehicle_list
 
     def converting_objects(self, vehicle_list):
-        return [vehicle.vehicle_id() for vehicle in vehicle_list]
+        # sourcery skip: for-append-to-extend
+        vehicle_stats = []
+        for vehicle in vehicle_list:
+            if isinstance(vehicle, Vehicle):
+                vehicle_stats.append(vehicle.vehicle_id())
+            else:
+                for convoy in vehicle.convoy_list:
+                    vehicle_stats.append(convoy.vehicle_id())
+        return vehicle_stats
 
     def update_frame(self, is_recording, frame, restart):
 

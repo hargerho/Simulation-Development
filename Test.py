@@ -14,10 +14,10 @@ class Test:
 
     def run_test(self):
         frame = 0
-
+        restart = False
         while self.is_running:
             # Updates simulation frame
-                _, self.is_running = self.sim.update_frame(is_recording=self.is_recording, frame=frame)
+                _, self.is_running = self.sim.update_frame(is_recording=self.is_recording, frame=frame, restart=restart)
                 frame += 1
 
         print("\nTime Taken for 500 vehicle to despawnn:", time.time() - self.start)

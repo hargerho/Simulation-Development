@@ -1,5 +1,16 @@
 # Scale -> 1m:2px, 1km:2000px
 
+# Helper Functions
+def length_conversion(value):
+    # Convert meters to pixels
+    return value*2
+
+def speed_conversion(value):
+    # 1mph = 1.60934kmh
+    # Converts mph -> pixel/seconds
+    return float((value*1.60934*2000)/3600)
+
+# Main Params
 window_params = {
     "window_width": 1500,
     "window_height": 600,
@@ -22,37 +33,16 @@ window_params = {
     "record_stop_button": 'common/assets/record_stop_button.png'
 }
 
-# List = [ACC Logic, SHC Logic, Road Closure, On-ramp Flow, Vehicle Inflow]
-testing_params = {
-    "Baseline":['normal', 'normal', None, 0, 4000],
-    "1": ['cautious', 'normal', None, 0, 4000],
-    "2": ['cautious', 'irrational', None, 0, 4000],
-    "3": ['noraml', 'normal', None, 0, 4000],
-    "4": ['noraml', 'irrational', None, 0, 4000],
-    "5": ['noraml', 'normal', "left", 0, 4000],
-    "6": ['noraml', 'normal', "middle", 0, 4000],
-    "7": ['noraml', 'normal', "right", 0, 4000],
-    "8": ['noraml', 'normal', None, range(200), 4000], # Manual testing
-    "9": ['noraml', 'normal', None, 0, range(1000,7000)], # Manual testing
-}
-
-# Change here
-testing_list = testing_params.get("Baseline")
-
-def length_conversion(value):
-    # Convert meters to pixels
-    return value*2
-
 road_params = {
     "toplane_loc": (0,500), #(x, y)
-    "road_length": length_conversion(16000), #16000m
+    "road_length": length_conversion(1000), #16000m
     "onramp_length": length_conversion(140), # 140m
     "num_lanes": 4, # including an onramp
     "lanewidth": 10, # arbitary
-    "vehicle_inflow": testing_list[4], # 1000 approx 1veh/3.6sec testing: 10000
-    "onramp_inflow": testing_list[3],
+    "vehicle_inflow": 4000, # 1000 approx 1veh/3.6sec testing: 10000
+    "onramp_inflow": 0,
     "num_convoy_vehicles": 3,
-    "road_closed": testing_list[2]
+    "road_closed": None
 }
 
 # Safety threshold = 1.5m = 3px
@@ -60,12 +50,6 @@ road_params = {
 # Comfortable deceleration = 1.67m/s2 = 3.34px/s2
 # Left bias = 0.3m/s = 0.6px/s
 # Lane change threshold = 0.1m/s = 0.2px/s
-
-def speed_conversion(value):
-    # 1mph = 1.60934kmh
-    # Converts mph -> pixel/seconds
-    return float((value*1.60934*2000)/3600)
-
 driving_params = {
     "desired_velocity": speed_conversion(70), # testing: 16.6
     "safety_threshold": length_conversion(1.5), # testing: 20px
@@ -74,8 +58,8 @@ driving_params = {
     "acceleration_component": 4, # IDM Paper
     "left_bias": 0.6, # MOBIL Paper
     "lane_change_threshold": 0.2, # MOBIL Paper
-    "acc_logic": testing_list[0], # toggle normal/irrational
-    "shc_logic": testing_list[1], # toggle normal/cautious
+    "acc_logic": "normal", # toggle normal/irrational
+    "shc_logic": "normal", # toggle normal/cautious
 }
 
 # Noraml Speed Variation = 5m/s = 10px/s
@@ -101,8 +85,8 @@ simulation_params = {
     "ts": 0.1, # was 0.001  testing: 1/60 # Ts < 0.5 same results
     "playback_speed": 5, # realtime = 1
     "folderpath": "data",
-    "filename": baseline,
-    "record": False,
-    "num_vehicles": 2000,
-    "testing": False
+    "filename": f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}",
+    "record": True,
+    "num_vehicles": 10,
+    "testing": True
 }
