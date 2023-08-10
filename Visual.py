@@ -2,12 +2,14 @@ import pygame
 from common.config import window_params, road_params, simulation_params
 
 class Objects:
-    def __init__(self, x, y, image, scale):
+    def __init__(self, x, y, image, scale_x, scale_y):
         self.width = image.get_width()
         self.height = image.get_height()
-        self.image = pygame.transform.scale(image, (int(self.width * scale), int(self.height * scale)))
+        self.image = pygame.transform.scale(image, (int(self.width * scale_x), int(self.height * scale_y)))
         self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
+        self.x = x
+        self.y = y
+        self.rect.topleft = (self.x, self.y)
 
         # x,y = topleft corner coord
 
@@ -16,9 +18,12 @@ class Objects:
         center_y = self.rect.y + self.image.get_height()/2
         surface.blit(self.image, (center_x, center_y))
 
+    def draw_special(self, surface):
+        surface.blit(self.image, (self.x, self.y))
+
 class Button(Objects):
-    def __init__ (self, x, y, image, scale):
-        super().__init__(x, y, image, scale)
+    def __init__ (self, x, y, image, scale_x, scale_y):
+        super().__init__(x, y, image, scale_x, scale_y)
         self.clicked = False
         self.prev_state = False
 

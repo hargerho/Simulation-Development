@@ -170,7 +170,10 @@ class Road:
         # Reset onramp spawn timer if vehicle is not spawn to prevent upstream overcrowding
         self.onramp_last_spawn_time = self.onramp_timer
 
-    def update_road(self):
+    def update_road(self, restart):
+        if restart:
+            self.vehicle_list = []
+
         # Update vehicle local state
         for vehicle in self.vehicle_list:
 
