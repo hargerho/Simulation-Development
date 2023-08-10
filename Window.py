@@ -32,6 +32,7 @@ class Window:
         self.acc_image = pygame.image.load(window_params["acc_image"])
         self.shc_image = pygame.image.load(window_params["shc_image"])
         self.restart_image = pygame.image.load(window_params["restart_button"])
+        self.restart_stop_image = pygame.image.load(window_params["record_stop_button"])
         self.pause_image = pygame.image.load(window_params["pause_button"])
         self.record_image = pygame.image.load(window_params["record_button"])
         self.play_image = pygame.image.load(window_params["play_button"])
@@ -46,15 +47,18 @@ class Window:
         self.paused_time = 0
         self.last_pause_start = 0
         self.start_time = pygame.time.get_ticks()  # Record the start time of the simulation
+        self.start = time.time()
+        self.has_recorded = False
 
     def create_buttons(self):
-        self.pause_button = Button(1100, 100, self.pause_image, 0.05)
-        self.play_button = Button(1200, 100, self.play_image, 0.05)
+        self.pause_button = Button(1200, 100, self.pause_image, 0.05)
+        self.play_button = Button(1250, 100, self.play_image, 0.05)
 
-        self.restart_button = Button(1300, 100, self.restart_image, 0.05)
+        self.record_button = Button(1300, 100, self.record_image, 0.05)
+        self.record_stop = Button(1350, 100, self.restart_stop_image, 0.05)
+
+        self.restart_button = Button(1400, 100, self.restart_image, 0.05)
         self.restart = self.restart_button.draw(self.win)
-
-        self.record_button = Button(1400, 100, self.record_image, 0.05)
 
     def draw_timer(self):
         if self.is_paused:
@@ -75,6 +79,10 @@ class Window:
         # Fill background
         self.win.fill(window_params["white"])
 
+        # Drawing recording recording toggle
+        pygame.draw.ellipse(self.win, window_params["white"], (1293, 94, 90, 40))
+        pygame.draw.ellipse(self.win, window_params["black"], (1293, 94, 90, 40), 2)
+
         # Drawing the onramp
         onrampSurface = pygame.Surface((road_params['onramp_length'], road_params['lanewidth']))
         onrampSurface.fill(window_params['grey'])
@@ -90,9 +98,9 @@ class Window:
         roadRect.topleft = (road_params['toplane_loc'][0], road_params['toplane_loc'][1] - window_params['vehicle_width'] + road_params['lanewidth'])
         self.win.blit(roadSurface, roadRect.topleft)
 
-        self.create_buttons()
-
         # Draw speed limit
+
+        self.create_buttons()
 
     def refresh_window(self, vehicle_list):
 
@@ -124,30 +132,36 @@ class Window:
     def run_window(self): # vehicle_list passed from Simulation
         frame = 0
         while self.is_running:
-             # Drawing the landscape
+
             self.draw_fixed_objects()
 
-             # If window paused, simulation paused, no road updates
             if self.pause_button.draw(self.win):
                 self.is_paused = True
-            if not self.is_paused:
-                if self.pause_button.draw(self.win):
-                    self.is_paused = False
+
             if self.play_button.draw(self.win):
                 self.is_paused = False
-            if self.record_button.draw(self.win):
-                self.is_recording = True
+
+            if not self.is_recording:
+                if self.record_button.draw(self.win):
+                    self.is_recording = not self.is_recording
+                    print(" Start Recording")
+            elif self.record_stop.draw(self.win):
+                self.is_recording = not self.is_recording
+                self.has_recorded = True
+                print("Stopped Recording")
 
             # Event check first
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    self.close_window()
+                    self.is_running = False
+                    pygame.quit()
+                    sys.exit()
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
-                    self.close_window()
+                    self.is_running = False
 
             if not self.is_paused:
                 # Updates simulation frame
-                vehicle_list, self.is_running = self.sim.update_frame(is_recording=self.is_recording, frame=frame)
+                vehicle_list, _ = self.sim.update_frame(is_recording=self.is_recording, frame=frame)
 
                 # # Display newly updated frame on Window
                 if (len(vehicle_list) != 0):
@@ -156,14 +170,17 @@ class Window:
                 frame += 1
                 pygame.display.update()
                 self.clock.tick(1./self.ts * self.speed)
+
         time_taken = time.time() - self.start
-        print("Time Taken for 500 vehicle to despawnn: ", time_taken)
+        print(f"Time taken to despawn {simulation_params['num_vehicles']} vehicles: {time_taken}")
 
         # Saves Data
-        self.sim.saving_record()
-        print("Saving Record")
+        if simulation_params['testing']:
+            self.sim.saving_record()
+            print("Saving Record")
+        elif self.has_recorded:
+            self.sim.saving_record()
+            print("Saving Record")
 
-    def close_window(self):
-        self.is_running = False
         pygame.quit()
         sys.exit()

@@ -215,8 +215,8 @@ class Road:
 
         self.frames += 1
 
-        # if self.vehicle_despawn > self.total_vehicles:
-        #     self.run_flag = False
+        if simulation_params['testing'] and self.vehicle_despawn > self.total_vehicles:
+            self.run_flag = False
 
         return self.vehicle_list, self.run_flag # return vehicle list of this frame
 
