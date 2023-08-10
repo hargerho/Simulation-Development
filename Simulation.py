@@ -13,13 +13,16 @@ class SimulationManager:
     def converting_objects(self, vehicle_list):
         return [vehicle.vehicle_id() for vehicle in vehicle_list]
 
-    def update_frame(self, is_recording, frame):
+    def update_frame(self, is_recording, frame, restart):
 
         # print("Frame Count: ", frame)
-        vehicle_list, run_flag = self.road.update_road() # List of vehicle objects
+        vehicle_list, run_flag = self.road.update_road(restart=restart) # List of vehicle objects
 
         if is_recording:
             self.record_dict[frame] = self.converting_objects(vehicle_list=vehicle_list)
+
+        if restart:
+            self.record_dict = {}
 
         return vehicle_list, run_flag
 

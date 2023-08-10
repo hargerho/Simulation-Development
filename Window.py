@@ -49,15 +49,17 @@ class Window:
         # Creating window parameters
         self.win = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
         self.clock = pygame.time.Clock()
-        self.is_paused = False
-        self.is_recording = simulation_params['record']
-        self.restart = False
+        self.start = time.time()
 
+        # Recording params
+        self.is_recording = simulation_params['record']
+        self.has_recorded = False
+
+        # Pause/Unpause params
+        self.is_paused = False
         self.paused_time = 0
         self.last_pause_start = 0
         self.start_time = pygame.time.get_ticks()  # Record the start time of the simulation
-        self.start = time.time()
-        self.has_recorded = False
 
     def create_buttons(self):
         self.pause_button = Button(1200, 100, self.pause_image, 0.05, 0.05)
@@ -67,13 +69,22 @@ class Window:
         self.record_stop = Button(1350, 100, self.restart_stop_image, 0.05, 0.05)
 
         self.restart_button = Button(1400, 100, self.restart_image, 0.05, 0.05)
-        self.restart = self.restart_button.draw(self.win)
 
-    def draw_timer(self):
+    def draw_timer(self, restart):
+        if restart:
+            self.start_time = pygame.time.get_ticks()
+            self.paused_time = 0
+            self.last_pause_start = 0
+
+        # if self.is_paused:
+        #     elapsed_time = pygame.time.get_ticks() - self.paused_time - self.start_time
+        # else:
+        #     elapsed_time = pygame.time.get_ticks() - self.start_time
+
         if self.is_paused:
-            elapsed_time = (self.last_pause_start - self.start_time) - self.paused_time
+            elapsed_time = self.paused_time
         else:
-            elapsed_time = pygame.time.get_ticks() - self.start_time - self.paused_time
+            elapsed_time = pygame.time.get_ticks() - self.start_time
 
         milliseconds = elapsed_time % 1000
         seconds = (elapsed_time // 1000) % 60
@@ -144,15 +155,25 @@ class Window:
 
     def run_window(self): # vehicle_list passed from Simulation
         frame = 0
+        restarted_time = 0
         while self.is_running:
+            restart = False
 
             self.draw_fixed_objects()
 
+            # Button Presses
             if self.pause_button.draw(self.win):
                 self.is_paused = True
+                # self.last_pause_start = pygame.time.get_ticks()
+                self.paused_time = pygame.time.get_ticks() - self.start_time
 
             if self.play_button.draw(self.win):
                 self.is_paused = False
+                # self.paused_time = pygame.time.get_ticks() - self.last_pause_start
+                self.start_time = pygame.time.get_ticks() - self.paused_time
+
+            if self.restart_button.draw(self.win):
+                restart = True
 
             if not self.is_recording:
                 if self.record_button.draw(self.win):
@@ -162,6 +183,8 @@ class Window:
                 self.is_recording = not self.is_recording
                 self.has_recorded = True
                 print("Stopped Recording")
+
+            self.draw_timer(restart=restart)
 
             # Event check first
             for event in pygame.event.get():
@@ -174,17 +197,33 @@ class Window:
 
             if not self.is_paused:
                 # Updates simulation frame
-                vehicle_list, _ = self.sim.update_frame(is_recording=self.is_recording, frame=frame)
+                vehicle_list, _ = self.sim.update_frame(is_recording=self.is_recording, frame=frame, restart=restart)
 
-                # # Display newly updated frame on Window
+                # Display newly updated frame on Window
                 if (len(vehicle_list) != 0):
                     self.refresh_window(vehicle_list=vehicle_list)
 
                 frame += 1
+
                 pygame.display.update()
                 self.clock.tick(1./self.ts * self.speed)
 
-        time_taken = time.time() - self.start
+            if restart:
+                # Updates simulation frame
+                vehicle_list, _ = self.sim.update_frame(is_recording=self.is_recording, frame=frame, restart=restart)
+
+                # Display newly updated frame on Window
+                if (len(vehicle_list) != 0):
+                    self.refresh_window(vehicle_list=vehicle_list)
+
+                frame = 0
+
+                pygame.display.update()
+                self.clock.tick(1./self.ts * self.speed)
+
+        end_time = time.time() - restarted_time
+        time_taken = end_time - self.start
+
         print(f"Time taken to despawn {simulation_params['num_vehicles']} vehicles: {time_taken}")
 
         # Saves Data
