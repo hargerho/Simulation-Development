@@ -99,7 +99,7 @@ baseline = f"ACCNo_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['o
 
 simulation_params = {
     "ts": 0.1, # was 0.001  testing: 1/60 # Ts < 0.5 same results
-    "playback_speed": 10, # realtime = 1
+    "playback_speed": 5, # realtime = 1
     "folderpath": "data",
     "filename": baseline,
     "record": False,

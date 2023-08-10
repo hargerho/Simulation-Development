@@ -25,6 +25,15 @@ class Window:
         self.vehicle_width = window_params["vehicle_width"]
         self.road_length = road_params["road_length"]
         self.lanewidth = road_params["lanewidth"]
+        self.onramp_length = road_params['onramp_length']
+        self.num_lanes = road_params['num_lanes']
+
+        # Getting road y-coordinates
+        self.toplane_loc = road_params['toplane_loc']
+        self.onramp = self.toplane_loc[1]
+        self.leftlane = self.toplane_loc[1] + self.lanewidth
+        self.middlelane = self.toplane_loc[1] + (self.lanewidth * 2)
+        self.rightlane = self.toplane_loc[1] + self.lanewidth * (self.num_lanes - 1)
 
         # Loading images
         self.road_image = pygame.image.load(window_params["road_image"])
@@ -51,13 +60,13 @@ class Window:
         self.has_recorded = False
 
     def create_buttons(self):
-        self.pause_button = Button(1200, 100, self.pause_image, 0.05)
-        self.play_button = Button(1250, 100, self.play_image, 0.05)
+        self.pause_button = Button(1200, 100, self.pause_image, 0.05, 0.05)
+        self.play_button = Button(1250, 100, self.play_image, 0.05, 0.05)
 
-        self.record_button = Button(1300, 100, self.record_image, 0.05)
-        self.record_stop = Button(1350, 100, self.restart_stop_image, 0.05)
+        self.record_button = Button(1300, 100, self.record_image, 0.05, 0.05)
+        self.record_stop = Button(1350, 100, self.restart_stop_image, 0.05, 0.05)
 
-        self.restart_button = Button(1400, 100, self.restart_image, 0.05)
+        self.restart_button = Button(1400, 100, self.restart_image, 0.05, 0.05)
         self.restart = self.restart_button.draw(self.win)
 
     def draw_timer(self):
@@ -84,19 +93,23 @@ class Window:
         pygame.draw.ellipse(self.win, window_params["black"], (1293, 94, 90, 40), 2)
 
         # Drawing the onramp
-        onrampSurface = pygame.Surface((road_params['onramp_length'], road_params['lanewidth']))
+        onrampSurface = pygame.Surface((self.onramp_length, self.lanewidth))
         onrampSurface.fill(window_params['grey'])
         rampRect = onrampSurface.get_rect()
-        rampRect.topleft = (road_params['toplane_loc'][0], road_params['toplane_loc'][1] - window_params['vehicle_width'])
+        rampRect.topleft = (self.toplane_loc[0], self.toplane_loc[1] - self.vehicle_width)
         self.win.blit(onrampSurface, rampRect.topleft)
 
         # Drawing the road
-        road_width = road_params['lanewidth'] * (road_params['num_lanes'] - 1) + window_params['vehicle_width']
-        roadSurface = pygame.Surface((road_params['road_length'], road_width))
+        road_width = self.lanewidth * (self.num_lanes - 1) + self.vehicle_width
+        roadSurface = pygame.Surface((self.road_length, road_width))
         roadSurface.fill(window_params['black'])
         roadRect = roadSurface.get_rect()
-        roadRect.topleft = (road_params['toplane_loc'][0], road_params['toplane_loc'][1] - window_params['vehicle_width'] + road_params['lanewidth'])
+        roadRect.topleft = (self.toplane_loc[0], self.toplane_loc[1] - self.vehicle_width + self.lanewidth)
         self.win.blit(roadSurface, roadRect.topleft)
+
+        # Overlay the road image
+        road = Objects(rampRect.topleft[0], rampRect.topleft[1], self.road_image, 0.2, 0.136)
+        road.draw_special(self.win)
 
         # Draw speed limit
 
