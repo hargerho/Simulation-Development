@@ -3,7 +3,7 @@ from Test import Test
 import time
 
 from common.config import *
-testing = True
+testing = False
 
 def get_params(combination):
 
