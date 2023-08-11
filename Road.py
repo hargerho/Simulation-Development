@@ -197,10 +197,9 @@ class Road:
                             vehicle.convoy_list.remove(convoy)
             # Simulate roadblock by setting a SHC vehicle to 0m/s
             elif self.road_closed is not None:
-                print("Closure")
                 if vehicle.loc_front > self.road_length/2 and vehicle.loc[1] == self.road_closed:
                     vehicle.v = 0
-            elif vehicle.loc_front > self.road_length:
+            if vehicle.loc_front > self.road_length:
                 self.vehicle_list.remove(vehicle)
                 self.vehicle_despawn += 1
                 self.progress_bar.update(1)

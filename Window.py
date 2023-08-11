@@ -76,11 +76,6 @@ class Window:
             self.paused_time = 0
             self.last_pause_start = 0
 
-        # if self.is_paused:
-        #     elapsed_time = pygame.time.get_ticks() - self.paused_time - self.start_time
-        # else:
-        #     elapsed_time = pygame.time.get_ticks() - self.start_time
-
         if self.is_paused:
             elapsed_time = self.paused_time
         else:
@@ -119,8 +114,8 @@ class Window:
         self.win.blit(roadSurface, roadRect.topleft)
 
         # Overlay the road image
-        road = Objects(rampRect.topleft[0], rampRect.topleft[1], self.road_image, 0.2, 0.136)
-        road.draw_special(self.win)
+        # road = Objects(rampRect.topleft[0], rampRect.topleft[1], self.road_image, 0.2, 0.136)
+        # road.draw_special(self.win)
 
         # Draw speed limit
 
@@ -164,12 +159,10 @@ class Window:
             # Button Presses
             if self.pause_button.draw(self.win):
                 self.is_paused = True
-                # self.last_pause_start = pygame.time.get_ticks()
                 self.paused_time = pygame.time.get_ticks() - self.start_time
 
             if self.play_button.draw(self.win):
                 self.is_paused = False
-                # self.paused_time = pygame.time.get_ticks() - self.last_pause_start
                 self.start_time = pygame.time.get_ticks() - self.paused_time
 
             if self.restart_button.draw(self.win):
