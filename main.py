@@ -1,12 +1,11 @@
 from Window import Window
 from Test import Test
+import time
 
 from common.config import *
 testing = True
 
 def get_params(combination):
-
-    print(f"Testing combination {combination}")
 
     # List = [ACC Logic, SHC Logic, Road Closure, On-ramp Flow, Vehicle Inflow]
     testing_params = {
@@ -27,9 +26,15 @@ def get_params(combination):
 
 def main():
     # Data Collection
+
     if testing:
+
+        start = time.time()
+
         for i in range(8):
+            print("----------------------")
             print("Testing Combination:", i)
+            startite = time.time()
             testing_list = get_params(i)
             road_params["vehicle_inflow"] = testing_list[4]
             road_params["onramp_inflow"] = testing_list[3]
@@ -40,10 +45,19 @@ def main():
             simulation_params["filename"] = f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}"
             test = Test()
             test.run_test()
+            endite = time.time()
+            print(f"Combination {i} took {endite-startite}")
+
+        end = time.time()
+        print("============================")
+        print(f"Simulation Ended: {end-start}")
+        print("============================")
     else:
         # Just run the simulation
         win = Window()
         win.run_window()
+
+
 
 if __name__ == "__main__":
     main()

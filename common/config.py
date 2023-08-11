@@ -35,7 +35,7 @@ window_params = {
 
 road_params = {
     "toplane_loc": (0,500), #(x, y)
-    "road_length": length_conversion(1000), #16000m
+    "road_length": length_conversion(16000), #16000m
     "onramp_length": length_conversion(140), # 140m
     "num_lanes": 4, # including an onramp
     "lanewidth": 10, # arbitary
@@ -82,11 +82,11 @@ filename = f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_R
 baseline = f"ACCNo_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}"
 
 simulation_params = {
-    "ts": 0.1, # was 0.001  testing: 1/60 # Ts < 0.5 same results
+    "ts": 0.2, # was 0.001  testing: 1/60 # Ts < 0.5 same results
     "playback_speed": 5, # realtime = 1
     "folderpath": "data",
     "filename": f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}",
     "record": True,
-    "num_vehicles": 10,
+    "num_vehicles": 1000,
     "testing": True
 }
