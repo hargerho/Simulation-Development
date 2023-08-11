@@ -1,5 +1,5 @@
 import pygame
-from common.config import window_params, road_params, driving_params
+from common.config import window_params, road_params, driving_params, acc_params
 
 class Objects:
     def __init__(self, x, y, image, scale_x, scale_y):
@@ -61,30 +61,26 @@ class UserButton(pygame.sprite.Sprite):
         if self.is_selected:
             pygame.draw.rect(self.image, window_params['black'], self.image.get_rect(), 4)
             if self.button_name == "road_closed_off":
-                print("Off")
                 road_params["road_closed"] = 'off'
             elif self.button_name == "road_closed_left":
-                print("road_closed_left")
                 road_params["road_closed"] = 'left'
             elif self.button_name == "road_closed_middle":
-                print("road_closed_middle")
                 road_params["road_closed"] = 'middle'
             elif self.button_name == "road_closed_right":
-                print("road_closed_right")
                 road_params["road_closed"] = 'right'
 
             if self.button_name == "acc_logic_normal":
-                print("acc_logic_normal")
                 driving_params["acc_logic"] = 'normal'
+                acc_params["acc_spawnrate"] = 0.2
             elif self.button_name == "acc_logic_cautious":
-                print("acc_logic_cautious")
                 driving_params["acc_logic"] = 'cautious'
+                acc_params["acc_spawnrate"] = 0.2
+            elif self.button_name == "acc_off":
+                acc_params["acc_spawnrate"] = 0
 
             if self.button_name == "shc_logic_normal":
-                print("shc_logic_normal")
                 driving_params["shc_logic"] = 'normal'
             elif self.button_name == "shc_logic_irrational":
-                print("shc_logic_irrational")
                 driving_params["shc_logic"] = 'irrational'
         else:
             pygame.draw.rect(self.image, window_params['green'], self.image.get_rect(), 4)

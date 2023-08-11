@@ -38,15 +38,6 @@ class Road:
         self.middlelane = self.toplane_loc[1] + (self.lanewidth * 2)
         self.rightlane = self.toplane_loc[1] + self.lanewidth * (self.num_lanes - 1)
 
-        if road_params["road_closed"] == "left":
-            self.road_closed = self.leftlane
-        elif road_params["road_closed"] == "middle":
-            self.road_closed = self.middlelane
-        elif road_params["road_closed"] == "right":
-            self.road_closed = self.rightlane
-        else:
-            self.road_closed = None
-
         # Convoy Params
         self.num_convoy_vehicles = road_params['num_convoy_vehicles']  # Queue counter of 3 acc vehicles to form a convoy
         self.acc_spawn_loc = [self.toplane_loc[0], self.leftlane] # acc vehicle always spawns in left lane
@@ -58,6 +49,16 @@ class Road:
         self.run_flag = True
         self.total_vehicles = simulation_params['num_vehicles']
         self.progress_bar = tqdm(total=self.total_vehicles, desc="Despawning Vehicles")
+
+    def check_road_closed(self):
+        if road_params["road_closed"] == "left":
+            self.road_closed = self.leftlane
+        elif road_params["road_closed"] == "middle":
+            self.road_closed = self.middlelane
+        elif road_params["road_closed"] == "right":
+            self.road_closed = self.rightlane
+        else:
+            self.road_closed = None
 
     def spawn_helper(self, tmp_vehicle, vehicle_type):
 
@@ -171,6 +172,9 @@ class Road:
         self.onramp_last_spawn_time = self.onramp_timer
 
     def update_road(self, restart):
+
+        self.check_road_closed()
+
         if restart:
             self.vehicle_list = []
 

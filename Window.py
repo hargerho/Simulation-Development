@@ -80,8 +80,9 @@ class Window:
         self.global_buttons = pygame.sprite.Group()
 
         vehicle_button_info = [
-            (100, 200, self.normal_image, 0.2, 0.2, "acc_logic_normal"),
-            (250, 200, self.cautious_image, 0.2, 0.2, "acc_logic_cautious"),
+            (100, 200, self.off_image, 0.2, 0.2, "acc_off"),
+            (250, 200, self.normal_image, 0.2, 0.2, "acc_logic_normal"),
+            (400, 200, self.cautious_image, 0.2, 0.2, "acc_logic_cautious"),
             (100, 250, self.normal_image, 0.2, 0.2, "shc_logic_normal"),
             (250, 250, self.irrational_image, 0.2, 0.2, "shc_logic_irrational"),
         ]
@@ -90,16 +91,16 @@ class Window:
             button = UserButton(x, y, image, scalex, scaley, button_name)
             self.global_buttons.add(button)
 
-        self.acc_buttons = [self.global_buttons.sprites()[0], self.global_buttons.sprites()[1]]
-        self.shc_buttons = [self.global_buttons.sprites()[2], self.global_buttons.sprites()[3]]
+        self.acc_buttons = [self.global_buttons.sprites()[0], self.global_buttons.sprites()[1], self.global_buttons.sprites()[2]]
+        self.shc_buttons = [self.global_buttons.sprites()[3], self.global_buttons.sprites()[4]]
 
         # Road Buttons
         self.road_buttons = []
         road_button_info = [
-            (400, 200, self.off_image, 0.2, 0.2, "road_closed_off"),
-            (550, 200, self.left_image, 0.2, 0.2, "road_closed_left"),
-            (400, 250, self.middle_image, 0.2, 0.2, "road_closed_middle"),
-            (550, 250, self.right_image, 0.2, 0.2, "road_closed_right")
+            (600, 200, self.off_image, 0.2, 0.2, "road_closed_off"),
+            (750, 200, self.left_image, 0.2, 0.2, "road_closed_left"),
+            (600, 250, self.middle_image, 0.2, 0.2, "road_closed_middle"),
+            (750, 250, self.right_image, 0.2, 0.2, "road_closed_right")
         ]
 
         for x, y, image, scalex, scaley, button_name in road_button_info:
@@ -255,6 +256,9 @@ class Window:
 
                 frame += 1
 
+                pygame.display.update()
+                self.clock.tick(1./self.ts * self.speed)
+
             if restart:
                 # Updates simulation frame
                 vehicle_list, _ = self.sim.update_frame(is_recording=self.is_recording, frame=frame, restart=restart)
@@ -265,8 +269,8 @@ class Window:
 
                 frame = 0
 
-            pygame.display.update()
-            self.clock.tick(1./self.ts * self.speed)
+                pygame.display.update()
+                self.clock.tick(1./self.ts * self.speed)
 
         end_time = time.time() - restarted_time
         time_taken = end_time - self.start
