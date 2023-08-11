@@ -36,15 +36,20 @@ class Window:
         self.rightlane = self.toplane_loc[1] + self.lanewidth * (self.num_lanes - 1)
 
         # Loading images
+        acc_image = pygame.image.load(window_params["acc_image"])
+        shc_image = pygame.image.load(window_params["shc_image"])
+        self.acc_image = pygame.transform.scale(acc_image, (self.vehicle_length, self.vehicle_width))
+        self.shc_image = pygame.transform.scale(shc_image, (self.vehicle_length, self.vehicle_width))
+
         self.road_image = pygame.image.load(window_params["road_image"])
         self.road_border = pygame.image.load(window_params["road_border"])
-        self.acc_image = pygame.image.load(window_params["acc_image"])
-        self.shc_image = pygame.image.load(window_params["shc_image"])
+
         self.restart_image = pygame.image.load(window_params["restart_button"])
         self.restart_stop_image = pygame.image.load(window_params["record_stop_button"])
         self.pause_image = pygame.image.load(window_params["pause_button"])
         self.record_image = pygame.image.load(window_params["record_button"])
         self.play_image = pygame.image.load(window_params["play_button"])
+
         self.normal_image = pygame.image.load(window_params["normal_button"])
         self.cautious_image = pygame.image.load(window_params["cautious_button"])
         self.irrational_image = pygame.image.load(window_params["irrational_button"])
@@ -52,6 +57,10 @@ class Window:
         self.left_image = pygame.image.load(window_params["left_button"])
         self.middle_image = pygame.image.load(window_params["middle_button"])
         self.right_image = pygame.image.load(window_params["right_button"])
+
+        background_image = pygame.image.load(window_params["background_image"])
+        self.background_image = pygame.transform.scale(background_image, (self.width + 10, self.height))
+        self.loop_idx = 0
 
         # Creating window parameters
         self.win = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
@@ -143,20 +152,28 @@ class Window:
     def draw_refeshed_objects(self):
 
         # Fill background
-        self.win.fill(window_params["white"])
+        self.win.blit(self.background_image, (0,0))
+        # Moving Background
+        # self.win.blit(self.background_image, (self.loop_idx,0))
+        # self.win.blit(self.background_image, (self.width + self.loop_idx,0))
+        # if self.loop_idx == -self.width:
+        #     self.win.blit(self.background_image, (self.width + self.loop_idx, 0))
+        #     self.loop_idx = 0
+        # self.loop_idx -= 1
 
         # Writing Text
         text_list = [
-            ("Driving Logics", (450, 100)),
-            ("AI-Controlled Convoy Vehicle", (100, 200)),
-            ("Simulated Human Controlled Vehicle", (120, 250)),
-            ("Traffic Parameters", (1000, 100)),
-            ("Road Closure", (780 ,225)),
+            ("Driving Logics", (450, 150), 30),
+            ("AI-Controlled Convoy Vehicle", (100, 200), 20),
+            ("Simulated Human Controlled Vehicle", (120, 250), 20),
+            ("Traffic Parameters", (980, 150), 30),
+            ("Road Closure", (780 ,225), 20),
         ]
 
         text_font = pygame.font.Font(None, 20)
 
-        for text, pos in text_list:
+        for text, pos, font_size in text_list:
+            text_font = pygame.font.Font(None, font_size)
             text_surface = text_font.render(text, True, window_params['black'])
             text_rect = text_surface.get_rect(center=pos)
             self.win.blit(text_surface, text_rect)
@@ -195,21 +212,23 @@ class Window:
 
                     # Drawing the convoy
                     carSurface = pygame.Surface((self.vehicle_length,self.vehicle_width))
-                    carSurface.fill(window_params['white'])
+                    # carSurface.fill(window_params['white'])
                     carRect = carSurface.get_rect()
                     carRect.center = vehicleLoc
-                    self.win.blit(carSurface, carRect)
+                    # self.win.blit(carSurface, carRect)
+                    self.win.blit(self.acc_image, carRect)
             else:
                 vehicle_id = vehicle.vehicle_id()
                 vehicleLoc = vehicle_id['location']
 
                 carSurface = pygame.Surface((self.vehicle_length,self.vehicle_width))
-                carSurface.fill(window_params['green'])
+                # carSurface.fill(window_params['green'])
                 carRect = carSurface.get_rect()
                 carRect.center = vehicleLoc
-                self.win.blit(carSurface, carRect)
+                # self.win.blit(carSurface, carRect)
+                self.win.blit(self.shc_image, carRect)
 
-    def run_window(self): # vehicle_list passed from Simulation
+    def run_window(self):
         frame = 0
         restarted_time = 0
         self.draw_fixed_objects()
