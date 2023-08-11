@@ -80,11 +80,11 @@ class Window:
         self.global_buttons = pygame.sprite.Group()
 
         vehicle_button_info = [
-            (100, 200, self.off_image, 0.2, 0.2, "acc_off"),
-            (250, 200, self.normal_image, 0.2, 0.2, "acc_logic_normal"),
-            (400, 200, self.cautious_image, 0.2, 0.2, "acc_logic_cautious"),
-            (100, 250, self.normal_image, 0.2, 0.2, "shc_logic_normal"),
-            (250, 250, self.irrational_image, 0.2, 0.2, "shc_logic_irrational"),
+            (300, 200, self.off_image, 0.2, 0.2, "acc_off"),
+            (450, 200, self.normal_image, 0.2, 0.2, "acc_logic_normal"),
+            (600, 200, self.cautious_image, 0.2, 0.2, "acc_logic_cautious"),
+            (300, 250, self.normal_image, 0.2, 0.2, "shc_logic_normal"),
+            (450, 250, self.irrational_image, 0.2, 0.2, "shc_logic_irrational"),
         ]
 
         for x, y, image, scalex, scaley, button_name in vehicle_button_info:
@@ -97,10 +97,10 @@ class Window:
         # Road Buttons
         self.road_buttons = []
         road_button_info = [
-            (600, 200, self.off_image, 0.2, 0.2, "road_closed_off"),
-            (750, 200, self.left_image, 0.2, 0.2, "road_closed_left"),
-            (600, 250, self.middle_image, 0.2, 0.2, "road_closed_middle"),
-            (750, 250, self.right_image, 0.2, 0.2, "road_closed_right")
+            (900, 200, self.off_image, 0.2, 0.2, "road_closed_off"),
+            (1050, 200, self.left_image, 0.2, 0.2, "road_closed_left"),
+            (900, 250, self.middle_image, 0.2, 0.2, "road_closed_middle"),
+            (1050, 250, self.right_image, 0.2, 0.2, "road_closed_right")
         ]
 
         for x, y, image, scalex, scaley, button_name in road_button_info:
@@ -123,9 +123,14 @@ class Window:
         seconds = (elapsed_time // 1000) % 60
         minutes = (elapsed_time // 60000) % 60
         time_str = f"{minutes:02d}:{seconds:02d}.{milliseconds:02d}"
-        font = pygame.font.Font(None, 36)
-        timer_text = font.render(time_str, True, window_params["black"])
-        self.win.blit(timer_text, (10, 10))
+        timer_font = pygame.font.Font(None, 30)
+        timer_text = timer_font.render(time_str, True, window_params["black"])
+        self.win.blit(timer_text, (155,11))
+
+        timer_surface = timer_font.render("Elapsed Time:", True, window_params['black'])
+        timer_rect_text = timer_surface.get_rect(center=(80,20))
+        self.win.blit(timer_surface, timer_rect_text)
+
 
     def draw_fixed_objects(self):  # sourcery skip: extract-duplicate-method
 
@@ -135,10 +140,26 @@ class Window:
 
         self.create_buttons()
 
-    def draw_road(self):
+    def draw_refeshed_objects(self):
 
         # Fill background
         self.win.fill(window_params["white"])
+
+        # Writing Text
+        text_list = [
+            ("Driving Logics", (450, 100)),
+            ("AI-Controlled Convoy Vehicle", (100, 200)),
+            ("Simulated Human Controlled Vehicle", (120, 250)),
+            ("Traffic Parameters", (1000, 100)),
+            ("Road Closure", (780 ,225)),
+        ]
+
+        text_font = pygame.font.Font(None, 20)
+
+        for text, pos in text_list:
+            text_surface = text_font.render(text, True, window_params['black'])
+            text_rect = text_surface.get_rect(center=pos)
+            self.win.blit(text_surface, text_rect)
 
         # Drawing the onramp
         onrampSurface = pygame.Surface((self.onramp_length, self.lanewidth))
@@ -196,7 +217,7 @@ class Window:
         while self.is_running:
             restart = False
 
-            self.draw_road()
+            self.draw_refeshed_objects()
 
             # Simulation Button Presses
             if self.pause_button.draw(self.win):
