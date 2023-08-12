@@ -23,7 +23,7 @@ window_params = {
     "vehicle_length": 10, #5m
     "vehicle_width": 5, #2+m
     "background_image": 'common/assets/grassbackground.png',
-    "road_image": 'common/assets/grassroad.png',
+    "road_image": 'common/assets/transparentroad.png',
     "acc_image": 'common/assets/acc.png',
     "shc_image": 'common/assets/shc.png',
     "restart_button": 'common/assets/restart.png',
@@ -93,7 +93,7 @@ simulation_params = {
     "playback_speed": 5, # realtime = 1
     "folderpath": "data",
     "filename": f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}",
-    "record": True,
+    "record": False, # Default False
     "num_vehicles": 1000,
-    "testing": False
+    "testing": False # Default False
 }

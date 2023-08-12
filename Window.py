@@ -87,11 +87,14 @@ class Window:
 
     def create_buttons(self):
         # Simulation Buttons
-        self.pause_button = Button(1200, 100, self.pause_image, 0.05, 0.05)
-        self.play_button = Button(1250, 100, self.play_image, 0.05, 0.05)
-        self.record_button = Button(1300, 100, self.record_image, 0.05, 0.05)
-        self.record_stop = Button(1350, 100, self.restart_stop_image, 0.05, 0.05)
-        self.restart_button = Button(1400, 100, self.restart_image, 0.05, 0.05)
+        self.restart_x_loc = 1440
+        self.restart_y_loc = 25
+        button_scale = 0.065
+        self.pause_button = Button(self.restart_x_loc - 200, self.restart_y_loc, self.pause_image, button_scale, button_scale)
+        self.play_button = Button(self.restart_x_loc - 150, self.restart_y_loc, self.play_image, button_scale, button_scale)
+        self.record_button = Button(self.restart_x_loc - 100, self.restart_y_loc, self.record_image, button_scale, button_scale)
+        self.record_stop = Button(self.restart_x_loc - 50, self.restart_y_loc, self.restart_stop_image, button_scale, button_scale)
+        self.restart_button = Button(self.restart_x_loc, self.restart_y_loc, self.restart_image, button_scale, button_scale)
 
         # Traffic Buttons
         self.global_buttons = pygame.sprite.Group()
@@ -148,26 +151,7 @@ class Window:
         timer_rect_text = timer_surface.get_rect(center=(80,20))
         self.win.blit(timer_surface, timer_rect_text)
 
-
-    def draw_fixed_objects(self):  # sourcery skip: extract-duplicate-method
-
-        # Drawing recording recording toggle
-        pygame.draw.ellipse(self.win, window_params["white"], (1293, 94, 90, 40))
-        pygame.draw.ellipse(self.win, window_params["black"], (1293, 94, 90, 40), 2)
-
-        self.create_buttons()
-
     def draw_refeshed_objects(self):
-
-        # Fill background
-        self.win.blit(self.background_image, (0,0))
-        # Infinite Auto Moving Background
-        # self.win.blit(self.background_image, (self.loop_idx,0))
-        # self.win.blit(self.background_image, (self.width + self.loop_idx,0))
-        # if self.loop_idx == -self.width:
-        #     self.win.blit(self.background_image, (self.width + self.loop_idx, 0))
-        #     self.loop_idx = 0
-        # self.loop_idx -= 1
 
         # Scrolling background
         for i in range(self.panels):
@@ -176,6 +160,10 @@ class Window:
         self.scroll_idx += self.scroll_speed * self.scroll_direction
         if abs(self.scroll_idx) > self.background_width:
             self.scroll_idx = 0
+
+        # Draw the recording toggle
+        ellipse_rect = pygame.Rect(self.restart_x_loc - 108, 17, 100, 50)
+        pygame.draw.ellipse(self.win, window_params['black'], ellipse_rect, 2)
 
         # Writing Text
         text_list = [
@@ -210,8 +198,8 @@ class Window:
         self.win.blit(roadSurface, roadRect.topleft)
 
         # Overlay the road image
-        # road = Objects(rampRect.topleft[0], rampRect.topleft[1], self.road_image, 0.2, 0.136)
-        # road.draw_special(self.win)
+        road = Objects(rampRect.topleft[0], rampRect.topleft[1], self.road_image, 0.2, 0.136)
+        road.draw_special(self.win)
 
         # Draw speed limit
 
@@ -247,7 +235,7 @@ class Window:
     def run_window(self):
         frame = 0
         restarted_time = 0
-        self.draw_fixed_objects()
+        self.create_buttons()
 
         while self.is_running:
             restart = False
