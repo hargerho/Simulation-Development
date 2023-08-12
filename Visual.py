@@ -1,4 +1,5 @@
 import pygame
+import math
 from common.config import window_params, road_params, driving_params, acc_params
 
 class Objects:
@@ -86,37 +87,53 @@ class UserButton(pygame.sprite.Sprite):
             pygame.draw.rect(self.image, window_params['green'], self.image.get_rect(), 4)
 
 class Background():
-    def __init__(self, surface):
+    def __init__(self, surface, image_list, screen_width):
         self.surface = surface
-        self.panels = []
+        self.image_list = image_list
+        self.screen_width = screen_width
+        self.scroll_idx = 0
+        self.scroll_direction = 0
+        self.scroll_speed = 5
 
-    def load_bg(self, file):
-        return pygame.image.load(file)
+        self.main_image = self.image_list[0]
+        self.main_image_width = self.main_image.get_width()
+        self.panels = math.ceil(self.screen_width/self.main_image_width) + 2
 
-    def bg_panels(self, image_list):
-        if type(image_list) is str:
-            self.panels = [[self.load_bg(image_list)]]
-        elif type(image_list[0]) is str:
-            self.panels = [[self.load_bg(i) for i in image_list]]
-        else:
-            self.panels = [[self.load_bg(i) for i in row] for row in image_list]
-        self.camera_x = 0
-        self.camera_y = 0
-        self.bg_width = self.panels[0][0].get_width()
-        self.bg_height = self.panels[0][0].get_height()
-        self.surface.blit(self.panels[0][0], (0,0))
+    def scroll_bg(self):
+        # Scrolling background
+        for i in range(self.panels):
+            self.surface.blit(self.main_image, (i*self.main_image_width + self.scroll_idx - self.main_image_width, 0))
 
-    def scroll(self, x, y):
-        self.camera_x -= x
-        self.camera_y -= y
-        col = (self.camera_x % (self.bg_width * len(self.panels[0]))) // self.bg_width
-        row = (self.camera_y % (self.bg_height * len(self.panels))) // self.bg_height
-        col2 = ((self.camera_x + self.bg_width) % (self.bg_width * len(self.panels[0]))) // self.bg_width
-        row2 = ((self.camera_y + self.bg_height) % (self.bg_height * len(self.panels))) // self.bg_height
-        xOff = (0 - self.camera_x % self.bg_width)
-        yOff = (0 - self.camera_y % self.bg_height)
+        self.scroll_idx += self.scroll_speed * self.scroll_direction
+        if abs(self.scroll_idx) > self.main_image_width:
+            self.scroll_idx = 0
 
-        self.surface.blit(self.panels[row][col], [xOff, yOff])
-        self.surface.blit(self.panels[row][col2], [xOff + self.bg_width, yOff])
-        self.surface.blit(self.panels[row2][col], [xOff, yOff + self.bg_height])
-        self.surface.blit(self.panels[row2][col2], [xOff + self.bg_width, yOff + self.bg_height])
+
+    # def scroll_bg(self, x, y):
+    #     self.camera_x -= x
+    #     self.camera_y -= y
+    #     col = (self.camera_x % (self.bg_width * len(self.panels[0]))) // self.bg_width
+    #     row = (self.camera_y % (self.bg_height * len(self.panels))) // self.bg_height
+    #     col2 = ((self.camera_x + self.bg_width) % (self.bg_width * len(self.panels[0]))) // self.bg_width
+    #     row2 = ((self.camera_y + self.bg_height) % (self.bg_height * len(self.panels))) // self.bg_height
+    #     xOff = (0 - self.camera_x % self.bg_width)
+    #     yOff = (0 - self.camera_y % self.bg_height)
+
+    #     self.surface.blit(self.panels[row][col], [xOff, yOff])
+    #     self.surface.blit(self.panels[row][col2], [xOff + self.bg_width, yOff])
+    #     self.surface.blit(self.panels[row2][col], [xOff, yOff + self.bg_height])
+    #     self.surface.blit(self.panels[row2][col2], [xOff + self.bg_width, yOff + self.bg_height])
+
+
+        #  def bg_panels(self, image_list):
+        #     if type(image_list) is str:
+        #         self.panels = [[self.load_bg(image_list)]]
+        #     elif type(image_list[0]) is str:
+        #         self.panels = [[self.load_bg(i) for i in image_list]]
+        #     else:
+        #         self.panels = [[self.load_bg(i) for i in row] for row in image_list]
+        #     self.camera_x = 0
+        #     self.camera_y = 0
+        #     self.bg_width = self.panels[0][0].get_width()
+        #     self.bg_height = self.panels[0][0].get_height()
+        #     self.surface.blit(self.panels[0][0], (0,0))

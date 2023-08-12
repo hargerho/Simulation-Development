@@ -61,15 +61,8 @@ class Window:
         self.road_image = pygame.image.load(window_params["road_image"])
         background_image = pygame.image.load(window_params["background_image"])
         self.background_image = pygame.transform.scale(background_image, (self.width + 10, self.height))
-        self.background_width = self.background_image.get_width()
-        self.background_height = self.background_image.get_height()
-        self.scroll_idx = 0
-        self.scroll_direction = 0
-        self.scroll_speed = 5
-        self.panels = math.ceil(self.width/self.background_width) + 2
-
-        # self.background = Background(self.win)
-        # self.background.bg_panels(window_params["background_image"])
+        background_list = [self.background_image]
+        self.background = Background(surface=self.win, image_list=background_list, screen_width=self.width)
 
         # Recording params
         self.is_recording = simulation_params['record']
@@ -153,13 +146,7 @@ class Window:
 
     def draw_refeshed_objects(self):
 
-        # Scrolling background
-        for i in range(self.panels):
-            self.win.blit(self.background_image, (i*self.background_width + self.scroll_idx - self.background_width, 0))
-
-        self.scroll_idx += self.scroll_speed * self.scroll_direction
-        if abs(self.scroll_idx) > self.background_width:
-            self.scroll_idx = 0
+        self.background.scroll_bg()
 
         # Draw the recording toggle
         ellipse_rect = pygame.Rect(self.restart_x_loc - 108, 17, 100, 50)
@@ -267,7 +254,7 @@ class Window:
 
             # Event check first
             for event in pygame.event.get():
-                self.scroll_direction, self.scroll_speed = 0, 0
+                self.background.scroll_direction, self.background.scroll_direction = 0, 0
                 if event.type == pygame.QUIT:
                     self.is_running = False
                     pygame.quit()
@@ -276,17 +263,17 @@ class Window:
                     if event.key == pygame.K_q:
                         self.is_running = False
                     if event.key == pygame.K_RIGHT:
-                        self.scroll_direction = -1
-                        self.scroll_speed = 5
+                        self.background.scroll_direction = -1
+                        self.background.scroll_speed = 5
                     if event.key == pygame.K_LEFT:
-                        self.scroll_direction = 1
-                        self.scroll_speed = 5
+                        self.background.scroll_direction = 1
+                        self.background.scroll_speed = 5
                     if event.key == pygame.K_UP:
-                        self.scroll_direction = 1
-                        self.scroll_speed = 20
+                        self.background.scroll_direction = -1
+                        self.background.scroll_speed = 20
                     if event.key == pygame.K_DOWN:
-                        self.scroll_direction = -1
-                        self.scroll_speed = 20
+                        self.background.scroll_direction = 1
+                        self.background.scroll_speed = 20
                     # if event.key == pygame.K_RIGHT:
                     #     self.background.scroll(-5, 0)
                     # if event.key == pygame.K_LEFT:
