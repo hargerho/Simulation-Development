@@ -31,7 +31,7 @@ def main():
 
         start = time.time()
 
-        for i in range(8):
+        for i in range(6,8):
             print("----------------------")
             print("Testing Combination:", i)
             startite = time.time()

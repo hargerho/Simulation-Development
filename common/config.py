@@ -79,7 +79,7 @@ acc_params = {
 vehicle_models = [shc_params, acc_params]
 
 filename = f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}"
-baseline = f"ACCNo_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}"
+baseline = f"ACCNo_SHC{driving_params['shc_logic']}_Road{road_params['road_closed']}_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}"
 
 simulation_params = {
     "ts": 0.2, # was 0.001  testing: 1/60 # Ts < 0.5 same results
