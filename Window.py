@@ -183,7 +183,7 @@ class Window:
         self.win.blit(roadSurface, roadRect.topleft)
 
         # Overlay the road image
-        road = Objects(-1, 350, self.road_image, 0.5, 0.55)
+        road = Objects(-1, 350, self.road_image, 0.3, 0.1)
         road.draw_special(self.win)
 
         # Draw speed limit
@@ -251,11 +251,16 @@ class Window:
 
             self.draw_timer(restart=restart)
 
+            # Background controls
             key = pygame.key.get_pressed()
             if key[pygame.K_LEFT] and self.bg.scroll_speed > 0:
                 self.bg.scroll_speed -= 5
             if key[pygame.K_RIGHT]:
                 self.bg.scroll_speed += 5
+            if key[pygame.K_DOWN] and self.bg.scroll_speed > 0:
+                self.bg.scroll_speed -= 20
+            if key[pygame.K_UP]:
+                self.bg.scroll_speed += 20
 
             # Event check first
             for event in pygame.event.get():
@@ -267,14 +272,6 @@ class Window:
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
                         self.is_running = False
-                    # if event.key == pygame.K_RIGHT:
-                    #     self.bg.scroll_speed += 5
-                    # if event.key == pygame.K_LEFT:
-                    #     self.bg.scroll_speed -= 5
-                    # if event.key == pygame.K_UP:
-                    #     self.bg.scroll_speed += 20
-                    # if event.key == pygame.K_DOWN:
-                    #     self.bg.scroll_speed -= 20
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:  # Left mouse button
                         for button in self.global_buttons:
