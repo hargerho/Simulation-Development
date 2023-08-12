@@ -42,7 +42,7 @@ def main():
             driving_params["shc_logic"] = testing_list[1]
             driving_params["acc_logic"] = testing_list[0]
             acc_params["acc_spawnrate"] = 0 if i == 0 else 0.2
-            simulation_params["filename"] = f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}"
+            simulation_params["filename"] = f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_Road{road_params['road_closed']}_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}"
             test = Test()
             test.run_test()
             endite = time.time()
