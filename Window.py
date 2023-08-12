@@ -1,19 +1,15 @@
 import pygame
 import sys
 import time
+import math
 
 from common.config import window_params, road_params, simulation_params
 from Simulation import SimulationManager
 from ACC import Convoy
-from Visual import Objects, Button, UserButton
+from Visual import Objects, Button, UserButton, Background
 
 class Window:
     def __init__(self):
-        pygame.init()
-
-        # Setting up the Simulation
-        self.is_running = True
-        self.sim = SimulationManager() # Create the simulation
 
         # Creating the window
         self.width = window_params["window_width"]
@@ -28,6 +24,12 @@ class Window:
         self.onramp_length = road_params['onramp_length']
         self.num_lanes = road_params['num_lanes']
 
+        # Creating window parameters
+        pygame.init()
+        self.win = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
+        self.clock = pygame.time.Clock()
+        self.start = time.time()
+
         # Getting road y-coordinates
         self.toplane_loc = road_params['toplane_loc']
         self.onramp = self.toplane_loc[1]
@@ -40,9 +42,6 @@ class Window:
         shc_image = pygame.image.load(window_params["shc_image"])
         self.acc_image = pygame.transform.scale(acc_image, (self.vehicle_length, self.vehicle_width))
         self.shc_image = pygame.transform.scale(shc_image, (self.vehicle_length, self.vehicle_width))
-
-        self.road_image = pygame.image.load(window_params["road_image"])
-        self.road_border = pygame.image.load(window_params["road_border"])
 
         self.restart_image = pygame.image.load(window_params["restart_button"])
         self.restart_stop_image = pygame.image.load(window_params["record_stop_button"])
@@ -58,14 +57,19 @@ class Window:
         self.middle_image = pygame.image.load(window_params["middle_button"])
         self.right_image = pygame.image.load(window_params["right_button"])
 
+        # Background params
+        self.road_image = pygame.image.load(window_params["road_image"])
         background_image = pygame.image.load(window_params["background_image"])
         self.background_image = pygame.transform.scale(background_image, (self.width + 10, self.height))
-        self.loop_idx = 0
+        self.background_width = self.background_image.get_width()
+        self.background_height = self.background_image.get_height()
+        self.scroll_idx = 0
+        self.scroll_direction = 0
+        self.scroll_speed = 5
+        self.panels = math.ceil(self.width/self.background_width) + 2
 
-        # Creating window parameters
-        self.win = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
-        self.clock = pygame.time.Clock()
-        self.start = time.time()
+        # self.background = Background(self.win)
+        # self.background.bg_panels(window_params["background_image"])
 
         # Recording params
         self.is_recording = simulation_params['record']
@@ -76,6 +80,10 @@ class Window:
         self.paused_time = 0
         self.last_pause_start = 0
         self.start_time = pygame.time.get_ticks()  # Record the start time of the simulation
+
+        # Setting up the Simulation
+        self.is_running = True
+        self.sim = SimulationManager() # Create the simulation
 
     def create_buttons(self):
         # Simulation Buttons
@@ -153,13 +161,21 @@ class Window:
 
         # Fill background
         self.win.blit(self.background_image, (0,0))
-        # Moving Background
+        # Infinite Auto Moving Background
         # self.win.blit(self.background_image, (self.loop_idx,0))
         # self.win.blit(self.background_image, (self.width + self.loop_idx,0))
         # if self.loop_idx == -self.width:
         #     self.win.blit(self.background_image, (self.width + self.loop_idx, 0))
         #     self.loop_idx = 0
         # self.loop_idx -= 1
+
+        # Scrolling background
+        for i in range(self.panels):
+            self.win.blit(self.background_image, (i*self.background_width + self.scroll_idx - self.background_width, 0))
+
+        self.scroll_idx += self.scroll_speed * self.scroll_direction
+        if abs(self.scroll_idx) > self.background_width:
+            self.scroll_idx = 0
 
         # Writing Text
         text_list = [
@@ -263,12 +279,30 @@ class Window:
 
             # Event check first
             for event in pygame.event.get():
+                self.scroll_direction, self.scroll_speed = 0, 0
                 if event.type == pygame.QUIT:
                     self.is_running = False
                     pygame.quit()
                     sys.exit()
-                elif event.type == pygame.KEYDOWN and event.key == pygame.K_q:
-                    self.is_running = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        self.is_running = False
+                    if event.key == pygame.K_RIGHT:
+                        self.scroll_direction = -1
+                        self.scroll_speed = 5
+                    if event.key == pygame.K_LEFT:
+                        self.scroll_direction = 1
+                        self.scroll_speed = 5
+                    if event.key == pygame.K_UP:
+                        self.scroll_direction = 1
+                        self.scroll_speed = 20
+                    if event.key == pygame.K_DOWN:
+                        self.scroll_direction = -1
+                        self.scroll_speed = 20
+                    # if event.key == pygame.K_RIGHT:
+                    #     self.background.scroll(-5, 0)
+                    # if event.key == pygame.K_LEFT:
+                    #     self.background.scroll(0, -5)
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:  # Left mouse button
                         for button in self.global_buttons:

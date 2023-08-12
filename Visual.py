@@ -84,3 +84,39 @@ class UserButton(pygame.sprite.Sprite):
                 driving_params["shc_logic"] = 'irrational'
         else:
             pygame.draw.rect(self.image, window_params['green'], self.image.get_rect(), 4)
+
+class Background():
+    def __init__(self, surface):
+        self.surface = surface
+        self.panels = []
+
+    def load_bg(self, file):
+        return pygame.image.load(file)
+
+    def bg_panels(self, image_list):
+        if type(image_list) is str:
+            self.panels = [[self.load_bg(image_list)]]
+        elif type(image_list[0]) is str:
+            self.panels = [[self.load_bg(i) for i in image_list]]
+        else:
+            self.panels = [[self.load_bg(i) for i in row] for row in image_list]
+        self.camera_x = 0
+        self.camera_y = 0
+        self.bg_width = self.panels[0][0].get_width()
+        self.bg_height = self.panels[0][0].get_height()
+        self.surface.blit(self.panels[0][0], (0,0))
+
+    def scroll(self, x, y):
+        self.camera_x -= x
+        self.camera_y -= y
+        col = (self.camera_x % (self.bg_width * len(self.panels[0]))) // self.bg_width
+        row = (self.camera_y % (self.bg_height * len(self.panels))) // self.bg_height
+        col2 = ((self.camera_x + self.bg_width) % (self.bg_width * len(self.panels[0]))) // self.bg_width
+        row2 = ((self.camera_y + self.bg_height) % (self.bg_height * len(self.panels))) // self.bg_height
+        xOff = (0 - self.camera_x % self.bg_width)
+        yOff = (0 - self.camera_y % self.bg_height)
+
+        self.surface.blit(self.panels[row][col], [xOff, yOff])
+        self.surface.blit(self.panels[row][col2], [xOff + self.bg_width, yOff])
+        self.surface.blit(self.panels[row2][col], [xOff, yOff + self.bg_height])
+        self.surface.blit(self.panels[row2][col2], [xOff + self.bg_width, yOff + self.bg_height])

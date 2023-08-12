@@ -24,7 +24,6 @@ window_params = {
     "vehicle_width": 5, #2+m
     "background_image": 'common/assets/grassbackground.png',
     "road_image": 'common/assets/grassroad.png',
-    "road_border": 'common/assets/road_mask.png',
     "acc_image": 'common/assets/acc.png',
     "shc_image": 'common/assets/shc.png',
     "restart_button": 'common/assets/restart.png',
