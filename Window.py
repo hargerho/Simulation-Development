@@ -59,10 +59,7 @@ class Window:
 
         # Background params
         self.road_image = pygame.image.load(window_params["road_image"])
-        background_image = pygame.image.load(window_params["background_image"])
-        self.background_image = pygame.transform.scale(background_image, (self.width + 10, self.height))
-        background_list = [self.background_image]
-        self.background = Background(surface=self.win, image_list=background_list, screen_width=self.width)
+        self.bg = Background(surface=self.win, screen_width=self.width, screen_height=self.height, start_file=1, end_file=5)
 
         # Recording params
         self.is_recording = simulation_params['record']
@@ -91,13 +88,14 @@ class Window:
 
         # Traffic Buttons
         self.global_buttons = pygame.sprite.Group()
+        self.traffic_datumn_x, self.traffic_datumn_y = 230, 200
 
         vehicle_button_info = [
-            (300, 200, self.off_image, 0.2, 0.2, "acc_off"),
-            (450, 200, self.normal_image, 0.2, 0.2, "acc_logic_normal"),
-            (600, 200, self.cautious_image, 0.2, 0.2, "acc_logic_cautious"),
-            (300, 250, self.normal_image, 0.2, 0.2, "shc_logic_normal"),
-            (450, 250, self.irrational_image, 0.2, 0.2, "shc_logic_irrational"),
+            (self.traffic_datumn_x+200, self.traffic_datumn_y, self.off_image, 0.2, 0.2, "acc_off"),
+            (self.traffic_datumn_x+350, self.traffic_datumn_y, self.normal_image, 0.2, 0.2, "acc_logic_normal"),
+            (self.traffic_datumn_x+500, self.traffic_datumn_y, self.cautious_image, 0.2, 0.2, "acc_logic_cautious"),
+            (self.traffic_datumn_x+200, self.traffic_datumn_y+50, self.normal_image, 0.2, 0.2, "shc_logic_normal"),
+            (self.traffic_datumn_x+350, self.traffic_datumn_y+50, self.irrational_image, 0.2, 0.2, "shc_logic_irrational"),
         ]
 
         for x, y, image, scalex, scaley, button_name in vehicle_button_info:
@@ -110,10 +108,10 @@ class Window:
         # Road Buttons
         self.road_buttons = []
         road_button_info = [
-            (900, 200, self.off_image, 0.2, 0.2, "road_closed_off"),
-            (1050, 200, self.left_image, 0.2, 0.2, "road_closed_left"),
-            (900, 250, self.middle_image, 0.2, 0.2, "road_closed_middle"),
-            (1050, 250, self.right_image, 0.2, 0.2, "road_closed_right")
+            (self.traffic_datumn_x+850, self.traffic_datumn_y, self.off_image, 0.2, 0.2, "road_closed_off"),
+            (self.traffic_datumn_x+1000, self.traffic_datumn_y, self.left_image, 0.2, 0.2, "road_closed_left"),
+            (self.traffic_datumn_x+850, self.traffic_datumn_y+50, self.middle_image, 0.2, 0.2, "road_closed_middle"),
+            (self.traffic_datumn_x+1000, self.traffic_datumn_y+50, self.right_image, 0.2, 0.2, "road_closed_right")
         ]
 
         for x, y, image, scalex, scaley, button_name in road_button_info:
@@ -146,7 +144,7 @@ class Window:
 
     def draw_refeshed_objects(self):
 
-        self.background.scroll_bg()
+        # self.background.scroll_bg()
 
         # Draw the recording toggle
         ellipse_rect = pygame.Rect(self.restart_x_loc - 108, 17, 100, 50)
@@ -154,11 +152,11 @@ class Window:
 
         # Writing Text
         text_list = [
-            ("Driving Logics", (450, 150), 30),
-            ("AI-Controlled Convoy Vehicle", (100, 200), 20),
-            ("Simulated Human Controlled Vehicle", (120, 250), 20),
-            ("Traffic Parameters", (980, 150), 30),
-            ("Road Closure", (780 ,225), 20),
+            ("Driving Logics", (self.traffic_datumn_x+350, self.traffic_datumn_y-50), 30),
+            ("AI-Controlled Convoy Vehicle", (self.traffic_datumn_x, self.traffic_datumn_y), 20),
+            ("Simulated Human Controlled Vehicle", (self.traffic_datumn_x+20, self.traffic_datumn_y+50), 20),
+            ("Traffic Parameters", (self.traffic_datumn_x+930, self.traffic_datumn_y-50), 30),
+            ("Road Closure", (self.traffic_datumn_x+730, self.traffic_datumn_y+25), 20),
         ]
 
         text_font = pygame.font.Font(None, 20)
@@ -185,7 +183,7 @@ class Window:
         self.win.blit(roadSurface, roadRect.topleft)
 
         # Overlay the road image
-        road = Objects(rampRect.topleft[0], rampRect.topleft[1], self.road_image, 0.2, 0.136)
+        road = Objects(-1, 350, self.road_image, 0.5, 0.55)
         road.draw_special(self.win)
 
         # Draw speed limit
@@ -226,6 +224,7 @@ class Window:
 
         while self.is_running:
             restart = False
+            self.bg.draw_bg()
 
             self.draw_refeshed_objects()
 
@@ -252,9 +251,15 @@ class Window:
 
             self.draw_timer(restart=restart)
 
+            key = pygame.key.get_pressed()
+            if key[pygame.K_LEFT] and self.bg.scroll_speed > 0:
+                self.bg.scroll_speed -= 5
+            if key[pygame.K_RIGHT]:
+                self.bg.scroll_speed += 5
+
             # Event check first
             for event in pygame.event.get():
-                self.background.scroll_direction, self.background.scroll_direction = 0, 0
+                # self.bg.scroll_speed = 0
                 if event.type == pygame.QUIT:
                     self.is_running = False
                     pygame.quit()
@@ -262,22 +267,14 @@ class Window:
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
                         self.is_running = False
-                    if event.key == pygame.K_RIGHT:
-                        self.background.scroll_direction = -1
-                        self.background.scroll_speed = 5
-                    if event.key == pygame.K_LEFT:
-                        self.background.scroll_direction = 1
-                        self.background.scroll_speed = 5
-                    if event.key == pygame.K_UP:
-                        self.background.scroll_direction = -1
-                        self.background.scroll_speed = 20
-                    if event.key == pygame.K_DOWN:
-                        self.background.scroll_direction = 1
-                        self.background.scroll_speed = 20
                     # if event.key == pygame.K_RIGHT:
-                    #     self.background.scroll(-5, 0)
+                    #     self.bg.scroll_speed += 5
                     # if event.key == pygame.K_LEFT:
-                    #     self.background.scroll(0, -5)
+                    #     self.bg.scroll_speed -= 5
+                    # if event.key == pygame.K_UP:
+                    #     self.bg.scroll_speed += 20
+                    # if event.key == pygame.K_DOWN:
+                    #     self.bg.scroll_speed -= 20
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:  # Left mouse button
                         for button in self.global_buttons:

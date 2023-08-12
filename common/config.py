@@ -23,7 +23,7 @@ window_params = {
     "vehicle_length": 10, #5m
     "vehicle_width": 5, #2+m
     "background_image": 'common/assets/grassbackground.png',
-    "road_image": 'common/assets/transparentroad.png',
+    "road_image": 'common/assets/test.png',
     "acc_image": 'common/assets/acc.png',
     "shc_image": 'common/assets/shc.png',
     "restart_button": 'common/assets/restart.png',
