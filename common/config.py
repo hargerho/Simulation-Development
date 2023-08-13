@@ -23,7 +23,8 @@ window_params = {
     "vehicle_length": 10, #5m
     "vehicle_width": 5, #2+m
     "background_image": 'common/assets/grassbackground.png',
-    "road_image": 'common/assets/testing.png',
+    "onramp_image": 'common/assets/onramp.png',
+    "road_image": 'common/assets/roadtile.png',
     "acc_image": 'common/assets/acc.png',
     "shc_image": 'common/assets/shc.png',
     "restart_button": 'common/assets/restart.png',
