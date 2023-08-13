@@ -1,19 +1,15 @@
 import pygame
 import sys
 import time
+import math
 
 from common.config import window_params, road_params, simulation_params
 from Simulation import SimulationManager
 from ACC import Convoy
-from Visual import Objects, Button
+from Visual import Objects, Button, UserButton, Background
 
 class Window:
     def __init__(self):
-        pygame.init()
-
-        # Setting up the Simulation
-        self.is_running = True
-        self.sim = SimulationManager() # Create the simulation
 
         # Creating the window
         self.width = window_params["window_width"]
@@ -28,6 +24,12 @@ class Window:
         self.onramp_length = road_params['onramp_length']
         self.num_lanes = road_params['num_lanes']
 
+        # Creating window parameters
+        pygame.init()
+        self.win = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
+        self.clock = pygame.time.Clock()
+        self.start = time.time()
+
         # Getting road y-coordinates
         self.toplane_loc = road_params['toplane_loc']
         self.onramp = self.toplane_loc[1]
@@ -36,20 +38,28 @@ class Window:
         self.rightlane = self.toplane_loc[1] + self.lanewidth * (self.num_lanes - 1)
 
         # Loading images
-        self.road_image = pygame.image.load(window_params["road_image"])
-        self.road_border = pygame.image.load(window_params["road_border"])
-        self.acc_image = pygame.image.load(window_params["acc_image"])
-        self.shc_image = pygame.image.load(window_params["shc_image"])
+        acc_image = pygame.image.load(window_params["acc_image"])
+        shc_image = pygame.image.load(window_params["shc_image"])
+        self.acc_image = pygame.transform.scale(acc_image, (self.vehicle_length, self.vehicle_width))
+        self.shc_image = pygame.transform.scale(shc_image, (self.vehicle_length, self.vehicle_width))
+
         self.restart_image = pygame.image.load(window_params["restart_button"])
         self.restart_stop_image = pygame.image.load(window_params["record_stop_button"])
         self.pause_image = pygame.image.load(window_params["pause_button"])
         self.record_image = pygame.image.load(window_params["record_button"])
         self.play_image = pygame.image.load(window_params["play_button"])
 
-        # Creating window parameters
-        self.win = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
-        self.clock = pygame.time.Clock()
-        self.start = time.time()
+        self.normal_image = pygame.image.load(window_params["normal_button"])
+        self.cautious_image = pygame.image.load(window_params["cautious_button"])
+        self.irrational_image = pygame.image.load(window_params["irrational_button"])
+        self.off_image = pygame.image.load(window_params["off_button"])
+        self.left_image = pygame.image.load(window_params["left_button"])
+        self.middle_image = pygame.image.load(window_params["middle_button"])
+        self.right_image = pygame.image.load(window_params["right_button"])
+
+        # Background params
+        self.road_image = pygame.image.load(window_params["road_image"])
+        self.bg = Background(surface=self.win, screen_width=self.width, screen_height=self.height, start_file=1, end_file=5)
 
         # Recording params
         self.is_recording = simulation_params['record']
@@ -61,14 +71,53 @@ class Window:
         self.last_pause_start = 0
         self.start_time = pygame.time.get_ticks()  # Record the start time of the simulation
 
+        # Setting up the Simulation
+        self.is_running = True
+        self.sim = SimulationManager() # Create the simulation
+
     def create_buttons(self):
-        self.pause_button = Button(1200, 100, self.pause_image, 0.05, 0.05)
-        self.play_button = Button(1250, 100, self.play_image, 0.05, 0.05)
+        # Simulation Buttons
+        self.restart_x_loc = 1440
+        self.restart_y_loc = 25
+        button_scale = 0.065
+        self.pause_button = Button(self.restart_x_loc - 200, self.restart_y_loc, self.pause_image, button_scale, button_scale)
+        self.play_button = Button(self.restart_x_loc - 150, self.restart_y_loc, self.play_image, button_scale, button_scale)
+        self.record_button = Button(self.restart_x_loc - 100, self.restart_y_loc, self.record_image, button_scale, button_scale)
+        self.record_stop = Button(self.restart_x_loc - 50, self.restart_y_loc, self.restart_stop_image, button_scale, button_scale)
+        self.restart_button = Button(self.restart_x_loc, self.restart_y_loc, self.restart_image, button_scale, button_scale)
 
-        self.record_button = Button(1300, 100, self.record_image, 0.05, 0.05)
-        self.record_stop = Button(1350, 100, self.restart_stop_image, 0.05, 0.05)
+        # Traffic Buttons
+        self.global_buttons = pygame.sprite.Group()
+        self.traffic_datumn_x, self.traffic_datumn_y = 230, 200
 
-        self.restart_button = Button(1400, 100, self.restart_image, 0.05, 0.05)
+        vehicle_button_info = [
+            (self.traffic_datumn_x+200, self.traffic_datumn_y, self.off_image, 0.2, 0.2, "acc_off"),
+            (self.traffic_datumn_x+350, self.traffic_datumn_y, self.normal_image, 0.2, 0.2, "acc_logic_normal"),
+            (self.traffic_datumn_x+500, self.traffic_datumn_y, self.cautious_image, 0.2, 0.2, "acc_logic_cautious"),
+            (self.traffic_datumn_x+200, self.traffic_datumn_y+50, self.normal_image, 0.2, 0.2, "shc_logic_normal"),
+            (self.traffic_datumn_x+350, self.traffic_datumn_y+50, self.irrational_image, 0.2, 0.2, "shc_logic_irrational"),
+        ]
+
+        for x, y, image, scalex, scaley, button_name in vehicle_button_info:
+            button = UserButton(x, y, image, scalex, scaley, button_name)
+            self.global_buttons.add(button)
+
+        self.acc_buttons = [self.global_buttons.sprites()[0], self.global_buttons.sprites()[1], self.global_buttons.sprites()[2]]
+        self.shc_buttons = [self.global_buttons.sprites()[3], self.global_buttons.sprites()[4]]
+
+        # Road Buttons
+        self.road_buttons = []
+        road_button_info = [
+            (self.traffic_datumn_x+850, self.traffic_datumn_y, self.off_image, 0.2, 0.2, "road_closed_off"),
+            (self.traffic_datumn_x+1000, self.traffic_datumn_y, self.left_image, 0.2, 0.2, "road_closed_left"),
+            (self.traffic_datumn_x+850, self.traffic_datumn_y+50, self.middle_image, 0.2, 0.2, "road_closed_middle"),
+            (self.traffic_datumn_x+1000, self.traffic_datumn_y+50, self.right_image, 0.2, 0.2, "road_closed_right")
+        ]
+
+        for x, y, image, scalex, scaley, button_name in road_button_info:
+            button = UserButton(x, y, image, scalex, scaley, button_name)
+            self.global_buttons.add(button)
+            self.road_buttons.append(button)
 
     def draw_timer(self, restart):
         if restart:
@@ -85,18 +134,38 @@ class Window:
         seconds = (elapsed_time // 1000) % 60
         minutes = (elapsed_time // 60000) % 60
         time_str = f"{minutes:02d}:{seconds:02d}.{milliseconds:02d}"
-        font = pygame.font.Font(None, 36)
-        timer_text = font.render(time_str, True, window_params["black"])
-        self.win.blit(timer_text, (10, 10))
+        timer_font = pygame.font.Font(None, 30)
+        timer_text = timer_font.render(time_str, True, window_params["black"])
+        self.win.blit(timer_text, (155,11))
 
-    def draw_fixed_objects(self):  # sourcery skip: extract-duplicate-method
+        timer_surface = timer_font.render("Elapsed Time:", True, window_params['black'])
+        timer_rect_text = timer_surface.get_rect(center=(80,20))
+        self.win.blit(timer_surface, timer_rect_text)
 
-        # Fill background
-        self.win.fill(window_params["white"])
+    def draw_refeshed_objects(self):
 
-        # Drawing recording recording toggle
-        pygame.draw.ellipse(self.win, window_params["white"], (1293, 94, 90, 40))
-        pygame.draw.ellipse(self.win, window_params["black"], (1293, 94, 90, 40), 2)
+        # self.background.scroll_bg()
+
+        # Draw the recording toggle
+        ellipse_rect = pygame.Rect(self.restart_x_loc - 108, 17, 100, 50)
+        pygame.draw.ellipse(self.win, window_params['black'], ellipse_rect, 2)
+
+        # Writing Text
+        text_list = [
+            ("Driving Logics", (self.traffic_datumn_x+350, self.traffic_datumn_y-50), 30),
+            ("AI-Controlled Convoy Vehicle", (self.traffic_datumn_x, self.traffic_datumn_y), 20),
+            ("Simulated Human Controlled Vehicle", (self.traffic_datumn_x+20, self.traffic_datumn_y+50), 20),
+            ("Traffic Parameters", (self.traffic_datumn_x+930, self.traffic_datumn_y-50), 30),
+            ("Road Closure", (self.traffic_datumn_x+730, self.traffic_datumn_y+25), 20),
+        ]
+
+        text_font = pygame.font.Font(None, 20)
+
+        for text, pos, font_size in text_list:
+            text_font = pygame.font.Font(None, font_size)
+            text_surface = text_font.render(text, True, window_params['black'])
+            text_rect = text_surface.get_rect(center=pos)
+            self.win.blit(text_surface, text_rect)
 
         # Drawing the onramp
         onrampSurface = pygame.Surface((self.onramp_length, self.lanewidth))
@@ -114,12 +183,10 @@ class Window:
         self.win.blit(roadSurface, roadRect.topleft)
 
         # Overlay the road image
-        # road = Objects(rampRect.topleft[0], rampRect.topleft[1], self.road_image, 0.2, 0.136)
-        # road.draw_special(self.win)
+        road = Objects(-1, 350, self.road_image, 0.3, 0.1)
+        road.draw_special(self.win)
 
         # Draw speed limit
-
-        self.create_buttons()
 
     def refresh_window(self, vehicle_list):
 
@@ -134,29 +201,34 @@ class Window:
 
                     # Drawing the convoy
                     carSurface = pygame.Surface((self.vehicle_length,self.vehicle_width))
-                    carSurface.fill(window_params['white'])
+                    # carSurface.fill(window_params['white'])
                     carRect = carSurface.get_rect()
                     carRect.center = vehicleLoc
-                    self.win.blit(carSurface, carRect)
+                    # self.win.blit(carSurface, carRect)
+                    self.win.blit(self.acc_image, carRect)
             else:
                 vehicle_id = vehicle.vehicle_id()
                 vehicleLoc = vehicle_id['location']
 
                 carSurface = pygame.Surface((self.vehicle_length,self.vehicle_width))
-                carSurface.fill(window_params['green'])
+                # carSurface.fill(window_params['green'])
                 carRect = carSurface.get_rect()
                 carRect.center = vehicleLoc
-                self.win.blit(carSurface, carRect)
+                # self.win.blit(carSurface, carRect)
+                self.win.blit(self.shc_image, carRect)
 
-    def run_window(self): # vehicle_list passed from Simulation
+    def run_window(self):
         frame = 0
         restarted_time = 0
+        self.create_buttons()
+
         while self.is_running:
             restart = False
+            self.bg.draw_bg()
 
-            self.draw_fixed_objects()
+            self.draw_refeshed_objects()
 
-            # Button Presses
+            # Simulation Button Presses
             if self.pause_button.draw(self.win):
                 self.is_paused = True
                 self.paused_time = pygame.time.get_ticks() - self.start_time
@@ -179,14 +251,43 @@ class Window:
 
             self.draw_timer(restart=restart)
 
+            # Background controls
+            key = pygame.key.get_pressed()
+            if key[pygame.K_LEFT] and self.bg.scroll_speed > 0:
+                self.bg.scroll_speed -= 5
+            if key[pygame.K_RIGHT]:
+                self.bg.scroll_speed += 5
+            if key[pygame.K_DOWN] and self.bg.scroll_speed > 0:
+                self.bg.scroll_speed -= 20
+            if key[pygame.K_UP]:
+                self.bg.scroll_speed += 20
+
             # Event check first
             for event in pygame.event.get():
+                # self.bg.scroll_speed = 0
                 if event.type == pygame.QUIT:
                     self.is_running = False
                     pygame.quit()
                     sys.exit()
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
-                    self.is_running = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        self.is_running = False
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:  # Left mouse button
+                        for button in self.global_buttons:
+                            if button.rect.collidepoint(event.pos):
+                                if button in self.acc_buttons:
+                                    for acc_button in self.acc_buttons:
+                                        acc_button.is_selected = (acc_button == button)
+                                elif button in self.shc_buttons:
+                                    for shc_button in self.shc_buttons:
+                                        shc_button.is_selected = (shc_button == button)
+                                elif button in self.road_buttons:
+                                    for road_button in self.road_buttons:
+                                        road_button.is_selected = (road_button == button)
+
+            self.global_buttons.update()
+            self.global_buttons.draw(self.win)
 
             if not self.is_paused:
                 # Updates simulation frame

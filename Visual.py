@@ -1,5 +1,6 @@
 import pygame
-from common.config import window_params, road_params, simulation_params
+import math
+from common.config import window_params, road_params, driving_params, acc_params
 
 class Objects:
     def __init__(self, x, y, image, scale_x, scale_y):
@@ -24,8 +25,10 @@ class Objects:
 class Button(Objects):
     def __init__ (self, x, y, image, scale_x, scale_y):
         super().__init__(x, y, image, scale_x, scale_y)
+        self.image = pygame.transform.scale(image, (int(self.width * scale_x), int(self.height * scale_y)))
         self.clicked = False
         self.prev_state = False
+        self.is_selected = False
 
     def draw(self, surface):
         flag = False
@@ -44,3 +47,63 @@ class Button(Objects):
         surface.blit(self.image, (self.rect.x, self.rect.y))
 
         return flag
+
+class UserButton(pygame.sprite.Sprite):
+    def __init__ (self, x, y, image, scale_x, scale_y, button_name):
+        super().__init__()
+        self.button_name = button_name
+        width = image.get_width()
+        height = image.get_height()
+        self.image = pygame.transform.scale(image, (int(width * scale_x), int(height * scale_y)))
+        self.rect = self.image.get_rect(center=(x,y))
+        self.is_selected = False
+
+    def update(self):  # sourcery skip: switch
+        if self.is_selected:
+            pygame.draw.rect(self.image, window_params['black'], self.image.get_rect(), 4)
+            if self.button_name == "road_closed_off":
+                road_params["road_closed"] = 'off'
+            elif self.button_name == "road_closed_left":
+                road_params["road_closed"] = 'left'
+            elif self.button_name == "road_closed_middle":
+                road_params["road_closed"] = 'middle'
+            elif self.button_name == "road_closed_right":
+                road_params["road_closed"] = 'right'
+
+            if self.button_name == "acc_logic_normal":
+                driving_params["acc_logic"] = 'normal'
+                acc_params["acc_spawnrate"] = 0.2
+            elif self.button_name == "acc_logic_cautious":
+                driving_params["acc_logic"] = 'cautious'
+                acc_params["acc_spawnrate"] = 0.2
+            elif self.button_name == "acc_off":
+                acc_params["acc_spawnrate"] = 0
+
+            if self.button_name == "shc_logic_normal":
+                driving_params["shc_logic"] = 'normal'
+            elif self.button_name == "shc_logic_irrational":
+                driving_params["shc_logic"] = 'irrational'
+        else:
+            pygame.draw.rect(self.image, window_params['green'], self.image.get_rect(), 4)
+
+class Background():
+    def __init__(self, surface, screen_width, screen_height, start_file, end_file):
+        self.surface = surface
+        self.screen_width = screen_width
+        self.screen_height = screen_height
+        self.scroll_speed = 0
+
+        self.bg_images = []
+        for panel in range(start_file, end_file):
+            bg_panel = pygame.image.load(f"common/assets/background/{panel}.png").convert_alpha()
+            bg_image = pygame.transform.scale(bg_panel, (self.screen_width, self.screen_height))
+            self.bg_images.append(bg_image)
+
+        self.bg_width = self.bg_images[0].get_width()
+
+    def draw_bg(self):
+        for x in range(5):
+            bg_speed = 1
+            for i in self.bg_images:
+                self.surface.blit(i, ((x * self.bg_width) - bg_speed * self.scroll_speed, 0))
+                bg_speed += 0.2

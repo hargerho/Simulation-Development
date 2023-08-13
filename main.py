@@ -3,7 +3,7 @@ from Test import Test
 import time
 
 from common.config import *
-testing = True
+testing = False
 
 def get_params(combination):
 
@@ -43,6 +43,8 @@ def main():
             driving_params["acc_logic"] = testing_list[0]
             acc_params["acc_spawnrate"] = 0 if i == 0 else 0.2
             simulation_params["filename"] = f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}"
+            simulation_params['testing'] = testing
+            simulation_params['record'] = testing
             test = Test()
             test.run_test()
             endite = time.time()
@@ -54,6 +56,8 @@ def main():
         print("============================")
     else:
         # Just run the simulation
+        simulation_params['record'] = testing
+        simulation_params['testing'] = testing
         win = Window()
         win.run_window()
 

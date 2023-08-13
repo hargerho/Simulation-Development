@@ -22,20 +22,27 @@ window_params = {
     "red": (255,0,0),
     "vehicle_length": 10, #5m
     "vehicle_width": 5, #2+m
-    "road_image": 'common/assets/road.png',
-    "road_border": 'common/assets/road_mask.png',
+    "background_image": 'common/assets/grassbackground.png',
+    "road_image": 'common/assets/testing.png',
     "acc_image": 'common/assets/acc.png',
     "shc_image": 'common/assets/shc.png',
     "restart_button": 'common/assets/restart.png',
     "pause_button": 'common/assets/pause_button.png',
     "play_button": 'common/assets/play_button.png',
     "record_button": 'common/assets/record_button.png',
-    "record_stop_button": 'common/assets/record_stop_button.png'
+    "record_stop_button": 'common/assets/record_stop_button.png',
+    "normal_button": 'common/assets/normal.png',
+    "cautious_button": 'common/assets/cautious.png',
+    "irrational_button": 'common/assets/irrational.png',
+    "off_button": 'common/assets/off.png',
+    "left_button": 'common/assets/left.png',
+    "middle_button": 'common/assets/middle.png',
+    "right_button": 'common/assets/right.png',
 }
 
 road_params = {
     "toplane_loc": (0,500), #(x, y)
-    "road_length": length_conversion(16000), #16000m
+    "road_length": length_conversion(500), #16000m
     "onramp_length": length_conversion(140), # 140m
     "num_lanes": 4, # including an onramp
     "lanewidth": 10, # arbitary
@@ -86,7 +93,7 @@ simulation_params = {
     "playback_speed": 5, # realtime = 1
     "folderpath": "data",
     "filename": f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}",
-    "record": True,
+    "record": False, # Default False
     "num_vehicles": 1000,
-    "testing": True
+    "testing": False # Default False
 }
