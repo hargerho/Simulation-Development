@@ -214,7 +214,7 @@ class Road:
         # Update spawn_timer
         if road_params['vehicle_inflow'] > 0:
             self.timer += self.ts
-            if self.timer - self.last_spawn_time >= self.spawn_interval and road_params['vehicle_inflow'] > 0:
+            if self.timer - self.last_spawn_time >= self.spawn_interval:
                 self.spawn_vehicle()
 
         if road_params['onramp_inflow'] > 0:

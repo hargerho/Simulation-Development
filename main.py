@@ -17,12 +17,25 @@ def get_params(combination):
         5: ['normal', 'normal', "left", 0, 4000],
         6: ['normal', 'normal', "middle", 0, 4000],
         7: ['normal', 'normal', "right", 0, 4000],
-        8: ['normal', 'normal', None, range(200), 4000], # Manual testing
+        8: ['normal', 'normal', None, range(200), 4000], # Manual testing range(200)
         9: ['normal', 'normal', None, 0, range(1000,7000)], # Manual testing
     }
 
+    range_testing = {
+        0: ['normal', 'normal', None, 50, 4000],
+        1: ['normal', 'normal', None, 100, 4000],
+        2: ['normal', 'normal', None, 150, 4000],
+        3: ['normal', 'normal', None, 200, 4000],
+        4: ['normal', 'normal', None, 0, 1000],
+        5: ['normal', 'normal', None, 0, 2000],
+        6: ['normal', 'normal', None, 0, 3000],
+        7: ['normal', 'normal', None, 0, 5000],
+        8: ['normal', 'normal', None, 0, 6000],
+        9: ['normal', 'normal', None, 0, 7000],
+    }
+
     # Change here
-    return testing_params.get(combination)
+    return range_testing.get(combination)
 
 def main():
     # Data Collection
@@ -31,7 +44,7 @@ def main():
 
         start = time.time()
 
-        for i in range(8):
+        for i in range(10):
             print("----------------------")
             print("Testing Combination:", i)
             startite = time.time()
