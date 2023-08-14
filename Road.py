@@ -20,10 +20,13 @@ class Road:
         self.vehicle_list = []
 
         # Road Spawning
-        self.vehicle_frequency = road_params['vehicle_inflow'] / 3600 # per/hour -> per second
-        self.spawn_interval = round(1.0/self.vehicle_frequency, 1) # Round to 1dp since ts is 1dp
-        self.timer = 0.0
-        self.last_spawn_time = 0
+        if road_params['vehicle_inflow'] > 0:
+            self.vehicle_frequency = road_params['vehicle_inflow'] / 3600 # per/hour -> per second
+            self.spawn_interval = round(1.0/self.vehicle_frequency, 1) # Round to 1dp since ts is 1dp
+            self.timer = 0.0
+            self.last_spawn_time = 0
+        else:
+            self.vehicle_frequency, self.spawn_interval, self.timer, self.last_spawn_time = 0, 0, 0, 0
 
         # Onramp frequency
         if road_params['onramp_inflow'] > 0:
@@ -210,7 +213,7 @@ class Road:
 
         # Update spawn_timer
         self.timer += self.ts
-        if self.timer - self.last_spawn_time >= self.spawn_interval:
+        if self.timer - self.last_spawn_time >= self.spawn_interval and road_params['vehicle_inflow'] > 0:
             self.spawn_vehicle()
 
         if road_params['onramp_inflow'] > 0:

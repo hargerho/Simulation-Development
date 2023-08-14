@@ -128,7 +128,7 @@ class Background():
 
     def draw_road(self):
 
-        for x in range(15):
+        for x in range(1):
             # if x == 0:
             #     self.surface.blit(self.onramp_image, ((x * self.onramp_width) - self.scroll_speed * 5, self.onramp_y))
             #     continue

@@ -61,7 +61,7 @@ class Window:
         self.road_image = pygame.image.load(window_params["road_image"])
         # self.onramp_image = pygame.image.load(window_params['onramp_image'])
         self.bg = Background(surface=self.win, screen_width=self.width, screen_height=self.height, start_file=1, end_file=8)
-        self.bg.load_road(road_file=window_params['road_image'], x=0, y=390, scale_x=0.5, scale_y=0.2)
+        self.bg.load_road(road_file=window_params['road_image'], x=0, y=385, scale_x=0.5, scale_y=0.2)
         self.bg.load_onramp(road_file=window_params['onramp_image'], x=0, y=373, scale_x=0.5, scale_y=0.5)
         # Recording params
         self.is_recording = simulation_params['record']
@@ -149,7 +149,7 @@ class Window:
 
         # Scrolling bg
         self.bg.draw_bg()
-        self.bg.draw_road()
+        # self.bg.draw_road()
 
         # Draw the recording toggle
         ellipse_rect = pygame.Rect(self.restart_x_loc - 108, 17, 100, 50)
@@ -185,7 +185,7 @@ class Window:
         roadSurface.fill(window_params['black'])
         roadRect = roadSurface.get_rect()
         roadRect.topleft = (self.toplane_loc[0], self.toplane_loc[1] - self.vehicle_width + self.lanewidth)
-        self.win.blit(roadSurface, roadRect.topleft)
+        # self.win.blit(roadSurface, roadRect.topleft)
 
         # Overlay the road image
         # road = Objects(0, 420, self.road_image, 0.6, 0.6)
