@@ -72,7 +72,5 @@ def main():
         win = Window()
         win.run_window()
 
-
-
 if __name__ == "__main__":
     main()
