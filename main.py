@@ -67,6 +67,8 @@ def main():
         print("============================")
     else:
         # Just run the simulation
+        simulation_params['record'] = testing
+        simulation_params['testing'] = testing
         win = Window()
         win.run_window()
 

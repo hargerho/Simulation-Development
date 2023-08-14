@@ -171,21 +171,34 @@ class Vehicle:
             "left": left
         }
 
+    def headway_check(self, surround):
+        if surround is not None and self.v != 0:
+            headway = (surround.loc_back - self.loc_front) / self.v
+        else:
+            headway = self.T
+        return headway >= self.T
+
     def is_safe_to_change(self, change_dir, new_front, new_back, right, left):
 
-        safe_front = new_front is None or new_front.loc_back > self.loc_front
-        safe_back = new_back is None or new_back.loc_back < self.loc_back
+        safe_front = new_front is None or (new_front.loc_back > self.loc_front + self.s_0 and self.headway_check(new_front))
+        safe_back = new_back is None or (new_back.loc_front < self.loc_back + self.s_0 and self.headway_check(new_back))
         safe_side = (change_dir == 'left' and not left) or (change_dir == 'right' and not right)
 
         return safe_front and safe_back and safe_side
 
     def calc_lane_change(self, change_dir, current_front, new_front, new_back, right, left):
+        # sourcery skip: remove-redundant-if
 
-        onramp_flag = self.loc[1] == self.onramp
+        onramp_flag = (self.loc[1] == self.onramp)
 
         # Calculate distance and velocity of current and new front vehicles
-        current_front_dist, current_front_v = Vehicle.get_distance_and_velocity(self, current_front)
-        new_front_dist, new_front_v = Vehicle.get_distance_and_velocity(self, new_front)
+        if current_front is not None:
+            current_front_dist, current_front_v = Vehicle.get_distance_and_velocity(self, current_front)
+            new_front_dist, new_front_v = Vehicle.get_distance_and_velocity(self, new_front)
+        elif onramp_flag and current_front is None:
+            current_front_dist = self.onramp_length - self.loc_front
+            current_front_v = 0
+            new_front_dist, new_front_v = Vehicle.get_distance_and_velocity(self, new_front)
 
         # Calculate the disadvantage and new back acceleration if there is a vehicle behind
         if new_back is None:
@@ -204,13 +217,18 @@ class Vehicle:
             else:
                 current_back_dist = new_front.loc_back - new_back_front
                 current_back_v = new_front.v
+
+            if onramp_flag and current_front is None:
+                current_back_dist = self.onramp_length - self.loc_back
+                current_back_v = self.v
+
             new_back_dist = self.loc_back - new_back_front
             new_back_v = self.v
 
             # Getting the disadvantage in changing
             # Consider effects to back vehicle
             disadvantage, new_back_accel = new_back.driver.calc_disadvantage(v=new_back.v, new_surrounding_v=new_back_v, new_surrounding_dist=new_back_dist,
-                                                                     old_surrounding_v=current_back_v, old_surrounding_dist=current_back_dist)
+                                                                        old_surrounding_v=current_back_v, old_surrounding_dist=current_back_dist)
 
         is_safe = self.is_safe_to_change(change_dir, new_front, new_back, right, left)
 
@@ -236,7 +254,7 @@ class Vehicle:
             if change_flag:
                 self.local_loc[1] += self.lanewidth
         # For special case on-ramp
-        if self.loc[1] == self.onramp:
+        if self.loc[1] == self.onramp and (self.loc_front > self.onramp_length/2):
             change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
                                                 new_front=surrounding['front_right'], new_back=surrounding['back_right'], right=surrounding['right'], left=surrounding['left'])
             if change_flag:
@@ -249,7 +267,7 @@ class Vehicle:
 
         # If negative velocity (not allowed)
         if self.local_v + self.local_accel * self.ts < 0:
-            self.local_loc[0] -= (1/2) * (self.local_v/self.local_accel) # based on IDM paper
+            self.local_loc[0] -= (1/2) * (math.pow(self.local_v, 2)/self.local_accel) # based on IDM paper
             self.local_v = 0
         else:
             self.local_v += self.local_accel * self.ts
