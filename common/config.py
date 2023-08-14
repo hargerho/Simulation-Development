@@ -1,14 +1,17 @@
 # Scale -> 1m:2px, 1km:2000px
 
 # Helper Functions
+
+SCALE = 10
+
 def length_conversion(value):
     # Convert meters to pixels
-    return value*2
+    return value*SCALE
 
 def speed_conversion(value):
     # 1mph = 1.60934kmh
     # Converts mph -> pixel/seconds
-    return float((value*1.60934*2000)/3600)
+    return float((value*1.60934*length_conversion(1000))/3600)
 
 # Main Params
 window_params = {
@@ -20,9 +23,8 @@ window_params = {
     "green": (0,255,0),
     "grey": (128, 128, 128),
     "red": (255,0,0),
-    "vehicle_length": 10, #5m
-    "vehicle_width": 5, #2+m
-    "background_image": 'common/assets/grassbackground.png',
+    "vehicle_length": length_conversion(5), #5m TESTING: 10PX
+    "vehicle_width": length_conversion(2), #2+m TESTING: 5PX
     "onramp_image": 'common/assets/onramp.png',
     "road_image": 'common/assets/roadtile.png',
     "acc_image": 'common/assets/acc.png',
@@ -42,40 +44,40 @@ window_params = {
 }
 
 road_params = {
-    "toplane_loc": (0,500), #(x, y)
+    "toplane_loc": (0,380), #(x, y)
     "road_length": length_conversion(500), #16000m
     "onramp_length": length_conversion(140), # 140m
     "num_lanes": 4, # including an onramp
-    "lanewidth": 10, # arbitary
-    "vehicle_inflow": 4000, # 1000 approx 1veh/3.6sec testing: 10000
-    "onramp_inflow": 0,
+    "lanewidth": length_conversion(5), # arbitary
+    "vehicle_inflow": 0, # 1000 approx 1veh/3.6sec testing: 10000
+    "onramp_inflow": 1000,
     "num_convoy_vehicles": 3,
     "road_closed": None
 }
 
-# Safety threshold = 1.5m = 3px
-# Max Acceleration = 0.73m/s2 = 1.46px/s2
-# Comfortable deceleration = 1.67m/s2 = 3.34px/s2
-# Left bias = 0.3m/s = 0.6px/s
-# Lane change threshold = 0.1m/s = 0.2px/s
+# Safety threshold = 1.5m
+# Max Acceleration = 0.73m/s2
+# Comfortable deceleration = 1.67m/s2
+# Left bias = 0.3m/s
+# Lane change threshold = 0.1m/s
 driving_params = {
     "desired_velocity": speed_conversion(70), # testing: 16.6
     "safety_threshold": length_conversion(1.5), # testing: 20px
-    "max_acceleration": 1.46, # IDM Paper # was 0.73 # Testing:50
-    "comfortable_deceleration": 3.34, # IDM Paper # was 1.67 # Testing: 4.61
+    "max_acceleration": length_conversion(4), # IDM Paper # was 0.73 # Testing:50
+    "comfortable_deceleration": length_conversion(1.67), # IDM Paper # was 1.67 # Testing: 4.61
     "acceleration_component": 4, # IDM Paper
-    "left_bias": 0.6, # MOBIL Paper
-    "lane_change_threshold": 0.2, # MOBIL Paper
+    "left_bias": length_conversion(0.3), # MOBIL Paper
+    "lane_change_threshold": length_conversion(0.1), # MOBIL Paper
     "acc_logic": "normal", # toggle normal/irrational
     "shc_logic": "normal", # toggle normal/cautious
 }
 
-# Noraml Speed Variation = 5m/s = 10px/s
-# Irratinal Speed Variation = 10m/s = 20px/s
+# Noraml Speed Variation = 5m/s
+# Irratinal Speed Variation = 10m/s
 # Headway in seconds
 shc_params = {
-    "normal": {"safe_headway": 3.1, "speed_variation": 10, "politeness_factor": 0.25},
-    "irrational": {"safe_headway": 1.5, "speed_variation": 20, "politeness_factor": 0.15},
+    "normal": {"safe_headway": 3.1, "speed_variation": length_conversion(5), "politeness_factor": 0.25},
+    "irrational": {"safe_headway": 1.5, "speed_variation": length_conversion(10), "politeness_factor": 0.15},
 }
 
 acc_params = {
@@ -87,10 +89,10 @@ acc_params = {
 vehicle_models = [shc_params, acc_params]
 
 filename = f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}"
-baseline = f"ACCNo_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}"
+baseline = f"ACCNo_SHC{driving_params['shc_logic']}_Road{road_params['road_closed']}_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}"
 
 simulation_params = {
-    "ts": 0.2, # was 0.001  testing: 1/60 # Ts < 0.5 same results
+    "ts": 1/60, # was 0.001  testing: 1/60 # Ts < 0.5 same results
     "playback_speed": 5, # realtime = 1
     "folderpath": "data",
     "filename": f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}",

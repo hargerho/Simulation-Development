@@ -20,7 +20,7 @@ class Test:
                 _, self.is_running = self.sim.update_frame(is_recording=self.is_recording, frame=frame, restart=restart)
                 frame += 1
 
-        print("\nTime Taken for 500 vehicle to despawnn:", time.time() - self.start)
+        print("\nTime Taken for 1000 vehicle to despawnn:", time.time() - self.start)
 
         # Saves Data
         self.sim.saving_record()

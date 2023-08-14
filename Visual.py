@@ -103,19 +103,32 @@ class Background():
 
         print(len(self.bg_images))
 
-    def load_road(self, road_file, x, y, scale_x, scale_y):
+    def load_road(self, road_file, x, y, road_length, road_width):
         road_image = pygame.image.load(road_file).convert_alpha()
-        self.road_width = road_image.get_width()
-        self.road_height = road_image.get_height()
 
-        self.road_image = pygame.transform.scale(road_image, (int(self.screen_width * scale_x), int(self.road_height * scale_y)))
+        self.road_image = pygame.transform.scale(road_image, (road_length, road_width))
+        self.road_width = self.road_image.get_width()
         self.road_rect = self.road_image.get_rect()
-        self.road_x = x
         self.road_y = y
 
+    def load_onramp(self, road_file, x, y, onramp_length, onramp_width):
+        onramp_image = pygame.image.load(road_file).convert_alpha()
+
+        self.onramp_height = onramp_image.get_height()
+
+        self.onramp_image = pygame.transform.scale(onramp_image, (onramp_length, onramp_width))
+        self.onramp_width = self.onramp_image.get_width()
+        self.onramp_rect = self.onramp_image.get_rect()
+        self.onramp_x = x
+        self.onramp_y = y
+
     def draw_road(self):
-        for x in range(15):
+
+        for x in range(10):
             self.surface.blit(self.road_image, ((x * self.road_width) - self.scroll_speed * 5, self.road_y))
+            if x == 0:
+                self.surface.blit(self.onramp_image, ((x * self.onramp_width) - self.scroll_speed * 5, self.onramp_y))
+
 
     def draw_bg(self):
 
