@@ -60,7 +60,7 @@ class Window:
         # Background params
         self.road_image = pygame.image.load(window_params["road_image"])
         # self.onramp_image = pygame.image.load(window_params['onramp_image'])
-        self.bg = Background(surface=self.win, screen_width=self.width, screen_height=self.height, start_file=1, end_file=5)
+        self.bg = Background(surface=self.win, screen_width=self.width, screen_height=self.height, start_file=1, end_file=8)
         self.bg.load_road(road_file=window_params['road_image'], x=0, y=420, scale_x=0.788, scale_y=0.6)
         # Recording params
         self.is_recording = simulation_params['record']
