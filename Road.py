@@ -212,9 +212,10 @@ class Road:
                 self.progress_bar.update(1)
 
         # Update spawn_timer
-        self.timer += self.ts
-        if self.timer - self.last_spawn_time >= self.spawn_interval and road_params['vehicle_inflow'] > 0:
-            self.spawn_vehicle()
+        if road_params['vehicle_inflow'] > 0:
+            self.timer += self.ts
+            if self.timer - self.last_spawn_time >= self.spawn_interval and road_params['vehicle_inflow'] > 0:
+                self.spawn_vehicle()
 
         if road_params['onramp_inflow'] > 0:
             # Update onramp_spawn_timer
