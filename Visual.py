@@ -101,8 +101,6 @@ class Background():
 
         self.bg_width = self.bg_images[0].get_width()
 
-        print(len(self.bg_images))
-
     def load_road(self, road_file, x, y, road_length, road_width):
         road_image = pygame.image.load(road_file).convert_alpha()
 
@@ -133,14 +131,14 @@ class Background():
 
     def draw_road(self):
 
-        for x in range(6):
+        for x in range(107):
             self.surface.blit(self.road_image, ((x * self.road_width) - self.scroll_speed * 5, self.road_y))
             if x == 0:
                 self.surface.blit(self.onramp_image, ((x * self.onramp_width) - self.scroll_speed * 5, self.onramp_y))
 
     def draw_bg(self):
 
-        self.draw_bg1(num_img=4,bg_speed=1)
+        self.draw_bg1(num_img=25,bg_speed=1)
 
         # Trying to work with multiple backgrounds
         # if flag:
