@@ -41,7 +41,7 @@ class Window:
         self.acc_image = pygame.image.load(window_params["acc_image"])
         self.shc_image = pygame.image.load(window_params["shc_image"])
         self.restart_image = pygame.image.load(window_params["restart_button"])
-        self.restart_stop_image = pygame.image.load(window_params["record_stop_button"])
+        # self.restart_stop_image = pygame.image.load(window_params["record_stop_button"])
         self.pause_image = pygame.image.load(window_params["pause_button"])
         self.record_image = pygame.image.load(window_params["record_button"])
         self.play_image = pygame.image.load(window_params["play_button"])
@@ -66,7 +66,7 @@ class Window:
         self.play_button = Button(1250, 100, self.play_image, 0.05, 0.05)
 
         self.record_button = Button(1300, 100, self.record_image, 0.05, 0.05)
-        self.record_stop = Button(1350, 100, self.restart_stop_image, 0.05, 0.05)
+        # self.record_stop = Button(1350, 100, self.restart_stop_image, 0.05, 0.05)
 
         self.restart_button = Button(1400, 100, self.restart_image, 0.05, 0.05)
 
@@ -172,10 +172,10 @@ class Window:
                 if self.record_button.draw(self.win):
                     self.is_recording = not self.is_recording
                     print(" Start Recording")
-            elif self.record_stop.draw(self.win):
-                self.is_recording = not self.is_recording
-                self.has_recorded = True
-                print("Stopped Recording")
+            # elif self.record_stop.draw(self.win):
+            #     self.is_recording = not self.is_recording
+            #     self.has_recorded = True
+            #     print("Stopped Recording")
 
             self.draw_timer(restart=restart)
 
