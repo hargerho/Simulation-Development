@@ -59,8 +59,9 @@ class Window:
 
         # Background params
         self.road_image = pygame.image.load(window_params["road_image"])
-        self.bg = Background(surface=self.win, screen_width=self.width, screen_height=self.height, start_file=1, end_file=5)
-
+        # self.onramp_image = pygame.image.load(window_params['onramp_image'])
+        self.bg = Background(surface=self.win, screen_width=self.width, screen_height=self.height, start_file=1, end_file=8)
+        self.bg.load_road(road_file=window_params['road_image'], x=0, y=420, scale_x=0.788, scale_y=0.6)
         # Recording params
         self.is_recording = simulation_params['record']
         self.has_recorded = False
@@ -134,17 +135,20 @@ class Window:
         seconds = (elapsed_time // 1000) % 60
         minutes = (elapsed_time // 60000) % 60
         time_str = f"{minutes:02d}:{seconds:02d}.{milliseconds:02d}"
-        timer_font = pygame.font.Font(None, 30)
+        timer_font = pygame.font.Font(None, 32)
         timer_text = timer_font.render(time_str, True, window_params["black"])
-        self.win.blit(timer_text, (155,11))
+        timer_rect = timer_text.get_rect(center=(220, 41))
+        self.win.blit(timer_text, timer_rect)
 
         timer_surface = timer_font.render("Elapsed Time:", True, window_params['black'])
-        timer_rect_text = timer_surface.get_rect(center=(80,20))
+        timer_rect_text = timer_surface.get_rect(center=(85,40))
         self.win.blit(timer_surface, timer_rect_text)
 
     def draw_refeshed_objects(self):
 
-        # self.background.scroll_bg()
+        # Scrolling bg
+        self.bg.draw_bg()
+        self.bg.draw_road()
 
         # Draw the recording toggle
         ellipse_rect = pygame.Rect(self.restart_x_loc - 108, 17, 100, 50)
@@ -183,8 +187,8 @@ class Window:
         self.win.blit(roadSurface, roadRect.topleft)
 
         # Overlay the road image
-        road = Objects(-1, 350, self.road_image, 0.3, 0.1)
-        road.draw_special(self.win)
+        # road = Objects(0, 420, self.road_image, 0.6, 0.6)
+        # road.draw_special(self.win)
 
         # Draw speed limit
 
@@ -224,7 +228,6 @@ class Window:
 
         while self.is_running:
             restart = False
-            self.bg.draw_bg()
 
             self.draw_refeshed_objects()
 
