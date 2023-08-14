@@ -41,7 +41,9 @@ window_params = {
     "left_button": 'common/assets/left.png',
     "middle_button": 'common/assets/middle.png',
     "right_button": 'common/assets/right.png',
-    "scroll_limit": 31760
+    "scroll_limit": 31760,
+    "signpost_image": 'common/assets/signpost.png',
+    "signpost_interval": length_conversion(1000)
 }
 
 road_params = {

@@ -63,7 +63,7 @@ class Window:
         self.bg = Background(surface=self.win, screen_width=self.width, screen_height=self.height, start_file=1, end_file=8)
         self.bg.load_road(road_file=window_params['road_image'], x=0, y=410, road_length=self.width, road_width=self.road_width)
         self.bg.load_onramp(road_file=window_params['onramp_image'], x=0, y=355, onramp_length=self.onramp_length*1.35, onramp_width=self.lanewidth+10)
-
+        self.bg.load_signpost(signpost_file = window_params['signpost_image'])
         # Recording params
         self.is_recording = simulation_params['record']
         self.has_recorded = False
@@ -150,7 +150,9 @@ class Window:
 
         # Scrolling bg
         self.bg.draw_bg()
+        self.bg.draw_signpost()
         self.bg.draw_road()
+
 
         # Draw the recording toggle
         ellipse_rect = pygame.Rect(self.restart_x_loc - 108, 17, 100, 50)

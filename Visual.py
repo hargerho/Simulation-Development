@@ -120,6 +120,41 @@ class Background():
         self.onramp_x = x
         self.onramp_y = y
 
+    def load_signpost(self, signpost_file):
+        signpost_image = pygame.image.load(signpost_file).convert_alpha()
+
+        self.signpost_height = signpost_image.get_height()
+        self.signpost_width = signpost_image.get_width()
+        self.signpost_image = pygame.transform.scale(signpost_image, (self.signpost_width, self.signpost_height))
+
+
+    def draw_signpost(self):
+        font = pygame.font.Font(None, 32)
+        box_y = 340
+
+        for interval in range(1,17):
+            box_width, box_height = 200, 100
+            box_x = interval*window_params['signpost_interval'] - self.scroll_speed * 5
+            # Render text
+            text_surface = font.render(f"{str(interval)}km", True, window_params['black'])
+            text_width, text_height = text_surface.get_size()
+
+            # Calculate text position
+            text_x = box_x + (box_width - text_width) // 2
+            text_y = box_y + (box_height - text_height) // 2
+
+            # Draw signpost
+            self.surface.blit(self.signpost_image, (box_x - 180, 150))
+
+            # Draw text
+            self.surface.blit(text_surface, (text_x, text_y))
+
+            if interval == 16:
+                # Draw text
+                text_surface = font.render(f"{str(interval)}km", True, window_params['black'])
+                self.surface.blit(text_surface, (text_x, text_y))
+
+
     def draw_vehicle(self, shc_image, veh_length, veh_width, vehicle_loc):
         car_surface = pygame.Surface((veh_length, veh_width))
         car_rect = car_surface.get_rect()
