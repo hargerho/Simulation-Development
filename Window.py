@@ -20,6 +20,7 @@ class Window:
         self.vehicle_length = window_params["vehicle_length"]
         self.vehicle_width = window_params["vehicle_width"]
         self.road_length = road_params["road_length"]
+        print(self.road_length)
         self.lanewidth = road_params["lanewidth"]
         self.onramp_length = road_params['onramp_length']
         self.num_lanes = road_params['num_lanes']
@@ -246,11 +247,13 @@ class Window:
             if key[pygame.K_LEFT] and self.bg.scroll_speed > 0:
                 self.bg.scroll_speed -= 5
             if key[pygame.K_RIGHT]:
-                self.bg.scroll_speed += 5
+                self.bg.scroll_speed += 50
             if key[pygame.K_DOWN] and self.bg.scroll_speed > 0:
                 self.bg.scroll_speed -= 20
             if key[pygame.K_UP]:
-                self.bg.scroll_speed += 20
+                self.bg.scroll_speed += 100
+
+            # print("scroll_speed:", self.bg.scroll_speed)
 
             # Event check first
             for event in pygame.event.get():

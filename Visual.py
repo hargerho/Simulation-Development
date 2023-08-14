@@ -133,14 +133,14 @@ class Background():
 
     def draw_road(self):
 
-        for x in range(10):
+        for x in range(6):
             self.surface.blit(self.road_image, ((x * self.road_width) - self.scroll_speed * 5, self.road_y))
             if x == 0:
                 self.surface.blit(self.onramp_image, ((x * self.onramp_width) - self.scroll_speed * 5, self.onramp_y))
 
     def draw_bg(self):
 
-        self.draw_bg1(2,1)
+        self.draw_bg1(num_img=4,bg_speed=1)
 
         # Trying to work with multiple backgrounds
         # if flag:
@@ -148,8 +148,8 @@ class Background():
         #     self.draw_bg2(2,1)
 
 
-    def draw_bg1(self, y, bg_speed):
-        for x in range(y):
+    def draw_bg1(self, num_img, bg_speed):
+        for x in range(num_img):
             for img in self.bg_images[:3]:
                 x_coord = (x * self.bg_width) - bg_speed * self.scroll_speed
                 self.surface.blit(img, (x_coord, 0))
@@ -157,8 +157,8 @@ class Background():
 
         # return (x_coord <= 0)
 
-    def draw_bg2(self, y, bg_speed):
-        for x in range(y):
+    def draw_bg2(self, num_img, bg_speed):
+        for x in range(num_img):
             for img in self.bg_images[-4:]:
                 self.surface.blit(img, ((x * self.bg_width) - bg_speed * self.scroll_speed, 0))
                 # bg_speed += 0.2
