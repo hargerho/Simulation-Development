@@ -25,7 +25,6 @@ window_params = {
     "red": (255,0,0),
     "vehicle_length": length_conversion(5), #5m TESTING: 10PX
     "vehicle_width": length_conversion(2), #2+m TESTING: 5PX
-    "background_image": 'common/assets/grassbackground.png',
     "onramp_image": 'common/assets/onramp.png',
     "road_image": 'common/assets/roadtile.png',
     "acc_image": 'common/assets/acc.png',
