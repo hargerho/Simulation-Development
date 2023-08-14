@@ -122,13 +122,21 @@ class Background():
         self.onramp_x = x
         self.onramp_y = y
 
+    def draw_vehicle(self, shc_image, veh_length, veh_width, vehicle_loc):
+        car_surface = pygame.Surface((veh_length, veh_width))
+        car_rect = car_surface.get_rect()
+        car_rect.center = vehicle_loc
+        x_pos = car_rect.centerx
+        y_pos = car_rect.centery
+
+        self.surface.blit(shc_image, (x_pos - self.scroll_speed * 5, y_pos))
+
     def draw_road(self):
 
         for x in range(10):
             self.surface.blit(self.road_image, ((x * self.road_width) - self.scroll_speed * 5, self.road_y))
             if x == 0:
                 self.surface.blit(self.onramp_image, ((x * self.onramp_width) - self.scroll_speed * 5, self.onramp_y))
-
 
     def draw_bg(self):
 
