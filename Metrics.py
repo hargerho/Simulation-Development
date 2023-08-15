@@ -14,183 +14,91 @@ folderpath = "data/1000_vehicles/"
 
 road_length = road_params['road_length']
 
-testList = [[0, loc_conversion(1000)], [loc_conversion(1000), loc_conversion(1000)+loc_conversion(2000)],[(int(road_length/2) - loc_conversion(500)), (int(road_length/2) + loc_conversion(500))], [(road_length-loc_conversion(1000)), road_length], [0, road_length]]
-nameList = [[0, 1], [1, 2], ['Roadblock-500m', '+500'], [15, 16], [0, 16]]
+testDict = {
+    '0-1km': (0, loc_conversion(1000)),
+    '1-2km': (loc_conversion(1000), loc_conversion(1000)+loc_conversion(2000)),
+    'Roadblock:+-500m': ((int(road_length/2) - loc_conversion(500)), (int(road_length/2) + loc_conversion(500))),
+    '15-16km': ((road_length-loc_conversion(1000)), road_length),
+}
 
-for index, item in tqdm(enumerate(testList), total=len(testList), desc="Processing"):
-    section_start = item[0]
-    section_end = item[1]
-    start_name = nameList[index][0]
-    end_name = nameList[index][1]
-    # Iterate through the files in the folder
-    for filename in tqdm(os.listdir(folderpath), desc="Files"):
-        if filename.endswith('.json'):
-            json_path = os.path.join(folderpath, filename)
+# Iterate through the files in the folder
+for filename in tqdm(os.listdir(folderpath), desc="Files"):
+    if filename.endswith('.json'):
+        json_path = os.path.join(folderpath, filename)
 
-            # Read JSON file
-            with open(json_path, 'r') as json_file:
-                json_data = json.load(json_file)
+        # Read JSON file
+        with open(json_path, 'r') as json_file:
+            json_data = json.load(json_file)
 
-            # Convert data to a flat list of dictionaries
-            flat_data = []
-            for frame_key, frame_data in json_data.items():
-                for vehicle in frame_data:
-                    flat_data.append({
-                        'frame': int(frame_key),
-                        'uuid': vehicle['uuid'],
-                        'vehicle_type': vehicle['vehicle_type'],
-                        'location': vehicle['location'],
-                        'speed': vehicle['speed'],
-                        'timestamp': vehicle['timestamp']
-                    })
+        # Convert data to a flat list of dictionaries
+        flat_data = []
+        for frame_key, frame_data in json_data.items():
+            for vehicle in frame_data:
+                flat_data.append({
+                    'frame': int(frame_key),
+                    'uuid': vehicle['uuid'],
+                    'vehicle_type': vehicle['vehicle_type'],
+                    'location': vehicle['location'],
+                    'speed': vehicle['speed'],
+                    'timestamp': vehicle['timestamp']
+                })
+        # Create a DataFrame from the flat data
+        df = pd.DataFrame(flat_data)
 
-            # Create a DataFrame from the flat data
-            df = pd.DataFrame(flat_data)
+        # Create a list to store interval-specific DataFrames
+        interval_dfs = []
 
-            # Filter rows based on x-coordinate range
-            filtered_df = df[df['location'].apply(lambda loc: section_start <= loc[0] <= section_end)]
+        # Filter rows and create interval-specific DataFrames
+        for label, (start, end) in testDict.items():
+            interval_rows = df[df['location'].apply(lambda x: start <= x[0] <= end)]
+            interval_rows['Interval'] = label  # Add a new column for interval label
+            interval_dfs.append(interval_rows)
 
-            # Converting pixel/second -> kmph
-            filtered_df.loc[:,'speed']= filtered_df['speed'] * (3600/2000) # Converts back to kmph
+        # Combine interval-specific DataFrames into a single DataFrame
+        combined_df = pd.concat(interval_dfs, ignore_index=True)
 
-            # Remove unnecessary columns
-            dropped_df = filtered_df.drop(['vehicle_type', 'location', 'timestamp'], axis=1)
+        # Convert speed from pixel/second -> kmph
+        combined_df['speed'] *= (3600 / 2000)
 
-            # Counting Vehicle Density = vehicles/km per frame
-            dropped_df['num_vehicles'] = dropped_df.groupby('frame')['uuid'].transform('nunique')
-            dropped_df = dropped_df.drop(['uuid'], axis=1)
+        # Group by interval and frame, and calculate necessary statistics
+        grouped_df = combined_df.groupby(['Interval', 'frame']).agg({
+            'speed': 'mean',
+            'uuid': 'nunique'
+        }).reset_index()
 
-            # Counting Space mean speed per frame
-            dropped_df['average_speed'] = dropped_df.groupby('frame')['speed'].transform('mean')
-            result_df = dropped_df.drop_duplicates(subset=['frame'])
-            sorted_df = result_df.sort_values('frame')
+        # Rename columns for clarity
+        grouped_df.rename(columns={'speed': 'average_speed', 'uuid': 'num_vehicles'}, inplace=True)
 
-            # Compute vehicle flow per km per frame
-            sorted_df['flow'] = sorted_df['num_vehicles'].multiply(sorted_df['average_speed'])
+        # Compute flow and moving average
+        grouped_df['flow'] = grouped_df['num_vehicles'] * grouped_df['average_speed']
+        grouped_df['moving_average_flow'] = grouped_df.groupby('Interval')['flow'].rolling(window=10).mean().reset_index(level=0, drop=True)
 
-            # Compute traffic flow moving average across 10 frame intervals
-            moving_average_flow_df = sorted_df['flow'].rolling(window=10).mean()
-            cleaned_df = moving_average_flow_df.dropna(axis=0)
-            moving_average_list = cleaned_df.tolist()
+        # Filter out NaN values from moving average
+        grouped_df.dropna(subset=['moving_average_flow'], inplace=True)
 
-            num_vehicles = sorted_df['num_vehicles'].values.tolist()
-            flow = sorted_df['flow'].values.tolist()
+        # Iterate over intervals and create separate plots
+        for interval_label, interval_df in grouped_df.groupby('Interval'):
+            plt.figure(figsize=(12, 8))
 
-            # Plotting Data
-            plt.figure(figsize=(12,8))
-
-            # Plotting Vehicle Flow vs Vehicle Density
             plt.subplot(3,1,1)
-            plt.scatter(num_vehicles, flow, 0.1)
-            plt.xlabel('Vehicle Density (Vehicle/km)')
-            plt.ylabel('Vehicle Flow (Vehicle/Hour)')
-            plt.title(f"Vehicle Flow vs Vehicle Density from {start_name}-{end_name}km")
+            plt.scatter(interval_df['num_vehicles'], interval_df['flow'], 0.1)
+            plt.xlabel('Vehicle Density')
+            plt.ylabel('Vehicle Flow')
+            plt.title(f'Vehicle Flow vs Vehicle Density per Timestep ({interval_label})')
 
-            # Plotting Vehicle Flow vs Timestep
             plt.subplot(3,1,2)
-            plt.scatter(range(len(flow)), flow, 0.1)
+            plt.scatter(interval_df['frame'], interval_df['flow'], 0.1)
             plt.xlabel('Timestep')
-            plt.ylabel('Vehicle Flow (Vehicle/Hour)')
-            plt.title(f"Vehicle Flow vs Timestep from {start_name}-{end_name}km")
+            plt.ylabel('Vehicle Flow')
+            plt.title(f'Vehicle Flow vs Timestep ({interval_label})')
 
-            # Plotting Vehicle Flow Moving Average vs Timestep
             plt.subplot(3,1,3)
-            plt.scatter(range(len(moving_average_list)), moving_average_list, 0.1)  # Adding markers for each data point
+            plt.scatter(interval_df['frame'], interval_df['moving_average_flow'], 0.1)
             plt.xlabel('Timestep')
             plt.ylabel('Flow Moving Average')
-            plt.title(f"Plot of Vehicle Flow Moving Average from {start_name}-{end_name}km")
+            plt.title(f'Vehicle Flow Moving Average ({interval_label})')
 
             plt.tight_layout()
-            name = f"{filename}{start_name}-{end_name}km.png"
+            name = f"{filename}_{interval_label}.png"
             save_name = name.replace("data/", "").replace(".json", "").replace("1000_vehicles/", "100_vehicles_")
-            plt.savefig(save_name)
-
-folderpath2 = "data/ranged/"
-
-for index, item in tqdm(enumerate(testList), total=len(testList), desc="Processing"):
-    section_start = item[0]
-    section_end = item[1]
-    start_name = nameList[index][0]
-    end_name = nameList[index][1]
-    # Iterate through the files in the folder
-    for filename in tqdm(os.listdir(folderpath2), desc="Files"):
-        if filename.endswith('.json'):
-            json_path = os.path.join(folderpath2, filename)
-
-            # Read JSON file
-            with open(json_path, 'r') as json_file:
-                json_data = json.load(json_file)
-
-            # Convert data to a flat list of dictionaries
-            flat_data = []
-            for frame_key, frame_data in json_data.items():
-                for vehicle in frame_data:
-                    flat_data.append({
-                        'frame': int(frame_key),
-                        'uuid': vehicle['uuid'],
-                        'vehicle_type': vehicle['vehicle_type'],
-                        'location': vehicle['location'],
-                        'speed': vehicle['speed'],
-                        'timestamp': vehicle['timestamp']
-                    })
-
-            # Create a DataFrame from the flat data
-            df = pd.DataFrame(flat_data)
-
-            # Filter rows based on x-coordinate range
-            filtered_df = df[df['location'].apply(lambda loc: section_start <= loc[0] <= section_end)]
-
-            # Converting pixel/second -> kmph
-            filtered_df.loc[:,'speed']= filtered_df['speed'] * (3600/2000) # Converts back to kmph
-
-            # Remove unnecessary columns
-            dropped_df = filtered_df.drop(['vehicle_type', 'location', 'timestamp'], axis=1)
-
-            # Counting Vehicle Density = vehicles/km per frame
-            dropped_df['num_vehicles'] = dropped_df.groupby('frame')['uuid'].transform('nunique')
-            dropped_df = dropped_df.drop(['uuid'], axis=1)
-
-            # Counting Space mean speed per frame
-            dropped_df['average_speed'] = dropped_df.groupby('frame')['speed'].transform('mean')
-            result_df = dropped_df.drop_duplicates(subset=['frame'])
-            sorted_df = result_df.sort_values('frame')
-
-            # Compute vehicle flow per km per frame
-            sorted_df['flow'] = sorted_df['num_vehicles'].multiply(sorted_df['average_speed'])
-
-            # Compute traffic flow moving average across 10 frame intervals
-            moving_average_flow_df = sorted_df['flow'].rolling(window=10).mean()
-            cleaned_df = moving_average_flow_df.dropna(axis=0)
-            moving_average_list = cleaned_df.tolist()
-
-            num_vehicles = sorted_df['num_vehicles'].values.tolist()
-            flow = sorted_df['flow'].values.tolist()
-
-            # Plotting Data
-            plt.figure(figsize=(12,8))
-
-            # Plotting Vehicle Flow vs Vehicle Density
-            plt.subplot(3,1,1)
-            plt.scatter(num_vehicles, flow, 0.1)
-            plt.xlabel('Vehicle Density (Vehicle/km)')
-            plt.ylabel('Vehicle Flow (Vehicle/Hour)')
-            plt.title(f"Vehicle Flow vs Vehicle Density from {start_name}-{end_name}km")
-
-            # Plotting Vehicle Flow vs Timestep
-            plt.subplot(3,1,2)
-            plt.scatter(range(len(flow)), flow, 0.1)
-            plt.xlabel('Timestep')
-            plt.ylabel('Vehicle Flow (Vehicle/Hour)')
-            plt.title(f"Vehicle Flow vs Timestep from {start_name}-{end_name}km")
-
-            # Plotting Vehicle Flow Moving Average vs Timestep
-            plt.subplot(3,1,3)
-            plt.scatter(range(len(moving_average_list)), moving_average_list, 0.1)  # Adding markers for each data point
-            plt.xlabel('Timestep')
-            plt.ylabel('Flow Moving Average')
-            plt.title(f"Plot of Vehicle Flow Moving Average from {start_name}-{end_name}km")
-
-            plt.tight_layout()
-            name = f"{filename}{start_name}-{end_name}km.png"
-            save_name = name.replace("data/ranged/", "").replace(".json", "")
             plt.savefig(save_name)
