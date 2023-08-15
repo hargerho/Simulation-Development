@@ -101,8 +101,6 @@ class Background():
 
         self.bg_width = self.bg_images[0].get_width()
 
-        print(len(self.bg_images))
-
     def load_road(self, road_file, x, y, road_length, road_width):
         road_image = pygame.image.load(road_file).convert_alpha()
 
@@ -122,17 +120,60 @@ class Background():
         self.onramp_x = x
         self.onramp_y = y
 
+    def load_signpost(self, signpost_file):
+        signpost_image = pygame.image.load(signpost_file).convert_alpha()
+
+        self.signpost_height = signpost_image.get_height()
+        self.signpost_width = signpost_image.get_width()
+        self.signpost_image = pygame.transform.scale(signpost_image, (self.signpost_width, self.signpost_height))
+
+
+    def draw_signpost(self):
+        font = pygame.font.Font(None, 32)
+        box_y = 340
+
+        for interval in range(1,17):
+            box_width, box_height = 200, 100
+            box_x = interval*window_params['signpost_interval'] - self.scroll_speed * 5
+            # Render text
+            text_surface = font.render(f"{str(interval)}km", True, window_params['black'])
+            text_width, text_height = text_surface.get_size()
+
+            # Calculate text position
+            text_x = box_x + (box_width - text_width) // 2
+            text_y = box_y + (box_height - text_height) // 2
+
+            # Draw signpost
+            self.surface.blit(self.signpost_image, (box_x - 180, 150))
+
+            # Draw text
+            self.surface.blit(text_surface, (text_x, text_y))
+
+            if interval == 16:
+                # Draw text
+                text_surface = font.render(f"{str(interval)}km", True, window_params['black'])
+                self.surface.blit(text_surface, (text_x, text_y))
+
+
+    def draw_vehicle(self, shc_image, veh_length, veh_width, vehicle_loc):
+        car_surface = pygame.Surface((veh_length, veh_width))
+        car_rect = car_surface.get_rect()
+        car_rect.center = vehicle_loc
+        x_pos = car_rect.centerx
+        y_pos = car_rect.centery
+
+        self.surface.blit(shc_image, (x_pos - self.scroll_speed * 5, y_pos))
+
     def draw_road(self):
 
-        for x in range(10):
+        for x in range(107):
             self.surface.blit(self.road_image, ((x * self.road_width) - self.scroll_speed * 5, self.road_y))
             if x == 0:
                 self.surface.blit(self.onramp_image, ((x * self.onramp_width) - self.scroll_speed * 5, self.onramp_y))
 
-
     def draw_bg(self):
 
-        self.draw_bg1(2,1)
+        self.draw_bg1(num_img=25,bg_speed=1)
 
         # Trying to work with multiple backgrounds
         # if flag:
@@ -140,8 +181,8 @@ class Background():
         #     self.draw_bg2(2,1)
 
 
-    def draw_bg1(self, y, bg_speed):
-        for x in range(y):
+    def draw_bg1(self, num_img, bg_speed):
+        for x in range(num_img):
             for img in self.bg_images[:3]:
                 x_coord = (x * self.bg_width) - bg_speed * self.scroll_speed
                 self.surface.blit(img, (x_coord, 0))
@@ -149,8 +190,8 @@ class Background():
 
         # return (x_coord <= 0)
 
-    def draw_bg2(self, y, bg_speed):
-        for x in range(y):
+    def draw_bg2(self, num_img, bg_speed):
+        for x in range(num_img):
             for img in self.bg_images[-4:]:
                 self.surface.blit(img, ((x * self.bg_width) - bg_speed * self.scroll_speed, 0))
                 # bg_speed += 0.2

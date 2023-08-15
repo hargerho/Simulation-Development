@@ -41,16 +41,19 @@ window_params = {
     "left_button": 'common/assets/left.png',
     "middle_button": 'common/assets/middle.png',
     "right_button": 'common/assets/right.png',
+    "scroll_limit": 31760,
+    "signpost_image": 'common/assets/signpost.png',
+    "signpost_interval": length_conversion(1000)
 }
 
 road_params = {
     "toplane_loc": (0,380), #(x, y)
-    "road_length": length_conversion(500), #16000m
+    "road_length": length_conversion(16000), #16000m
     "onramp_length": length_conversion(140), # 140m
     "num_lanes": 4, # including an onramp
     "lanewidth": length_conversion(5), # arbitary
-    "vehicle_inflow": 0, # 1000 approx 1veh/3.6sec testing: 10000
-    "onramp_inflow": 1000,
+    "vehicle_inflow": 1000, # 1000 approx 1veh/3.6sec testing: 10000
+    "onramp_inflow": 0,
     "num_convoy_vehicles": 3,
     "road_closed": None
 }
@@ -61,7 +64,7 @@ road_params = {
 # Left bias = 0.3m/s
 # Lane change threshold = 0.1m/s
 driving_params = {
-    "desired_velocity": speed_conversion(70), # testing: 16.6
+    "desired_velocity": speed_conversion(100), # testing: 16.6 real: 70
     "safety_threshold": length_conversion(1.5), # testing: 20px
     "max_acceleration": length_conversion(4), # IDM Paper # was 0.73 # Testing:50
     "comfortable_deceleration": length_conversion(1.67), # IDM Paper # was 1.67 # Testing: 4.61
@@ -92,8 +95,8 @@ filename = f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_R
 baseline = f"ACCNo_SHC{driving_params['shc_logic']}_Road{road_params['road_closed']}_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}"
 
 simulation_params = {
-    "ts": 1/60, # was 0.001  testing: 1/60 # Ts < 0.5 same results
-    "playback_speed": 5, # realtime = 1
+    "ts": 0.1, # was 0.001  testing: 1/60 # Ts < 0.5 same results
+    "playback_speed": 10, # realtime = 1
     "folderpath": "data",
     "filename": f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}",
     "record": False, # Default False

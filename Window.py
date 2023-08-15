@@ -63,6 +63,7 @@ class Window:
         self.bg = Background(surface=self.win, screen_width=self.width, screen_height=self.height, start_file=1, end_file=8)
         self.bg.load_road(road_file=window_params['road_image'], x=0, y=410, road_length=self.width, road_width=self.road_width)
         self.bg.load_onramp(road_file=window_params['onramp_image'], x=0, y=355, onramp_length=self.onramp_length*1.35, onramp_width=self.lanewidth+10)
+        self.bg.load_signpost(signpost_file = window_params['signpost_image'])
         # Recording params
         self.is_recording = simulation_params['record']
         self.has_recorded = False
@@ -149,6 +150,7 @@ class Window:
 
         # Scrolling bg
         self.bg.draw_bg()
+        self.bg.draw_signpost()
         self.bg.draw_road()
 
 
@@ -199,25 +201,14 @@ class Window:
                 for convoy in vehicle.convoy_list:
                     # Indexing the convoy
                     vehicle_id = convoy.vehicle_id()
-                    vehicleLoc = vehicle_id['location']
+                    vehicle_loc = vehicle_id['location']
 
-                    # Drawing the convoy
-                    carSurface = pygame.Surface((self.vehicle_length,self.vehicle_width))
-                    # carSurface.fill(window_params['white'])
-                    carRect = carSurface.get_rect()
-                    carRect.center = vehicleLoc
-                    # self.win.blit(carSurface, carRect)
-                    self.win.blit(self.acc_image, carRect)
+                    self.bg.draw_vehicle(self.acc_image, self.vehicle_length, self.vehicle_width, vehicle_loc=vehicle_loc)
             else:
                 vehicle_id = vehicle.vehicle_id()
-                vehicleLoc = vehicle_id['location']
+                vehicle_loc = vehicle_id['location']
 
-                carSurface = pygame.Surface((self.vehicle_length,self.vehicle_width))
-                # carSurface.fill(window_params['green'])
-                carRect = carSurface.get_rect()
-                carRect.center = vehicleLoc
-                # self.win.blit(carSurface, carRect)
-                self.win.blit(self.shc_image, carRect)
+                self.bg.draw_vehicle(self.shc_image, self.vehicle_length, self.vehicle_width, vehicle_loc=vehicle_loc)
 
     def run_window(self):
         frame = 0
@@ -256,11 +247,11 @@ class Window:
             key = pygame.key.get_pressed()
             if key[pygame.K_LEFT] and self.bg.scroll_speed > 0:
                 self.bg.scroll_speed -= 5
-            if key[pygame.K_RIGHT]:
+            if key[pygame.K_RIGHT] and self.bg.scroll_speed < window_params['scroll_limit']:
                 self.bg.scroll_speed += 5
             if key[pygame.K_DOWN] and self.bg.scroll_speed > 0:
                 self.bg.scroll_speed -= 20
-            if key[pygame.K_UP]:
+            if key[pygame.K_UP] and self.bg.scroll_speed < window_params['scroll_limit']:
                 self.bg.scroll_speed += 20
 
             # Event check first
