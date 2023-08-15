@@ -4,7 +4,10 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+
 from common.config import road_params
+
+pd.options.mode.chained_assignment = None  # default='warn'
 
 # 1m : 2px
 def loc_conversion(value):
