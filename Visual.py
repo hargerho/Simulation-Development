@@ -86,6 +86,14 @@ class UserButton(pygame.sprite.Sprite):
         else:
             pygame.draw.rect(self.image, window_params['green'], self.image.get_rect(), 4)
 
+class Slider():
+    def __init__(self, pos, size, start, min, max):
+        self.pos = pos
+        self.size = size
+
+        self.left_pos = self.pos[0] - (size[0]//2)
+        self.right_pos = self.pos[0] + (size[0]//2)
+        self.top_pos = self.pos[1] + (size[1]//2)
 class Background():
     def __init__(self, surface, screen_width, screen_height, start_file, end_file):
         self.surface = surface
