@@ -132,6 +132,33 @@ class Slider():
             pos = self.right_pos
         self.slider_button.centerx = pos
 
+class Minimap():
+    def __init__(self, surface):
+        self.surface = surface
+
+    def load_map(self, x, y, map_width, map_height):
+        miniroad = pygame.image.load(window_params['miniroad']).convert_alpha()
+        self.miniroad = pygame.transform.scale(miniroad, (map_width, map_height))
+        self.map_width, self.map_height = self.miniroad.get_rect().size
+        self.miniroad_y = y
+        self.miniroad_x = x
+
+    def draw_map(self):
+        # Display text
+        font = pygame.font.Font(None, 30)
+        text_surface = font.render('Mini-Map', True, window_params['black'])
+        text_rect = text_surface.get_rect(center=((self.miniroad_x+self.map_width/2), 20))
+        self.surface.blit(text_surface, text_rect)
+
+        # Drawing border
+        border = 2
+        border_x = self.miniroad_x - 2 * border
+        border_y = self.miniroad_y - 2 * border
+        border_width = self.map_width + 4 * border
+        border_height = self.map_height + 4 * border
+        pygame.draw.rect(self.surface, window_params['black'], (border_x, border_y, border_width, border_height), border)
+
+        self.surface.blit(self.miniroad, (self.miniroad_x, self.miniroad_y))
 class Background():
     def __init__(self, surface, screen_width, screen_height, start_file, end_file):
         self.surface = surface
@@ -173,7 +200,6 @@ class Background():
         self.signpost_width = signpost_image.get_width()
         self.signpost_image = pygame.transform.scale(signpost_image, (self.signpost_width, self.signpost_height))
 
-
     def draw_signpost(self):
         font = pygame.font.Font(None, 32)
         box_y = 340
@@ -200,7 +226,6 @@ class Background():
                 text_surface = font.render(f"{str(interval)}km", True, window_params['black'])
                 self.surface.blit(text_surface, (text_x, text_y))
 
-
     def draw_vehicle(self, shc_image, veh_length, veh_width, vehicle_loc):
         car_surface = pygame.Surface((veh_length, veh_width))
         car_rect = car_surface.get_rect()
@@ -225,7 +250,6 @@ class Background():
         # if flag:
         #     print("Reached")
         #     self.draw_bg2(2,1)
-
 
     def draw_bg1(self, num_img, bg_speed):
         for x in range(num_img):

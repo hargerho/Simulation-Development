@@ -27,6 +27,7 @@ window_params = {
     "vehicle_width": length_conversion(2), #2+m TESTING: 5PX
     "onramp_image": 'common/assets/onramp.png',
     "road_image": 'common/assets/roadtile.png',
+    "miniroad": 'common/assets/miniroad.png',
     "acc_image": 'common/assets/acc.png',
     "shc_image": 'common/assets/shc.png',
     "restart_button": 'common/assets/restart.png',
@@ -43,7 +44,7 @@ window_params = {
     "right_button": 'common/assets/right.png',
     "scroll_limit": 31760,
     "signpost_image": 'common/assets/signpost.png',
-    "signpost_interval": length_conversion(1000)
+    "signpost_interval": length_conversion(1000),
 }
 
 road_params = {

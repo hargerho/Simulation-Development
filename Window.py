@@ -64,6 +64,11 @@ class Window:
         self.bg.load_road(road_file=window_params['road_image'], x=0, y=410, road_length=self.width, road_width=self.road_width)
         self.bg.load_onramp(road_file=window_params['onramp_image'], x=0, y=355, onramp_length=self.onramp_length*1.35, onramp_width=self.lanewidth+10)
         self.bg.load_signpost(signpost_file = window_params['signpost_image'])
+
+        # Minimap
+        self.minimap = Minimap(surface=self.win)
+        self.minimap.load_map(x=550, y=40, map_width=400, map_height=50)
+
         # Recording params
         self.is_recording = simulation_params['record']
         self.has_recorded = False
@@ -122,7 +127,7 @@ class Window:
             self.global_buttons.add(button)
             self.road_buttons.append(button)
 
-        # Create Slider
+        # Create Sliders
         self.inflow_slider = Slider((self.traffic_datumn_x+934,self.traffic_datumn_y-25), (258,15), 4/7, 0, 7000, "vehicle_inflow")
         self.onramp_slider = Slider((self.traffic_datumn_x+934,self.traffic_datumn_y), (258,15), 0, 0, 200, "onramp_inflow")
         self.inflow_value = road_params['vehicle_inflow']
@@ -158,6 +163,11 @@ class Window:
         self.bg.draw_bg()
         self.bg.draw_signpost()
         self.bg.draw_road()
+
+        # Drawing minimap
+        self.minimap.draw_map()
+
+        # Drawing sliders
         self.inflow_slider.draw_slider(self.win)
         self.onramp_slider.draw_slider(self.win)
 
