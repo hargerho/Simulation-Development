@@ -171,9 +171,9 @@ class Window:
             ("AI-Controlled Convoy Vehicle", (self.traffic_datumn_x-5, self.traffic_datumn_y+2), 20),
             ("Simulated Human Controlled Vehicle", (self.traffic_datumn_x+20, self.traffic_datumn_y+50), 20),
             ("Traffic Parameters", (self.traffic_datumn_x+930, self.traffic_datumn_y-50), 30),
-            ("Road Closure", (self.traffic_datumn_x+750, self.traffic_datumn_y+80), 20),
-            ("Inflow", (self.traffic_datumn_x+727, self.traffic_datumn_y-10), 20),
-            ("On-ramp Flow", (self.traffic_datumn_x+752, self.traffic_datumn_y+15), 20),
+            ("Road Closure", (self.traffic_datumn_x+740, self.traffic_datumn_y+80), 20),
+            ("Inflow", (self.traffic_datumn_x+717, self.traffic_datumn_y-10), 20),
+            ("On-ramp Flow", (self.traffic_datumn_x+742, self.traffic_datumn_y+15), 20),
             (f"{self.inflow_value} veh/h", (self.traffic_datumn_x+1110, self.traffic_datumn_y-13), 20),
             (f"{self.onramp_value} veh/h", (self.traffic_datumn_x+1110, self.traffic_datumn_y+13), 20),
         ]
