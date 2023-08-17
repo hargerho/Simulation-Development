@@ -3,7 +3,7 @@ from Test import Test
 import time
 
 from common.config import *
-testing = False
+testing = True
 
 def get_params(combination):
 
@@ -35,16 +35,18 @@ def get_params(combination):
     }
 
     # Change here
-    return range_testing.get(combination)
+    return testing_params.get(combination)
 
 def main():
     # Data Collection
 
     if testing:
+        simulation_params['record'] = testing
+        simulation_params['testing'] = testing
 
         start = time.time()
 
-        for i in range(10):
+        for i in range(1):
             print("----------------------")
             print("Testing Combination:", i)
             startite = time.time()
@@ -55,7 +57,8 @@ def main():
             driving_params["shc_logic"] = testing_list[1]
             driving_params["acc_logic"] = testing_list[0]
             acc_params["acc_spawnrate"] = 0 if i == 0 else 0.2
-            simulation_params["filename"] = f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_Road{road_params['road_closed']}_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}_ranged"
+            # simulation_params["filename"] = f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_Road{road_params['road_closed']}_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}_ranged"
+            simulation_params["filename"] = f"NoVariation"
             test = Test()
             test.run_test()
             endite = time.time()

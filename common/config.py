@@ -64,10 +64,11 @@ driving_params = {
 
 # Noraml Speed Variation = 5m/s = 10px/s
 # Irratinal Speed Variation = 10m/s = 20px/s
+# Normal = 10 variation, irrational = 20
 # Headway in seconds
 shc_params = {
-    "normal": {"safe_headway": 3.1, "speed_variation": 10, "politeness_factor": 0.25},
-    "irrational": {"safe_headway": 1.5, "speed_variation": 20, "politeness_factor": 0.15},
+    "normal": {"safe_headway": 3.1, "speed_variation": 0, "politeness_factor": 0.25},
+    "irrational": {"safe_headway": 1.5, "speed_variation": 0, "politeness_factor": 0.15},
 }
 
 acc_params = {
@@ -86,7 +87,7 @@ simulation_params = {
     "playback_speed": 1, # realtime = 1
     "folderpath": "data",
     "filename": f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}",
-    "record": False,
+    "record": True,
     "num_vehicles": 1000,
-    "testing": False
+    "testing": True
 }

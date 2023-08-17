@@ -45,63 +45,117 @@ for filename in tqdm(os.listdir(folderpath), desc="Files"):
                     'speed': vehicle['speed'],
                     'timestamp': vehicle['timestamp']
                 })
+
         # Create a DataFrame from the flat data
-        df = pd.DataFrame(flat_data)
+        initdf = pd.DataFrame(flat_data)
 
-        # Create a list to store interval-specific DataFrames
-        interval_dfs = []
+        df = initdf.copy()
+        df = df.drop(columns=['vehicle_type', 'timestamp'])
+        section_length = loc_conversion(1000)
+        def assign_section(location):
+            return int(location[0]//section_length)
+        df['section'] = df['location'].apply(assign_section)
+        df['speed'] *= (3600/2000)
+        df['num_vehicles'] = df.groupby(['frame', 'section'])['uuid'].transform('count')
+        df['section'] = df['location'].apply(assign_section)
 
-        # Filter rows and create interval-specific DataFrames
-        for label, (start, end) in testDict.items():
-            interval_rows = df[df['location'].apply(lambda x: start <= x[0] <= end)]
-            interval_rows['Interval'] = label  # Add a new column for interval label
-            interval_dfs.append(interval_rows)
+        df['reciprocal_speed'] = 1 / df['speed']
+        flow_df = df.drop_duplicates(subset=['frame', 'section','uuid'])
+        flow_df['space_mean_speed_denom'] = flow_df.groupby(['frame', 'section'])['reciprocal_speed'].transform('sum')
 
-        # Combine interval-specific DataFrames into a single DataFrame
-        combined_df = pd.concat(interval_dfs, ignore_index=True)
+        flow_df['space_mean_speed'] = flow_df['num_vehicles'] / flow_df['space_mean_speed_denom']
+        flow_df['traffic_flow'] = flow_df['space_mean_speed'] * flow_df['num_vehicles']
 
-        # Convert speed from pixel/second -> kmph
-        combined_df['speed'] *= (3600 / 2000)
+        flow_df = flow_df.drop_duplicates(subset=['frame', 'section'])
+        flow_df.dropna(subset=['traffic_flow'], inplace=True)
 
-        # Group by interval and frame, and calculate necessary statistics
-        grouped_df = combined_df.groupby(['Interval', 'frame']).agg({
-            'speed': 'mean',
-            'uuid': 'nunique'
-        }).reset_index()
+        # Saving timestep plots
+        num_plots = flow_df['section'].max()
+        # Create a figure with subplots
+        fig, axes = plt.subplots(nrows=num_plots, figsize=(40, 10*num_plots))  # You can adjust figsize as needed
 
-        # Rename columns for clarity
-        grouped_df.rename(columns={'speed': 'average_speed', 'uuid': 'num_vehicles'}, inplace=True)
+        for i, ax in enumerate(axes):
+            # Filter data for the current section
+            visual = flow_df[flow_df['section'] == i]
 
-        # Compute flow and moving average
-        grouped_df['flow'] = grouped_df['num_vehicles'] * grouped_df['average_speed']
-        grouped_df['moving_average_flow'] = grouped_df.groupby('Interval')['flow'].rolling(window=10).mean().reset_index(level=0, drop=True)
+            # Calculate the average traffic flow
+            averaged = visual['traffic_flow'].mean()
 
-        # Filter out NaN values from moving average
-        grouped_df.dropna(subset=['moving_average_flow'], inplace=True)
+            # Plot the average line
+            ax.axhline(y=averaged, color='red', linestyle='--', label=f'Average: {averaged:.3f}')
 
-        # Iterate over intervals and create separate plots
-        for interval_label, interval_df in grouped_df.groupby('Interval'):
-            plt.figure(figsize=(12, 8))
+            # Plot the data
+            ax.plot(visual['frame'], visual['traffic_flow'], label='Traffic Flow')
 
-            plt.subplot(3,1,1)
-            plt.scatter(interval_df['num_vehicles'], interval_df['flow'], 0.1)
-            plt.xlabel('Vehicle Density')
-            plt.ylabel('Vehicle Flow')
-            plt.title(f'Vehicle Flow vs Vehicle Density per Timestep ({interval_label})')
+            # Set title, xlabel, and ylabel
+            ax.set_title(f"Traffic Flow vs Timestep: Interval {i}")
+            ax.set_xlabel("Timestep")
+            ax.set_ylabel("Traffic Flow (veh/h)")
 
-            plt.subplot(3,1,2)
-            plt.scatter(interval_df['frame'], interval_df['flow'], 0.1)
-            plt.xlabel('Timestep')
-            plt.ylabel('Vehicle Flow')
-            plt.title(f'Vehicle Flow vs Timestep ({interval_label})')
+            # Add legend
+            ax.legend()
 
-            plt.subplot(3,1,3)
-            plt.scatter(interval_df['frame'], interval_df['moving_average_flow'], 0.1)
-            plt.xlabel('Timestep')
-            plt.ylabel('Flow Moving Average')
-            plt.title(f'Vehicle Flow Moving Average ({interval_label})')
+        # Adjust layout and spacing
+        plt.tight_layout()
 
-            plt.tight_layout()
-            name = f"{filename}_{interval_label}.png"
-            save_name = name.replace("data/", "").replace(".json", "").replace("1000_vehicles/", "100_vehicles_")
-            plt.savefig(save_name)
+        # Save the figure as a single image
+        plot_name = filename.replace(".json", "")
+        plt.savefig(f'{plot_name}.png', dpi=300)
+
+        # Fundamental Diagrams
+        # Calculate linear fit
+        m, c = np.polyfit(flow_df['num_vehicles'], flow_df['space_mean_speed'], 1)
+        y_fit = m * flow_df['num_vehicles'] + c
+        flow_capacity = (c*c)/(4*abs(m)) # Greenshields Maximum Flow Rate Relationship
+
+        # Generate data for Speed vs Flow
+        density = np.arange(int(c/abs(m)))
+        speed = c + density * m
+        flow = density * speed
+
+        # Generate data for Flow vs Density
+        density = np.arange(int(c/abs(m)))
+        kj = c/abs(m)
+        kcap = kj/2
+        flowden = c * (density - ((density * density) / kj))
+
+        # Create figure and axis objects
+        fig, axs = plt.subplots(3, 1, figsize=(10, 8*2))
+
+        # Plot Speed vs Density
+        axs[0].scatter(flow_df['num_vehicles'], flow_df['space_mean_speed'], s=0.01)
+        axs[0].plot(flow_df['num_vehicles'], y_fit, 'black', linestyle='dotted', label=f'Bestfit = {m:.3g}k + {c:.3g}')
+        axs[0].set_ylim(bottom=0)
+        axs[0].set_xlabel('Traffic Density (veh/km)')
+        axs[0].set_ylabel('Traffic Speed (km/h)')
+        axs[0].set_title('Traffic Speed vs. Traffic Density')
+        axs[0].legend()
+
+
+
+        # Plot Speed vs Flow
+        axs[1].plot(flow, speed, label='Model')
+        axs[1].scatter(flow_df['traffic_flow'], flow_df['space_mean_speed'], s=0.01)
+        axs[1].axvline(x=flow_capacity, color='yellow', label=f'Flow Capacity: {flow_capacity:.3f}', linestyle='dotted')
+        axs[1].axhline(y=c/2, color='black', label=f'Speed Capacity: {c/2:.3f}', linestyle='dotted')
+        axs[1].set_xlabel('Traffic Flow (veh/h)')
+        axs[1].set_ylabel('Traffic Speed (km/h)')
+        axs[1].set_title('Traffic Speed vs. Traffic Flow')
+        axs[1].legend()
+
+
+
+        # Plot Flow vs Density
+        axs[2].plot(density, flowden, label='Model')
+        axs[2].scatter(flow_df['num_vehicles'], flow_df['traffic_flow'], s=0.01)
+        axs[2].axhline(y=flow_capacity, color='yellow', label=f'Flow Capacity: {flow_capacity:.3f}', linestyle='dotted')
+        axs[2].axvline(x=kcap, color='r', label=f'Density Capacity: {kcap:.3f}', linestyle='dotted')
+        axs[2].set_xlabel('Traffic Density (veh/h)')
+        axs[2].set_ylabel('Traffic Flow (km/h)')
+        axs[2].set_title('Traffic Flow vs. Traffic Density')
+        axs[2].legend(loc='upper right')
+
+        # Adjust layout and display plots
+        plt.tight_layout()
+        # Save the figure as a single image
+        plt.savefig(f'_{plot_name}.png', dpi=300)  # Change filename and format as needed
