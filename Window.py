@@ -294,8 +294,8 @@ class Window:
                     self.onramp_value = self.onramp_slider.slider_value()
                 elif self.minimap.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
                     self.minimap.move_slider(pygame.mouse.get_pos())
-                    self.minimap_value = self.minimap.slider_value()
-            print("self.minimap_value", self.minimap_value)
+                    self.bg.scroll_speed = (self.minimap.slider_value()-6) * window_params['scroll_limit']/86.95
+
             self.global_buttons.update()
             self.global_buttons.draw(self.win)
 
