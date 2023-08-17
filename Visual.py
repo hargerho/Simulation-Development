@@ -87,19 +87,102 @@ class UserButton(pygame.sprite.Sprite):
             pygame.draw.rect(self.image, window_params['green'], self.image.get_rect(), 4)
 
 class Slider():
-    def __init__(self, pos, size, start, min, max):
+    def __init__(self, pos, size, start_factor, min, max, offset, slider_name):
         self.pos = pos
         self.size = size
+        self.slider_name = slider_name
 
         self.left_pos = self.pos[0] - (size[0]//2)
         self.right_pos = self.pos[0] + (size[0]//2)
         self.top_pos = self.pos[1] + (size[1]//2)
+        self.bottom_pos = self.pos[1] - (size[1]//2)
+
+        self.height = self.top_pos - self.bottom_pos
+
+        self.min = min
+        self.max = max
+        self.start_factor = (self.right_pos-self.left_pos)*start_factor
+        self.offset = offset
+
+        self.rect = self.left_pos + self.start_factor - self.offset, self.top_pos, self.height*1.2, self.size[1]
+
+        self.slide_rect = pygame.Rect(self.left_pos, self.top_pos, self.size[0], self.size[1])
+        self.slider_button = pygame.Rect(self.rect)
+
+    def draw_slider(self, surface):
+        radius = self.slider_button.width//2
+        pygame.draw.rect(surface, window_params['white'], self.slide_rect)
+        pygame.draw.circle(surface, window_params['black'], self.slider_button.center, radius)
+
+    def slider_value(self):
+        range = self.right_pos - self.left_pos - 1
+        value = self.slider_button.centerx - self.left_pos
+
+        flow_value = int((value/range) * (self.max-self.min) + self.min)
+
+        print("sliderx:", flow_value)
+
+        if self.slider_name == "vehicle_inflow":
+            road_params["vehicle_inflow"] = flow_value
+        if self.slider_name == "onramp_inflow":
+            road_params["onramp_inflow"] = flow_value
+
+        return flow_value
+
+    def move_slider(self, mouse_loc):
+        pos = mouse_loc[0]
+        if pos < self.left_pos:
+            pos = self.left_pos
+        if pos > self.right_pos:
+            pos = self.right_pos
+        self.slider_button.centerx = pos
+
+class Minimap(Slider):
+    def __init__(self, pos, size, start_factor, min, max, offset, slider_name):
+        super().__init__(pos, size, start_factor, min, max, offset, slider_name)
+
+        self.rect = self.left_pos + self.start_factor - self.offset, self.top_pos, self.height, self.size[1]
+        self.slider_button = pygame.Rect(self.rect)
+
+    def load_map(self):
+        miniroad = pygame.image.load(window_params['miniroad']).convert_alpha()
+        self.miniroad = pygame.transform.scale(miniroad, (self.size[0], self.size[1]))
+
+    def draw_slider(self, surface):
+        # Display text
+        font = pygame.font.Font(None, 30)
+        text_surface = font.render('Mini-Map', True, window_params['black'])
+        text_rect = text_surface.get_rect(center=(self.pos[0], self.top_pos-20))
+        surface.blit(text_surface, text_rect)
+
+        # Draw minimap
+        surface.blit(self.miniroad, self.slide_rect)
+
+        # Draw sliding panel
+        pygame.draw.rect(surface, window_params['black'], self.slider_button, width=2)
+
+    def move_slider(self, mouse_loc):
+        pos = mouse_loc[0]
+        if pos < self.left_pos + self.height/2:
+            pos = self.left_pos + self.height/2
+        if pos > self.right_pos - self.height/2:
+            pos = self.right_pos - self.height/2
+        self.slider_button.centerx = pos
+
+    def scroll_slider(self, scroll_pos):
+
+        update = ((87*scroll_pos)/window_params['scroll_limit']) + self.left_pos + self.height/2
+
+        self.slider_button.centerx = update
+
+        print("sliderx:", self.slider_button.centerx)
+
 class Background():
     def __init__(self, surface, screen_width, screen_height, start_file, end_file):
         self.surface = surface
         self.screen_width = screen_width
         self.screen_height = screen_height
-        self.scroll_speed = 0
+        self.scroll_pos = 0
 
         self.bg_images = []
         for panel in range(start_file, end_file):
@@ -135,14 +218,13 @@ class Background():
         self.signpost_width = signpost_image.get_width()
         self.signpost_image = pygame.transform.scale(signpost_image, (self.signpost_width, self.signpost_height))
 
-
     def draw_signpost(self):
         font = pygame.font.Font(None, 32)
         box_y = 340
 
         for interval in range(1,17):
             box_width, box_height = 200, 100
-            box_x = interval*window_params['signpost_interval'] - self.scroll_speed * 5
+            box_x = interval*window_params['signpost_interval'] - self.scroll_pos * 5
             # Render text
             text_surface = font.render(f"{str(interval)}km", True, window_params['black'])
             text_width, text_height = text_surface.get_size()
@@ -162,7 +244,6 @@ class Background():
                 text_surface = font.render(f"{str(interval)}km", True, window_params['black'])
                 self.surface.blit(text_surface, (text_x, text_y))
 
-
     def draw_vehicle(self, shc_image, veh_length, veh_width, vehicle_loc):
         car_surface = pygame.Surface((veh_length, veh_width))
         car_rect = car_surface.get_rect()
@@ -170,14 +251,14 @@ class Background():
         x_pos = car_rect.centerx
         y_pos = car_rect.centery
 
-        self.surface.blit(shc_image, (x_pos - self.scroll_speed * 5, y_pos))
+        self.surface.blit(shc_image, (x_pos - self.scroll_pos * 5, y_pos))
 
     def draw_road(self):
 
         for x in range(107):
-            self.surface.blit(self.road_image, ((x * self.road_width) - self.scroll_speed * 5, self.road_y))
+            self.surface.blit(self.road_image, ((x * self.road_width) - self.scroll_pos * 5, self.road_y))
             if x == 0:
-                self.surface.blit(self.onramp_image, ((x * self.onramp_width) - self.scroll_speed * 5, self.onramp_y))
+                self.surface.blit(self.onramp_image, ((x * self.onramp_width) - self.scroll_pos * 5, self.onramp_y))
 
     def draw_bg(self):
 
@@ -188,11 +269,10 @@ class Background():
         #     print("Reached")
         #     self.draw_bg2(2,1)
 
-
     def draw_bg1(self, num_img, bg_speed):
         for x in range(num_img):
             for img in self.bg_images[:3]:
-                x_coord = (x * self.bg_width) - bg_speed * self.scroll_speed
+                x_coord = (x * self.bg_width) - bg_speed * self.scroll_pos
                 self.surface.blit(img, (x_coord, 0))
                 # print(x_coord)
 
@@ -201,7 +281,7 @@ class Background():
     def draw_bg2(self, num_img, bg_speed):
         for x in range(num_img):
             for img in self.bg_images[-4:]:
-                self.surface.blit(img, ((x * self.bg_width) - bg_speed * self.scroll_speed, 0))
+                self.surface.blit(img, ((x * self.bg_width) - bg_speed * self.scroll_pos, 0))
                 # bg_speed += 0.2
 
 

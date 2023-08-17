@@ -6,7 +6,7 @@ import math
 from common.config import window_params, road_params, simulation_params
 from Simulation import SimulationManager
 from ACC import Convoy
-from Visual import Objects, Button, UserButton, Background
+from Visual import *
 
 class Window:
     def __init__(self):
@@ -64,6 +64,13 @@ class Window:
         self.bg.load_road(road_file=window_params['road_image'], x=0, y=410, road_length=self.width, road_width=self.road_width)
         self.bg.load_onramp(road_file=window_params['onramp_image'], x=0, y=355, onramp_length=self.onramp_length*1.35, onramp_width=self.lanewidth+10)
         self.bg.load_signpost(signpost_file = window_params['signpost_image'])
+
+        # Minimap
+        # self.minimap = Minimap(surface=self.win)
+        # self.minimap.load_map(x=400, y=40, map_width=400, map_height=50)
+        self.minimap = Minimap(pos=(self.width/2,20), size=(400,50), start_factor=0, min=0, max=100, offset=0, slider_name='minimap')
+        self.minimap.load_map()
+
         # Recording params
         self.is_recording = simulation_params['record']
         self.has_recorded = False
@@ -91,7 +98,7 @@ class Window:
 
         # Traffic Buttons
         self.global_buttons = pygame.sprite.Group()
-        self.traffic_datumn_x, self.traffic_datumn_y = 230, 200
+        self.traffic_datumn_x, self.traffic_datumn_y = 200, 200
 
         vehicle_button_info = [
             (self.traffic_datumn_x+200, self.traffic_datumn_y, self.off_image, 0.2, 0.2, "acc_off"),
@@ -111,16 +118,22 @@ class Window:
         # Road Buttons
         self.road_buttons = []
         road_button_info = [
-            (self.traffic_datumn_x+850, self.traffic_datumn_y, self.off_image, 0.2, 0.2, "road_closed_off"),
-            (self.traffic_datumn_x+1000, self.traffic_datumn_y, self.left_image, 0.2, 0.2, "road_closed_left"),
-            (self.traffic_datumn_x+850, self.traffic_datumn_y+50, self.middle_image, 0.2, 0.2, "road_closed_middle"),
-            (self.traffic_datumn_x+1000, self.traffic_datumn_y+50, self.right_image, 0.2, 0.2, "road_closed_right")
+            (self.traffic_datumn_x+860, self.traffic_datumn_y+60, self.off_image, 0.2, 0.2, "road_closed_off"),
+            (self.traffic_datumn_x+1010, self.traffic_datumn_y+60, self.left_image, 0.2, 0.2, "road_closed_left"),
+            (self.traffic_datumn_x+860, self.traffic_datumn_y+100, self.middle_image, 0.2, 0.2, "road_closed_middle"),
+            (self.traffic_datumn_x+1010, self.traffic_datumn_y+100, self.right_image, 0.2, 0.2, "road_closed_right")
         ]
 
         for x, y, image, scalex, scaley, button_name in road_button_info:
             button = UserButton(x, y, image, scalex, scaley, button_name)
             self.global_buttons.add(button)
             self.road_buttons.append(button)
+
+        # Create Sliders
+        self.inflow_slider = Slider((self.traffic_datumn_x+934,self.traffic_datumn_y-25), (258,15), 4/7, 0, 7000, 10, "vehicle_inflow")
+        self.onramp_slider = Slider((self.traffic_datumn_x+934,self.traffic_datumn_y), (258,15), 0, 0, 200, 10, "onramp_inflow")
+        self.inflow_value = road_params['vehicle_inflow']
+        self.onramp_value = road_params['onramp_inflow']
 
     def draw_timer(self, restart):
         if restart:
@@ -153,6 +166,12 @@ class Window:
         self.bg.draw_signpost()
         self.bg.draw_road()
 
+        # Drawing minimap
+        self.minimap.draw_slider(self.win)
+
+        # Drawing sliders
+        self.inflow_slider.draw_slider(self.win)
+        self.onramp_slider.draw_slider(self.win)
 
         # Draw the recording toggle
         ellipse_rect = pygame.Rect(self.restart_x_loc - 108, 17, 100, 50)
@@ -161,10 +180,14 @@ class Window:
         # Writing Text
         text_list = [
             ("Driving Logics", (self.traffic_datumn_x+350, self.traffic_datumn_y-50), 30),
-            ("AI-Controlled Convoy Vehicle", (self.traffic_datumn_x, self.traffic_datumn_y), 20),
+            ("AI-Controlled Convoy Vehicle", (self.traffic_datumn_x-5, self.traffic_datumn_y+2), 20),
             ("Simulated Human Controlled Vehicle", (self.traffic_datumn_x+20, self.traffic_datumn_y+50), 20),
             ("Traffic Parameters", (self.traffic_datumn_x+930, self.traffic_datumn_y-50), 30),
-            ("Road Closure", (self.traffic_datumn_x+730, self.traffic_datumn_y+25), 20),
+            ("Road Closure", (self.traffic_datumn_x+740, self.traffic_datumn_y+80), 20),
+            ("Inflow", (self.traffic_datumn_x+717, self.traffic_datumn_y-10), 20),
+            ("On-ramp Flow", (self.traffic_datumn_x+742, self.traffic_datumn_y+15), 20),
+            (f"{self.inflow_value} veh/h", (self.traffic_datumn_x+1110, self.traffic_datumn_y-13), 20),
+            (f"{self.onramp_value} veh/h", (self.traffic_datumn_x+1110, self.traffic_datumn_y+13), 20),
         ]
 
         text_font = pygame.font.Font(None, 20)
@@ -174,21 +197,6 @@ class Window:
             text_surface = text_font.render(text, True, window_params['black'])
             text_rect = text_surface.get_rect(center=pos)
             self.win.blit(text_surface, text_rect)
-
-        # # Drawing the onramp
-        # onrampSurface = pygame.Surface((self.onramp_length, self.lanewidth))
-        # onrampSurface.fill(window_params['grey'])
-        # rampRect = onrampSurface.get_rect()
-        # rampRect.topleft = (self.toplane_loc[0], self.toplane_loc[1] - self.vehicle_width)
-        # self.win.blit(onrampSurface, rampRect.topleft)
-
-        # # Drawing the road
-        # self.road_width = self.lanewidth * (self.num_lanes - 1) + self.vehicle_width
-        # roadSurface = pygame.Surface((self.road_length, self.road_width))
-        # roadSurface.fill(window_params['black'])
-        # roadRect = roadSurface.get_rect()
-        # roadRect.topleft = (self.toplane_loc[0], self.toplane_loc[1] - self.vehicle_width + self.lanewidth)
-        # self.win.blit(roadSurface, roadRect.topleft)
 
         # Draw speed limit
 
@@ -210,8 +218,15 @@ class Window:
 
                 self.bg.draw_vehicle(self.shc_image, self.vehicle_length, self.vehicle_width, vehicle_loc=vehicle_loc)
 
+    def out_bound_check(self, loc, diff):
+        tmp = loc - diff
+        if tmp < 0:
+            return 0
+        return tmp
+
     def run_window(self):
         frame = 0
+        self.minimap_value=0
         restarted_time = 0
         self.create_buttons()
 
@@ -242,21 +257,29 @@ class Window:
                 print("Stopped Recording")
 
             self.draw_timer(restart=restart)
-
             # Background controls
             key = pygame.key.get_pressed()
-            if key[pygame.K_LEFT] and self.bg.scroll_speed > 0:
-                self.bg.scroll_speed -= 5
-            if key[pygame.K_RIGHT] and self.bg.scroll_speed < window_params['scroll_limit']:
-                self.bg.scroll_speed += 5
-            if key[pygame.K_DOWN] and self.bg.scroll_speed > 0:
-                self.bg.scroll_speed -= 20
-            if key[pygame.K_UP] and self.bg.scroll_speed < window_params['scroll_limit']:
-                self.bg.scroll_speed += 20
+            if key[pygame.K_LEFT] and self.bg.scroll_pos > 0:
+                self.bg.scroll_pos -= 5
+                self.minimap.scroll_slider(self.bg.scroll_pos)
+            if key[pygame.K_RIGHT] and self.bg.scroll_pos < window_params['scroll_limit']:
+                self.bg.scroll_pos += 5
+                self.minimap.scroll_slider(self.bg.scroll_pos)
+            if key[pygame.K_DOWN] and self.bg.scroll_pos > 0:
+                self.bg.scroll_pos = self.out_bound_check(self.bg.scroll_pos, 20)
+                self.minimap.scroll_slider(self.bg.scroll_pos)
+            if key[pygame.K_UP] and self.bg.scroll_pos < window_params['scroll_limit']:
+                self.bg.scroll_pos += 20
+                self.minimap.scroll_slider(self.bg.scroll_pos)
+            if self.minimap.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
+                self.minimap.move_slider(pygame.mouse.get_pos())
+                x = self.minimap.slider_value()
+                self.bg.scroll_pos = (x-6) * window_params['scroll_limit']/87
+
+            print(f'scroll: {self.bg.scroll_pos}, value: {self.minimap.slider_value()}, sliderx: {self.minimap.slider_button.centerx}')
 
             # Event check first
             for event in pygame.event.get():
-                # self.bg.scroll_speed = 0
                 if event.type == pygame.QUIT:
                     self.is_running = False
                     pygame.quit()
@@ -277,6 +300,15 @@ class Window:
                                 elif button in self.road_buttons:
                                     for road_button in self.road_buttons:
                                         road_button.is_selected = (road_button == button)
+                elif self.inflow_slider.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
+                    self.inflow_slider.move_slider(pygame.mouse.get_pos())
+                    self.inflow_value = self.inflow_slider.slider_value()
+                elif self.onramp_slider.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
+                    self.onramp_slider.move_slider(pygame.mouse.get_pos())
+                    self.onramp_value = self.onramp_slider.slider_value()
+                elif self.minimap.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
+                    self.minimap.move_slider(pygame.mouse.get_pos())
+                    self.bg.scroll_pos = (self.minimap.slider_value()-6) * window_params['scroll_limit']/86.95
 
             self.global_buttons.update()
             self.global_buttons.draw(self.win)
