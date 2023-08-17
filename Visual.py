@@ -119,7 +119,8 @@ class Slider():
         value = self.slider_button.centerx - self.left_pos
 
         flow_value = int((value/range) * (self.max-self.min) + self.min)
-        print("Map:", flow_value)
+
+        print("sliderx:", flow_value)
 
         if self.slider_name == "vehicle_inflow":
             road_params["vehicle_inflow"] = flow_value
@@ -168,12 +169,20 @@ class Minimap(Slider):
             pos = self.right_pos - self.height/2
         self.slider_button.centerx = pos
 
+    def scroll_slider(self, scroll_pos):
+
+        update = ((87*scroll_pos)/window_params['scroll_limit']) + self.left_pos + self.height/2
+
+        self.slider_button.centerx = update
+
+        print("sliderx:", self.slider_button.centerx)
+
 class Background():
     def __init__(self, surface, screen_width, screen_height, start_file, end_file):
         self.surface = surface
         self.screen_width = screen_width
         self.screen_height = screen_height
-        self.scroll_speed = 0
+        self.scroll_pos = 0
 
         self.bg_images = []
         for panel in range(start_file, end_file):
@@ -215,7 +224,7 @@ class Background():
 
         for interval in range(1,17):
             box_width, box_height = 200, 100
-            box_x = interval*window_params['signpost_interval'] - self.scroll_speed * 5
+            box_x = interval*window_params['signpost_interval'] - self.scroll_pos * 5
             # Render text
             text_surface = font.render(f"{str(interval)}km", True, window_params['black'])
             text_width, text_height = text_surface.get_size()
@@ -242,14 +251,14 @@ class Background():
         x_pos = car_rect.centerx
         y_pos = car_rect.centery
 
-        self.surface.blit(shc_image, (x_pos - self.scroll_speed * 5, y_pos))
+        self.surface.blit(shc_image, (x_pos - self.scroll_pos * 5, y_pos))
 
     def draw_road(self):
 
         for x in range(107):
-            self.surface.blit(self.road_image, ((x * self.road_width) - self.scroll_speed * 5, self.road_y))
+            self.surface.blit(self.road_image, ((x * self.road_width) - self.scroll_pos * 5, self.road_y))
             if x == 0:
-                self.surface.blit(self.onramp_image, ((x * self.onramp_width) - self.scroll_speed * 5, self.onramp_y))
+                self.surface.blit(self.onramp_image, ((x * self.onramp_width) - self.scroll_pos * 5, self.onramp_y))
 
     def draw_bg(self):
 
@@ -263,7 +272,7 @@ class Background():
     def draw_bg1(self, num_img, bg_speed):
         for x in range(num_img):
             for img in self.bg_images[:3]:
-                x_coord = (x * self.bg_width) - bg_speed * self.scroll_speed
+                x_coord = (x * self.bg_width) - bg_speed * self.scroll_pos
                 self.surface.blit(img, (x_coord, 0))
                 # print(x_coord)
 
@@ -272,7 +281,7 @@ class Background():
     def draw_bg2(self, num_img, bg_speed):
         for x in range(num_img):
             for img in self.bg_images[-4:]:
-                self.surface.blit(img, ((x * self.bg_width) - bg_speed * self.scroll_speed, 0))
+                self.surface.blit(img, ((x * self.bg_width) - bg_speed * self.scroll_pos, 0))
                 # bg_speed += 0.2
 
 

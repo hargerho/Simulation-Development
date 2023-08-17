@@ -218,6 +218,12 @@ class Window:
 
                 self.bg.draw_vehicle(self.shc_image, self.vehicle_length, self.vehicle_width, vehicle_loc=vehicle_loc)
 
+    def out_bound_check(self, loc, diff):
+        tmp = loc - diff
+        if tmp < 0:
+            return 0
+        return tmp
+
     def run_window(self):
         frame = 0
         self.minimap_value=0
@@ -251,21 +257,29 @@ class Window:
                 print("Stopped Recording")
 
             self.draw_timer(restart=restart)
-
             # Background controls
             key = pygame.key.get_pressed()
-            if key[pygame.K_LEFT] and self.bg.scroll_speed > 0:
-                self.bg.scroll_speed -= 5
-            if key[pygame.K_RIGHT] and self.bg.scroll_speed < window_params['scroll_limit']:
-                self.bg.scroll_speed += 5
-            if key[pygame.K_DOWN] and self.bg.scroll_speed > 0:
-                self.bg.scroll_speed -= 20
-            if key[pygame.K_UP] and self.bg.scroll_speed < window_params['scroll_limit']:
-                self.bg.scroll_speed += 20
+            if key[pygame.K_LEFT] and self.bg.scroll_pos > 0:
+                self.bg.scroll_pos -= 5
+                self.minimap.scroll_slider(self.bg.scroll_pos)
+            if key[pygame.K_RIGHT] and self.bg.scroll_pos < window_params['scroll_limit']:
+                self.bg.scroll_pos += 5
+                self.minimap.scroll_slider(self.bg.scroll_pos)
+            if key[pygame.K_DOWN] and self.bg.scroll_pos > 0:
+                self.bg.scroll_pos = self.out_bound_check(self.bg.scroll_pos, 20)
+                self.minimap.scroll_slider(self.bg.scroll_pos)
+            if key[pygame.K_UP] and self.bg.scroll_pos < window_params['scroll_limit']:
+                self.bg.scroll_pos += 20
+                self.minimap.scroll_slider(self.bg.scroll_pos)
+            if self.minimap.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
+                self.minimap.move_slider(pygame.mouse.get_pos())
+                x = self.minimap.slider_value()
+                self.bg.scroll_pos = (x-6) * window_params['scroll_limit']/87
+
+            print(f'scroll: {self.bg.scroll_pos}, value: {self.minimap.slider_value()}, sliderx: {self.minimap.slider_button.centerx}')
 
             # Event check first
             for event in pygame.event.get():
-                # self.bg.scroll_speed = 0
                 if event.type == pygame.QUIT:
                     self.is_running = False
                     pygame.quit()
@@ -294,7 +308,7 @@ class Window:
                     self.onramp_value = self.onramp_slider.slider_value()
                 elif self.minimap.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
                     self.minimap.move_slider(pygame.mouse.get_pos())
-                    self.bg.scroll_speed = (self.minimap.slider_value()-6) * window_params['scroll_limit']/86.95
+                    self.bg.scroll_pos = (self.minimap.slider_value()-6) * window_params['scroll_limit']/86.95
 
             self.global_buttons.update()
             self.global_buttons.draw(self.win)
