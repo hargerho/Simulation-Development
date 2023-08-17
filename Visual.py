@@ -87,7 +87,7 @@ class UserButton(pygame.sprite.Sprite):
             pygame.draw.rect(self.image, window_params['green'], self.image.get_rect(), 4)
 
 class Slider():
-    def __init__(self, pos, size, start_factor, min, max, slider_name):
+    def __init__(self, pos, size, start_factor, min, max, offset, slider_name):
         self.pos = pos
         self.size = size
         self.slider_name = slider_name
@@ -102,9 +102,12 @@ class Slider():
         self.min = min
         self.max = max
         self.start_factor = (self.right_pos-self.left_pos)*start_factor
+        self.offset = offset
+
+        self.rect = self.left_pos + self.start_factor - self.offset, self.top_pos, self.height*1.2, self.size[1]
 
         self.slide_rect = pygame.Rect(self.left_pos, self.top_pos, self.size[0], self.size[1])
-        self.slider_button = pygame.Rect(self.left_pos + self.start_factor - 10, self.top_pos, self.height*1.2, self.size[1])
+        self.slider_button = pygame.Rect(self.rect)
 
     def draw_slider(self, surface):
         radius = self.slider_button.width//2
@@ -132,33 +135,31 @@ class Slider():
             pos = self.right_pos
         self.slider_button.centerx = pos
 
-class Minimap():
-    def __init__(self, surface):
-        self.surface = surface
+class Minimap(Slider):
+    def __init__(self, pos, size, start_factor, min, max, offset, slider_name):
+        super().__init__(pos, size, start_factor, min, max, offset, slider_name)
 
-    def load_map(self, x, y, map_width, map_height):
+    def load_map(self):
         miniroad = pygame.image.load(window_params['miniroad']).convert_alpha()
-        self.miniroad = pygame.transform.scale(miniroad, (map_width, map_height))
-        self.map_width, self.map_height = self.miniroad.get_rect().size
-        self.miniroad_y = y
-        self.miniroad_x = x
+        self.miniroad = pygame.transform.scale(miniroad, (self.size[0], self.size[1]))
 
-    def draw_map(self):
+    def draw_slider(self, surface):
         # Display text
         font = pygame.font.Font(None, 30)
         text_surface = font.render('Mini-Map', True, window_params['black'])
-        text_rect = text_surface.get_rect(center=((self.miniroad_x+self.map_width/2), 20))
-        self.surface.blit(text_surface, text_rect)
+        text_rect = text_surface.get_rect(center=(self.pos[0], self.top_pos-20))
+        surface.blit(text_surface, text_rect)
 
-        # Drawing border
-        border = 2
-        border_x = self.miniroad_x - 2 * border
-        border_y = self.miniroad_y - 2 * border
-        border_width = self.map_width + 4 * border
-        border_height = self.map_height + 4 * border
-        pygame.draw.rect(self.surface, window_params['black'], (border_x, border_y, border_width, border_height), border)
+        # Draw minimap
+        surface.blit(self.miniroad, self.slide_rect)
 
-        self.surface.blit(self.miniroad, (self.miniroad_x, self.miniroad_y))
+        # Draw translucent panel
+        self.panel = pygame.Surface(pygame.Rect(self.rect).size, pygame.SRCALPHA)
+        pygame.draw.rect(self.panel, (255, 255, 0, 127), self.panel.get_rect())
+        surface.blit(self.panel, self.rect)
+
+
+
 class Background():
     def __init__(self, surface, screen_width, screen_height, start_file, end_file):
         self.surface = surface
