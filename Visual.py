@@ -87,13 +87,44 @@ class UserButton(pygame.sprite.Sprite):
             pygame.draw.rect(self.image, window_params['green'], self.image.get_rect(), 4)
 
 class Slider():
-    def __init__(self, pos, size, start, min, max):
+    def __init__(self, pos, size, start_factor, min, max):
         self.pos = pos
         self.size = size
 
         self.left_pos = self.pos[0] - (size[0]//2)
         self.right_pos = self.pos[0] + (size[0]//2)
         self.top_pos = self.pos[1] + (size[1]//2)
+        self.bottom_pos = self.pos[1] - (size[1]//2)
+
+        self.height = self.top_pos - self.bottom_pos
+
+        self.min = min
+        self.max = max
+        self.start_factor = (self.right_pos-self.left_pos)*start_factor
+
+        self.slide_rect = pygame.Rect(self.left_pos, self.top_pos, self.size[0], self.size[1])
+        self.slider_button = pygame.Rect(self.left_pos + self.start_factor - 5, self.top_pos, self.height*1.2, self.size[1])
+
+    def slider_value(self):
+        range = self.right_pos - self.left_pos - 1
+        value = self.slider_button.centerx - self.left_pos
+
+        return ((value/range) * (self.max-self.min) + self.min)
+
+    def move_slider(self, mouse_loc):
+        pos = mouse_loc[0]
+        if pos < self.left_pos:
+            pos = self.left_pos
+        if pos > self.right_pos:
+            pos = self.right_pos
+        self.slider_button.centerx = pos
+
+    def draw_slider(self, surface):
+        radius = self.slider_button.width//2
+        pygame.draw.rect(surface, window_params['white'], self.slide_rect)
+        pygame.draw.circle(surface, window_params['black'], self.slider_button.center, radius)
+
+
 class Background():
     def __init__(self, surface, screen_width, screen_height, start_file, end_file):
         self.surface = surface
