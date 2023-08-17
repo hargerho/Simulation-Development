@@ -123,8 +123,9 @@ class Window:
             self.road_buttons.append(button)
 
         # Create Slider
-        self.inflow_slider = Slider((self.traffic_datumn_x+934,self.traffic_datumn_y-25), (258,15), 0.5, 0, 100)
-        self.onramp_slider = Slider((self.traffic_datumn_x+934,self.traffic_datumn_y), (258,15), 0.5, 0, 100)
+        self.inflow_slider = Slider((self.traffic_datumn_x+934,self.traffic_datumn_y-25), (258,15), 4/7, 0, 7000, "vehicle_inflow")
+        self.onramp_slider = Slider((self.traffic_datumn_x+934,self.traffic_datumn_y), (258,15), 0, 0, 200, "onramp_inflow")
+        self.slide_list = [self.inflow_slider, self.onramp_slider]
 
     def draw_timer(self, restart):
         if restart:
@@ -269,10 +270,15 @@ class Window:
                                 elif button in self.road_buttons:
                                     for road_button in self.road_buttons:
                                         road_button.is_selected = (road_button == button)
-                elif self.inflow_slider.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
-                    self.inflow_slider.move_slider(pygame.mouse.get_pos())
-                elif self.onramp_slider.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
-                    self.onramp_slider.move_slider(pygame.mouse.get_pos())
+                # elif self.inflow_slider.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
+                #     self.inflow_slider.move_slider(pygame.mouse.get_pos())
+                #     self.inflow_slider.slider_value()
+                # elif self.onramp_slider.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
+                #     self.onramp_slider.move_slider(pygame.mouse.get_pos())
+                #     self.onramp_slider.slider_value()
+                elif pygame.mouse.get_pressed()[0]:
+                    for slider in self.slide_list:
+                        slider.slider_update(mouse_loc=pygame.mouse.get_pos(), mouseclick=pygame.mouse.get_pressed())
 
             self.global_buttons.update()
             self.global_buttons.draw(self.win)

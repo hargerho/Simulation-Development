@@ -174,9 +174,31 @@ class Road:
         # Reset onramp spawn timer if vehicle is not spawn to prevent upstream overcrowding
         self.onramp_last_spawn_time = self.onramp_timer
 
+    def check_inflow(self, timer, last_spawn_time, onramp_timer, onramp_last_spawn_time):
+        # Road Spawning
+        if road_params['vehicle_inflow'] > 0:
+            self.vehicle_frequency = road_params['vehicle_inflow'] / 3600 # per/hour -> per second
+            self.spawn_interval = round(1.0/self.vehicle_frequency, 1) # Round to 1dp since ts is 1dp
+            self.timer = timer
+            self.last_spawn_time = last_spawn_time
+        else:
+            self.vehicle_frequency, self.spawn_interval, self.timer, self.last_spawn_time = 0, 0, 0, 0
+
+        # Onramp frequency
+        if road_params['onramp_inflow'] > 0:
+            self.onramp_frequency = road_params['onramp_inflow'] / 3600
+            self.onramp_spawn_interval = round(1.0/self.onramp_frequency, 1)
+            self.onramp_timer = onramp_timer
+            self.onramp_last_spawn_time = onramp_last_spawn_time
+        else:
+            self.onramp_frequency, self.onramp_spawn_interval, self.onramp_timer, self.onramp_last_spawn_time = 0, 0, 0, 0
+
     def update_road(self, restart):
 
         self.check_road_closed()
+
+        # Checking for flow updates
+        self.check_inflow(self.timer, self.last_spawn_time, self.onramp_timer, self.onramp_last_spawn_time)
 
         if restart:
             self.vehicle_list = []
@@ -222,6 +244,8 @@ class Road:
             self.onramp_timer += self.ts
             if self.onramp_timer - self.onramp_last_spawn_time >= self.onramp_spawn_interval:
                 self.spawn_onramp()
+        else:
+            self.onramp_timer, self.onramp_last_spawn_time, self.onramp_spawn_interval = 0,0,0
 
         self.frames += 1
 
