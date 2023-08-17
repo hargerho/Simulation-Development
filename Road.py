@@ -34,6 +34,8 @@ class Road:
             self.onramp_spawn_interval = round(1.0/self.onramp_frequency, 1)
             self.onramp_timer = 0.0
             self.onramp_last_spawn_time = 0
+        else:
+            self.onramp_frequency, self.onramp_spawn_interval, self.onramp_timer, self.onramp_last_spawn_time = 0, 0, 0, 0
 
         # Getting y-coord of lanes
         self.onramp = self.toplane_loc[1]

@@ -104,7 +104,7 @@ class Slider():
         self.start_factor = (self.right_pos-self.left_pos)*start_factor
 
         self.slide_rect = pygame.Rect(self.left_pos, self.top_pos, self.size[0], self.size[1])
-        self.slider_button = pygame.Rect(self.left_pos + self.start_factor - 5, self.top_pos, self.height*1.2, self.size[1])
+        self.slider_button = pygame.Rect(self.left_pos + self.start_factor - 10, self.top_pos, self.height*1.2, self.size[1])
 
     def draw_slider(self, surface):
         radius = self.slider_button.width//2
@@ -115,14 +115,14 @@ class Slider():
         range = self.right_pos - self.left_pos - 1
         value = self.slider_button.centerx - self.left_pos
 
-        self.flow_value = ((value/range) * (self.max-self.min) + self.min)
+        flow_value = int((value/range) * (self.max-self.min) + self.min)
 
         if self.slider_name == "vehicle_inflow":
-            road_params["vehicle_inflow"] = int(self.flow_value)
-            print("vehicleinflow:", int(self.flow_value))
+            road_params["vehicle_inflow"] = flow_value
         if self.slider_name == "onramp_inflow":
-            road_params["onramp_inflow"] = int(self.flow_value)
-            print("onrampinflow:", int(self.flow_value))
+            road_params["onramp_inflow"] = flow_value
+
+        return flow_value
 
     def move_slider(self, mouse_loc):
         pos = mouse_loc[0]
@@ -131,11 +131,6 @@ class Slider():
         if pos > self.right_pos:
             pos = self.right_pos
         self.slider_button.centerx = pos
-
-    def slider_update(self, mouse_loc, mouseclick):
-        if self.slide_rect.collidepoint(mouse_loc) and mouseclick[0]:
-            self.move_slider(mouse_loc)
-            self.slider_value()
 
 class Background():
     def __init__(self, surface, screen_width, screen_height, start_file, end_file):
