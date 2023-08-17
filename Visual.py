@@ -119,6 +119,7 @@ class Slider():
         value = self.slider_button.centerx - self.left_pos
 
         flow_value = int((value/range) * (self.max-self.min) + self.min)
+        print("Map:", flow_value)
 
         if self.slider_name == "vehicle_inflow":
             road_params["vehicle_inflow"] = flow_value
@@ -139,6 +140,9 @@ class Minimap(Slider):
     def __init__(self, pos, size, start_factor, min, max, offset, slider_name):
         super().__init__(pos, size, start_factor, min, max, offset, slider_name)
 
+        self.rect = self.left_pos + self.start_factor - self.offset, self.top_pos, self.height, self.size[1]
+        self.slider_button = pygame.Rect(self.rect)
+
     def load_map(self):
         miniroad = pygame.image.load(window_params['miniroad']).convert_alpha()
         self.miniroad = pygame.transform.scale(miniroad, (self.size[0], self.size[1]))
@@ -153,12 +157,16 @@ class Minimap(Slider):
         # Draw minimap
         surface.blit(self.miniroad, self.slide_rect)
 
-        # Draw translucent panel
-        self.panel = pygame.Surface(pygame.Rect(self.rect).size, pygame.SRCALPHA)
-        pygame.draw.rect(self.panel, (255, 255, 0, 127), self.panel.get_rect())
-        surface.blit(self.panel, self.rect)
+        # Draw sliding panel
+        pygame.draw.rect(surface, window_params['black'], self.slider_button, width=2)
 
-
+    def move_slider(self, mouse_loc):
+        pos = mouse_loc[0]
+        if pos < self.left_pos + self.height/2:
+            pos = self.left_pos + self.height/2
+        if pos > self.right_pos - self.height/2:
+            pos = self.right_pos - self.height/2
+        self.slider_button.centerx = pos
 
 class Background():
     def __init__(self, surface, screen_width, screen_height, start_file, end_file):

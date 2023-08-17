@@ -68,7 +68,7 @@ class Window:
         # Minimap
         # self.minimap = Minimap(surface=self.win)
         # self.minimap.load_map(x=400, y=40, map_width=400, map_height=50)
-        self.minimap = Minimap((self.width/2,20), (400,50), 0, 0, 100, 0, 'minimap')
+        self.minimap = Minimap(pos=(self.width/2,20), size=(400,50), start_factor=0, min=0, max=100, offset=0, slider_name='minimap')
         self.minimap.load_map()
 
         # Recording params
@@ -220,6 +220,7 @@ class Window:
 
     def run_window(self):
         frame = 0
+        self.minimap_value=0
         restarted_time = 0
         self.create_buttons()
 
@@ -291,7 +292,10 @@ class Window:
                 elif self.onramp_slider.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
                     self.onramp_slider.move_slider(pygame.mouse.get_pos())
                     self.onramp_value = self.onramp_slider.slider_value()
-
+                elif self.minimap.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
+                    self.minimap.move_slider(pygame.mouse.get_pos())
+                    self.minimap_value = self.minimap.slider_value()
+            print("self.minimap_value", self.minimap_value)
             self.global_buttons.update()
             self.global_buttons.draw(self.win)
 
