@@ -1,6 +1,6 @@
 import pygame
 import math
-from common.config import window_params, road_params, driving_params, acc_params
+from common.config import window_params, road_params, driving_params, acc_params, simulation_params
 
 class Objects:
     def __init__(self, x, y, image, scale_x, scale_y):
@@ -115,7 +115,7 @@ class Slider():
         pygame.draw.circle(surface, window_params['black'], self.slider_button.center, radius)
 
     def slider_value(self):
-        range = self.right_pos - self.left_pos - 1
+        range = self.right_pos - self.left_pos - 2
         value = self.slider_button.centerx - self.left_pos
 
         flow_value = int((value/range) * (self.max-self.min) + self.min)
@@ -124,6 +124,8 @@ class Slider():
             road_params["vehicle_inflow"] = flow_value
         if self.slider_name == "onramp_inflow":
             road_params["onramp_inflow"] = flow_value
+        if self.slider_name == "playback_speed":
+            simulation_params["playback_speed"] = flow_value
 
         return flow_value
 
@@ -154,7 +156,7 @@ class Minimap(Slider):
         # Display text
         font = pygame.font.Font(None, 30)
         text_surface = font.render('Mini-Map', True, window_params['black'])
-        text_rect = text_surface.get_rect(center=(self.pos[0]+20, self.top_pos-20))
+        text_rect = text_surface.get_rect(center=(self.pos[0]+20, self.top_pos-12))
         surface.blit(text_surface, text_rect)
 
         # Draw minimap
