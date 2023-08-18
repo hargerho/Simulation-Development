@@ -17,6 +17,8 @@ class Window:
         self.ts = simulation_params["ts"]
         self.speed = simulation_params["playback_speed"]
 
+        print(f"ts {self.ts}, speed {self.speed}")
+
         self.vehicle_length = window_params["vehicle_length"]
         self.vehicle_width = window_params["vehicle_width"]
         self.road_length = road_params["road_length"]
@@ -275,8 +277,6 @@ class Window:
                 self.bg.scroll_pos = x-1989
                 print(f"bg: {self.bg.scroll_pos}, slider:{x}")
 
-            # print(f'scroll: {self.bg.scroll_pos}, value: {self.minimap.slider_value()}, sliderx: {self.minimap.slider_button.centerx}')
-
             # Event check first
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -305,9 +305,6 @@ class Window:
                 elif self.onramp_slider.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
                     self.onramp_slider.move_slider(pygame.mouse.get_pos())
                     self.onramp_value = self.onramp_slider.slider_value()
-                # elif self.minimap.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
-                #     self.minimap.move_slider(pygame.mouse.get_pos())
-                #     self.bg.scroll_pos = self.minimap.slider_value()-6
 
             self.global_buttons.update()
             self.global_buttons.draw(self.win)
