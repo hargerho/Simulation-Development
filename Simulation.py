@@ -35,7 +35,6 @@ class SimulationManager:
 
         return vehicle_list, run_flag
 
-    # TODO
     def saving_record(self):
         print("Saving data ...")
         filepath = os.path.join(simulation_params['folderpath'], simulation_params['filename'] + ".json")
