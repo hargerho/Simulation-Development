@@ -15,9 +15,6 @@ class Window:
         self.width = window_params["window_width"]
         self.height = window_params["window_height"]
         self.ts = simulation_params["ts"]
-        self.speed = simulation_params["playback_speed"]
-
-        print(f"ts {self.ts}, speed {self.speed}")
 
         self.vehicle_length = window_params["vehicle_length"]
         self.vehicle_width = window_params["vehicle_width"]
@@ -29,7 +26,6 @@ class Window:
         # Creating window parameters
         pygame.init()
         self.win = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
-        self.clock = pygame.time.Clock()
         self.start = time.time()
 
         # Getting road y-coordinates
@@ -146,13 +142,13 @@ class Window:
         else:
             elapsed_time = pygame.time.get_ticks() - self.start_time
 
-        milliseconds = elapsed_time % 1000
-        seconds = (elapsed_time // 1000) % 60
-        minutes = (elapsed_time // 60000) % 60
+        milliseconds = int((elapsed_time % 1000) // 10)
+        seconds = int((elapsed_time // 1000) % 60)
+        minutes = int((elapsed_time // 60000) % 60)
         time_str = f"{minutes:02d}:{seconds:02d}.{milliseconds:02d}"
         timer_font = pygame.font.Font(None, 32)
         timer_text = timer_font.render(time_str, True, window_params["black"])
-        timer_rect = timer_text.get_rect(center=(220, 41))
+        timer_rect = timer_text.get_rect(center=(210, 42))
         self.win.blit(timer_text, timer_rect)
 
         timer_surface = timer_font.render("Elapsed Time:", True, window_params['black'])
@@ -225,6 +221,7 @@ class Window:
         return tmp
 
     def run_window(self):
+        clock = pygame.time.Clock()
         frame = 0
         self.minimap_value=0
         restarted_time = 0
@@ -286,6 +283,10 @@ class Window:
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
                         self.is_running = False
+                    if event.key == pygame.K_d:
+                        simulation_params['playback_speed'] += 1
+                    if event.key == pygame.K_a:
+                        simulation_params['playback_speed'] = max(1, simulation_params['playback_speed'] - 1)
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:  # Left mouse button
                         for button in self.global_buttons:
@@ -320,7 +321,7 @@ class Window:
                 frame += 1
 
                 pygame.display.update()
-                self.clock.tick(1./self.ts * self.speed)
+                clock.tick(1./self.ts * simulation_params['playback_speed'])
 
             if restart:
                 # Updates simulation frame
@@ -333,7 +334,7 @@ class Window:
                 frame = 0
 
                 pygame.display.update()
-                self.clock.tick(1./self.ts * self.speed)
+                clock.tick(1./self.ts * simulation_params['playback_speed'])
 
         end_time = time.time() - restarted_time
         time_taken = end_time - self.start

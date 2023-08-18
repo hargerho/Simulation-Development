@@ -46,7 +46,6 @@ class Road:
         # Convoy Params
         self.num_convoy_vehicles = road_params['num_convoy_vehicles']  # Queue counter of 3 acc vehicles to form a convoy
         self.acc_spawn_loc = [self.toplane_loc[0], self.leftlane] # acc vehicle always spawns in left lane
-        self.frames = 0
         self.convoy_spawned = False
 
         # Testing Controls
@@ -237,19 +236,17 @@ class Road:
 
         # Update spawn_timer
         if road_params['vehicle_inflow'] > 0:
-            self.timer += self.ts
+            self.timer += (self.ts * simulation_params['playback_speed'])
             if self.timer - self.last_spawn_time >= self.spawn_interval:
                 self.spawn_vehicle()
 
         if road_params['onramp_inflow'] > 0:
             # Update onramp_spawn_timer
-            self.onramp_timer += self.ts
+            self.onramp_timer += (self.ts * simulation_params['playback_speed'])
             if self.onramp_timer - self.onramp_last_spawn_time >= self.onramp_spawn_interval:
                 self.spawn_onramp()
         else:
             self.onramp_timer, self.onramp_last_spawn_time, self.onramp_spawn_interval = 0,0,0
-
-        self.frames += 1
 
         if simulation_params['testing'] and self.vehicle_despawn > self.total_vehicles:
             self.run_flag = False
