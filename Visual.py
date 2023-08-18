@@ -142,17 +142,21 @@ class Minimap(Slider):
         super().__init__(pos, size, start_factor, min, max, offset, slider_name)
 
         self.rect = self.left_pos + self.start_factor - self.offset, self.top_pos, self.height, self.size[1]
+        self.road_length_custom = self.size[0]+self.height-5
         self.slider_button = pygame.Rect(self.rect)
+        self.slide_rect = pygame.Rect(self.left_pos, self.top_pos, self.road_length_custom, self.size[1])
+
+        self.dx = 0
 
     def load_map(self):
         miniroad = pygame.image.load(window_params['miniroad']).convert_alpha()
-        self.miniroad = pygame.transform.scale(miniroad, (self.size[0], self.size[1]))
+        self.miniroad = pygame.transform.scale(miniroad, (self.road_length_custom, self.size[1]))
 
     def draw_slider(self, surface):
         # Display text
         font = pygame.font.Font(None, 30)
         text_surface = font.render('Mini-Map', True, window_params['black'])
-        text_rect = text_surface.get_rect(center=(self.pos[0], self.top_pos-20))
+        text_rect = text_surface.get_rect(center=(self.pos[0]+20, self.top_pos-20))
         surface.blit(text_surface, text_rect)
 
         # Draw minimap
@@ -169,13 +173,16 @@ class Minimap(Slider):
             pos = self.right_pos - self.height/2
         self.slider_button.centerx = pos
 
-    def scroll_slider(self, scroll_pos):
+    def scroll_slider(self, increment):
 
-        update = ((87*scroll_pos)/window_params['scroll_limit']) + self.left_pos + self.height/2
+        self.dx += increment
 
-        self.slider_button.centerx = update
-
-        print("sliderx:", self.slider_button.centerx)
+        if self.dx >= window_params['scroll_limit']/self.size[0]:
+            self.slider_button.centerx += 1
+            self.dx = 0
+        if self.dx <= -(window_params['scroll_limit']/self.size[0]):
+            self.slider_button.centerx -= 1
+            self.dx = 0
 
 class Background():
     def __init__(self, surface, screen_width, screen_height, start_file, end_file):
