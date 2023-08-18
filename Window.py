@@ -254,6 +254,7 @@ class Window:
                 print("Stopped Recording")
 
             self.draw_timer(restart=restart)
+
             # Background controls
             key = pygame.key.get_pressed()
             if key[pygame.K_LEFT] and self.bg.scroll_pos > 0:
