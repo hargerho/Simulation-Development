@@ -66,9 +66,7 @@ class Window:
         self.bg.load_signpost(signpost_file = window_params['signpost_image'])
 
         # Minimap
-        # self.minimap = Minimap(surface=self.win)
-        # self.minimap.load_map(x=400, y=40, map_width=400, map_height=50)
-        self.minimap = Minimap(pos=(self.width/2,20), size=(400,50), start_factor=0, min=0, max=100, offset=0, slider_name='minimap')
+        self.minimap = Minimap(pos=(self.width/2-20,20), size=(400,50), start_factor=0, min=0, max=31760, offset=0, slider_name='minimap')
         self.minimap.load_map()
 
         # Recording params
@@ -261,22 +259,23 @@ class Window:
             key = pygame.key.get_pressed()
             if key[pygame.K_LEFT] and self.bg.scroll_pos > 0:
                 self.bg.scroll_pos -= 5
-                self.minimap.scroll_slider(self.bg.scroll_pos)
+                self.minimap.scroll_slider(-5)
             if key[pygame.K_RIGHT] and self.bg.scroll_pos < window_params['scroll_limit']:
                 self.bg.scroll_pos += 5
-                self.minimap.scroll_slider(self.bg.scroll_pos)
+                self.minimap.scroll_slider(5)
             if key[pygame.K_DOWN] and self.bg.scroll_pos > 0:
                 self.bg.scroll_pos = self.out_bound_check(self.bg.scroll_pos, 20)
-                self.minimap.scroll_slider(self.bg.scroll_pos)
+                self.minimap.scroll_slider(-20)
             if key[pygame.K_UP] and self.bg.scroll_pos < window_params['scroll_limit']:
                 self.bg.scroll_pos += 20
-                self.minimap.scroll_slider(self.bg.scroll_pos)
+                self.minimap.scroll_slider(20)
             if self.minimap.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
                 self.minimap.move_slider(pygame.mouse.get_pos())
                 x = self.minimap.slider_value()
-                self.bg.scroll_pos = (x-6) * window_params['scroll_limit']/87
+                self.bg.scroll_pos = x-1989
+                print(f"bg: {self.bg.scroll_pos}, slider:{x}")
 
-            print(f'scroll: {self.bg.scroll_pos}, value: {self.minimap.slider_value()}, sliderx: {self.minimap.slider_button.centerx}')
+            # print(f'scroll: {self.bg.scroll_pos}, value: {self.minimap.slider_value()}, sliderx: {self.minimap.slider_button.centerx}')
 
             # Event check first
             for event in pygame.event.get():
@@ -306,9 +305,9 @@ class Window:
                 elif self.onramp_slider.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
                     self.onramp_slider.move_slider(pygame.mouse.get_pos())
                     self.onramp_value = self.onramp_slider.slider_value()
-                elif self.minimap.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
-                    self.minimap.move_slider(pygame.mouse.get_pos())
-                    self.bg.scroll_pos = (self.minimap.slider_value()-6) * window_params['scroll_limit']/86.95
+                # elif self.minimap.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
+                #     self.minimap.move_slider(pygame.mouse.get_pos())
+                #     self.bg.scroll_pos = self.minimap.slider_value()-6
 
             self.global_buttons.update()
             self.global_buttons.draw(self.win)
@@ -341,8 +340,6 @@ class Window:
 
         end_time = time.time() - restarted_time
         time_taken = end_time - self.start
-
-        print(f"Time taken to despawn {simulation_params['num_vehicles']} vehicles: {time_taken}")
 
         # Saves Data
         if simulation_params['testing']:
