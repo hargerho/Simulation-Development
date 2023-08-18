@@ -105,6 +105,88 @@ def fundamental_plots(flow_df):
     plt.savefig(f'{plot_name2}_plots.png', dpi=300)  # Change filename and format as needed
     print("Saved fundamental")
 
+def metrics_plots(flow_df):
+    # Find the indices of the maximum values for space_mean_speed and num_vehicles
+    maxv_idx = flow_df['space_mean_speed'].idxmax()
+    maxd_idx = flow_df['num_vehicles'].idxmax()
+    maxq_idx = flow_df['traffic_flow'].idxmax()
+
+    max_v = flow_df.loc[maxv_idx, 'space_mean_speed']
+    max_d = flow_df.loc[maxd_idx, 'num_vehicles']
+    max_q = flow_df.loc[maxq_idx, 'traffic_flow']
+
+    corr_vd = flow_df.loc[maxv_idx, 'num_vehicles']
+    corr_dv = flow_df.loc[maxd_idx, 'space_mean_speed']
+    corr_qv = flow_df.loc[maxq_idx, 'space_mean_speed']
+    corr_vq = flow_df.loc[maxv_idx, 'traffic_flow']
+    corr_dq = flow_df.loc[maxd_idx, 'traffic_flow']
+    corr_qd = flow_df.loc[maxq_idx, 'num_vehicles']
+
+    flow_df['combi_vd'] = flow_df['space_mean_speed'] + flow_df['num_vehicles']
+    flow_df['combi_vq'] = flow_df['space_mean_speed'] + flow_df['traffic_flow']
+    flow_df['combi_qd'] = flow_df['traffic_flow'] + flow_df['num_vehicles']
+
+    combi_vd_idx = flow_df[flow_df['combi_vd'] == flow_df['combi_vd'].max()].index
+    combi_vq_idx = flow_df[flow_df['combi_vq'] == flow_df['combi_vq'].max()].index
+    combi_qd_idx = flow_df[flow_df['combi_qd'] == flow_df['combi_qd'].max()].index
+
+    combi_vd = flow_df.loc[combi_vd_idx, ['space_mean_speed', 'num_vehicles']]
+    combi_vq = flow_df.loc[combi_vq_idx, ['space_mean_speed', 'traffic_flow']]
+    combi_qd = flow_df.loc[combi_qd_idx, ['traffic_flow', 'num_vehicles']]
+
+    combi_v = flow_df['space_mean_speed'][combi_vd_idx]
+    combi_d = flow_df['num_vehicles'][combi_vd_idx]
+    combi_v = flow_df['space_mean_speed'][combi_vq_idx]
+    combi_q = flow_df['traffic_flow'][combi_vq_idx]
+    combi_d = flow_df['num_vehicles'][combi_qd_idx]
+    combi_q = flow_df['traffic_flow'][combi_qd_idx]
+
+    # Create figure and axis objects
+    fig, axs = plt.subplots(3, 1, figsize=(12, 24))
+
+    # Create the plot Speed vs Density
+    axs[0].scatter(flow_df['num_vehicles'], flow_df['space_mean_speed'], s=0.01)
+    axs[0].scatter(corr_vd, max_v, color='red', label=f'Max Speed: {max_v:.2f}')
+    axs[0].scatter(max_d, corr_dv, color='blue', label=f'Max Density: {max_d}')
+    axs[0].scatter(combi_d, combi_v, color='green', label=f'Max (v&d) combination')
+    for index, row in combi_vd.iterrows():
+        axs[0].annotate(f'Density={int(row["num_vehicles"])}\nSpeed={row["space_mean_speed"]:.2f}', (row["num_vehicles"], row["space_mean_speed"]), textcoords="offset points", xytext=(0, 10), ha='center')
+    axs[0].set_xlabel('Traffic Density (veh/km)')
+    axs[0].set_ylabel('Traffic Speed (km/h)')
+    axs[0].set_title('Traffic Speed vs. Traffic Density')
+    axs[0].legend()
+
+    # Create the plot Speed vs Flow
+    axs[1].scatter(flow_df['traffic_flow'], flow_df['space_mean_speed'], s=0.01)
+    axs[1].scatter(corr_vq, max_v, color='red', label=f'Max Speed: {max_v:.2f}')
+    axs[1].scatter(max_q, corr_qv, color='blue', label=f'Max Flow: {max_q:.2f}')
+    axs[1].scatter(combi_q, combi_v, color='green', label=f'Max (v&q) combination')
+    for index, row in combi_vq.iterrows():
+        axs[1].annotate(f'Flow={row["traffic_flow"]:.2f}\nSpeed={row["space_mean_speed"]:.2f}', (row["traffic_flow"], row["space_mean_speed"]), textcoords="offset points", xytext=(0, 10), ha='center')
+    axs[1].set_xlabel('Traffic Flow (veh/h)')
+    axs[1].set_ylabel('Traffic Speed (km/h)')
+    axs[1].set_title('Traffic Speed vs. Traffic Flow')
+    axs[1].legend()
+
+
+    # Create the plot Flow vs Density
+    axs[2].scatter(flow_df['num_vehicles'], flow_df['traffic_flow'], s=0.01)
+    axs[2].scatter(corr_qd, max_q, color='red', label=f'Max Flow: {max_q:.2f}')
+    axs[2].scatter(max_d, corr_dq, color='blue', label=f'Max Density: {max_d}')
+    axs[2].scatter(combi_d, combi_q, color='green', label=f'Max (v&d) combination')
+    for index, row in combi_qd.iterrows():
+        axs[2].annotate(f'Density={int(row["num_vehicles"])}\nFlow={row["traffic_flow"]:.2f}', (row["num_vehicles"], row["traffic_flow"]), textcoords="offset points", xytext=(0, 10), ha='center')
+    axs[2].set_xlabel('Traffic Density (veh/h)')
+    axs[2].set_ylabel('Traffic Flow (km/h)')
+    axs[2].set_title('Traffic Flow vs. Traffic Density')
+    axs[2].legend(loc='upper right')
+
+    # Adjust layout and display plots
+    plt.tight_layout()
+    # Save the figure as a single image
+    plot_name3 = filename.replace(".json", "").replace("/content/drive/MyDrive/Colab Notebooks/","")
+    plt.savefig(f'{plot_name3}_points.png', dpi=300)
+
 folderpath = "data/1000_vehicles/"
 
 road_length = road_params['road_length']
