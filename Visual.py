@@ -120,8 +120,6 @@ class Slider():
 
         flow_value = int((value/range) * (self.max-self.min) + self.min)
 
-        print("sliderx:", flow_value)
-
         if self.slider_name == "vehicle_inflow":
             road_params["vehicle_inflow"] = flow_value
         if self.slider_name == "onramp_inflow":
@@ -169,14 +167,12 @@ class Minimap(Slider):
         pos = mouse_loc[0]
         if pos < self.left_pos + self.height/2:
             pos = self.left_pos + self.height/2
-        if pos > self.right_pos - self.height/2:
-            pos = self.right_pos - self.height/2
+        if pos > self.right_pos + self.height/2:
+            pos = self.right_pos + self.height/2 - 1
         self.slider_button.centerx = pos
 
     def scroll_slider(self, increment):
-
         self.dx += increment
-
         if self.dx >= window_params['scroll_limit']/self.size[0]:
             self.slider_button.centerx += 1
             self.dx = 0
@@ -262,7 +258,7 @@ class Background():
 
     def draw_road(self):
 
-        for x in range(107):
+        for x in range(108):
             self.surface.blit(self.road_image, ((x * self.road_width) - self.scroll_pos * 5, self.road_y))
             if x == 0:
                 self.surface.blit(self.onramp_image, ((x * self.onramp_width) - self.scroll_pos * 5, self.onramp_y))

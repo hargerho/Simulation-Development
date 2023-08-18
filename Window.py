@@ -66,9 +66,7 @@ class Window:
         self.bg.load_signpost(signpost_file = window_params['signpost_image'])
 
         # Minimap
-        # self.minimap = Minimap(surface=self.win)
-        # self.minimap.load_map(x=400, y=40, map_width=400, map_height=50)
-        self.minimap = Minimap(pos=(self.width/2-20,20), size=(400,50), start_factor=0, min=0, max=100, offset=0, slider_name='minimap')
+        self.minimap = Minimap(pos=(self.width/2-20,20), size=(400,50), start_factor=0, min=0, max=31760, offset=0, slider_name='minimap')
         self.minimap.load_map()
 
         # Recording params
@@ -274,7 +272,8 @@ class Window:
             if self.minimap.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
                 self.minimap.move_slider(pygame.mouse.get_pos())
                 x = self.minimap.slider_value()
-                self.bg.scroll_pos = (x-6) * window_params['scroll_limit']/87
+                self.bg.scroll_pos = x-1989
+                print(f"bg: {self.bg.scroll_pos}, slider:{x}")
 
             # print(f'scroll: {self.bg.scroll_pos}, value: {self.minimap.slider_value()}, sliderx: {self.minimap.slider_button.centerx}')
 
@@ -306,9 +305,9 @@ class Window:
                 elif self.onramp_slider.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
                     self.onramp_slider.move_slider(pygame.mouse.get_pos())
                     self.onramp_value = self.onramp_slider.slider_value()
-                elif self.minimap.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
-                    self.minimap.move_slider(pygame.mouse.get_pos())
-                    self.bg.scroll_pos = (self.minimap.slider_value()-6) * window_params['scroll_limit']/86.95
+                # elif self.minimap.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
+                #     self.minimap.move_slider(pygame.mouse.get_pos())
+                #     self.bg.scroll_pos = self.minimap.slider_value()-6
 
             self.global_buttons.update()
             self.global_buttons.draw(self.win)
