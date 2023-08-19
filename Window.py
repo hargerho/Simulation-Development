@@ -80,7 +80,7 @@ class Window:
 
         # Creating Real Time Metric Display
         self.realtime_flow = [0,0,0,0]
-        self.metric_list = [(167,325), (2100,380), (8000,380), (159980, 380)]
+        self.metric_list = [(167,325), (2100,390), (80000,390), (159980, 390)]
 
         # Setting up the Simulation
         self.is_running = True
