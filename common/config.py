@@ -53,8 +53,8 @@ road_params = {
     "onramp_length": length_conversion(140), # 140m
     "num_lanes": 4, # including an onramp
     "lanewidth": length_conversion(5), # arbitary
-    "vehicle_inflow": 4000, # 1000 approx 1veh/3.6sec testing: 10000
-    "onramp_inflow": 0,
+    "vehicle_inflow": 0, # 1000 approx 1veh/3.6sec testing: 10000
+    "onramp_inflow": 1000,
     "num_convoy_vehicles": 3,
     "road_closed": None
 }

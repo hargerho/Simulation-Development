@@ -52,7 +52,7 @@ class Road:
         self.vehicle_despawn = 0
         self.run_flag = True
         self.total_vehicles = simulation_params['num_vehicles']
-        self.progress_bar = tqdm(total=self.total_vehicles, desc="Despawning Vehicles")
+        # self.progress_bar = tqdm(total=self.total_vehicles, desc="Despawning Vehicles")
 
     def check_road_closed(self):
         if road_params["road_closed"] == "left":

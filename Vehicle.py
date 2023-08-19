@@ -206,7 +206,7 @@ class Vehicle:
         else:
             new_back_front = new_back.loc_front
             new_back_v = new_back.v
-            # Getting the correct new_back assignmente
+            # Getting the correct new_back assignment
             if not isinstance(new_back, Vehicle):
                 new_back = new_back.convoy_list[-1]
 
@@ -239,6 +239,10 @@ class Vehicle:
             new_back_accel=new_back_accel, onramp_flag=onramp_flag
         )
 
+        # For front vehicle stopped at onramp
+        if is_safe and current_front is None and (self.loc[0] >= self.onramp_length - self.loc_front - self.veh_length - self.s_0) and self.v == 0:
+            return True
+
         return change_incentive and is_safe
 
     def check_lane_change(self, surrounding):
@@ -254,7 +258,7 @@ class Vehicle:
             if change_flag:
                 self.local_loc[1] += self.lanewidth
         # For special case on-ramp
-        if self.loc[1] == self.onramp and (self.loc_front > self.onramp_length/2):
+        if self.loc[1] == self.onramp and (self.loc_front > self.onramp_length/2): # Start changing in the middle of onramp to prevent lane hogging from the main road spawn
             change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
                                                 new_front=surrounding['front_right'], new_back=surrounding['back_right'], right=surrounding['right'], left=surrounding['left'])
             if change_flag:
