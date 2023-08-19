@@ -184,7 +184,7 @@ def metrics_plots(flow_df):
     # Adjust layout and display plots
     plt.tight_layout()
     # Save the figure as a single image
-    plot_name3 = filename.replace(".json", "").replace("/content/drive/MyDrive/Colab Notebooks/","")
+    plot_name3 = filename.replace(".json", "").replace("data/1000_vehicles/","")
     plt.savefig(f'{plot_name3}_points.png', dpi=300)
 
 folderpath = "data/1000_vehicles/"
@@ -240,6 +240,6 @@ for filename in tqdm(os.listdir(folderpath), desc="Files"):
         flow_df = flow_df.drop_duplicates(subset=['frame', 'section'])
         flow_df.dropna(subset=['traffic_flow'], inplace=True)
 
-        interval_plots(flow_df)
+        # interval_plots(flow_df)
 
-        fundamental_plots(flow_df)
+        metrics_plots(flow_df)
