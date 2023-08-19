@@ -240,7 +240,7 @@ class Vehicle:
         )
 
         # For front vehicle stopped at onramp
-        if is_safe and current_front is None and (self.loc[0] >= self.onramp_length - self.loc_front - self.veh_length - self.s_0) and self.v == 0:
+        if is_safe and current_front is None and (self.loc[0] >= self.onramp_length - self.loc_front - self.veh_length - self.s_0) and self.v >= 0:
             return True
 
         return change_incentive and is_safe

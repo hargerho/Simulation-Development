@@ -77,6 +77,9 @@ class Window:
         self.last_pause_start = 0
         self.start_time = pygame.time.get_ticks()  # Record the start time of the simulation
 
+        # Creating Real Time Metric Display
+        # self.metrics = Metric(self.win, [(0,355), (1400,355), (8000,355), (159980, 0)])
+
         # Setting up the Simulation
         self.is_running = True
         self.sim = SimulationManager() # Create the simulation
@@ -162,6 +165,7 @@ class Window:
         self.bg.draw_bg()
         self.bg.draw_signpost()
         self.bg.draw_road()
+        self.bg.draw_metric(metric_loc=[(self.traffic_datumn_x-33,325), (2100,380), (8000,400), (159980, 400)])
 
         # Drawing minimap
         self.minimap.draw_slider(self.win)
@@ -170,6 +174,9 @@ class Window:
         self.inflow_slider.draw_slider(self.win)
         self.onramp_slider.draw_slider(self.win)
         self.speed_slider.draw_slider(self.win)
+
+        # Draw Metric Display
+        # self.metrics.draw_area()
 
         # Draw the recording toggle
         ellipse_rect = pygame.Rect(self.restart_x_loc - 108, 17, 100, 50)
@@ -289,7 +296,7 @@ class Window:
                     if event.key == pygame.K_q:
                         self.is_running = False
                     if event.key == pygame.K_d:
-                        simulation_params['playback_speed'] += 1
+                        simulation_params['playback_speed'] = min(simulation_params['playback_speed'] + 1, 7)
                     if event.key == pygame.K_a:
                         simulation_params['playback_speed'] = max(1, simulation_params['playback_speed'] - 1)
                 elif event.type == pygame.MOUSEBUTTONDOWN:

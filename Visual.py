@@ -182,6 +182,19 @@ class Minimap(Slider):
             self.slider_button.centerx -= 1
             self.dx = 0
 
+class Metric():
+    def __init__(self, surface, metric_loc):
+        self.surface = surface
+        self.loc_list = metric_loc
+
+    def draw_area(self):
+        for loc in self.loc_list:
+            self.metric_rect = pygame.Rect(loc[0], loc[1], 50, 10)
+            pygame.draw.rect(self.surface, window_params['white'], self.metric_rect)
+
+    # def compute_metrics(self):
+
+
 class Background():
     def __init__(self, surface, screen_width, screen_height, start_file, end_file):
         self.surface = surface
@@ -249,6 +262,19 @@ class Background():
                 text_surface = font.render(f"{str(interval)}km", True, window_params['black'])
                 self.surface.blit(text_surface, (text_x, text_y))
 
+    def draw_metric(self, metric_loc):
+        font = pygame.font.Font(None, 30)
+        text = "Centered Text"
+
+        # Render the text
+        text_surface = font.render(text, True, window_params['black'])
+
+        for loc in metric_loc:
+            # Calculate the position to center the text
+            center_x, center_y = loc[0] - self.scroll_pos * 5, loc[1]
+            text_rect = text_surface.get_rect(center=(center_x, center_y))
+            self.surface.blit(text_surface, text_rect)
+
     def draw_vehicle(self, shc_image, veh_length, veh_width, vehicle_loc):
         car_surface = pygame.Surface((veh_length, veh_width))
         car_rect = car_surface.get_rect()
@@ -288,5 +314,3 @@ class Background():
             for img in self.bg_images[-4:]:
                 self.surface.blit(img, ((x * self.bg_width) - bg_speed * self.scroll_pos, 0))
                 # bg_speed += 0.2
-
-
