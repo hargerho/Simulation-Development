@@ -2,6 +2,7 @@ import pygame
 import sys
 import time
 import math
+from statistics import harmonic_mean
 
 from common.config import window_params, road_params, simulation_params
 from Simulation import SimulationManager
@@ -78,7 +79,7 @@ class Window:
         self.start_time = pygame.time.get_ticks()  # Record the start time of the simulation
 
         # Creating Real Time Metric Display
-        # self.metrics = Metric(self.win, [(0,355), (1400,355), (8000,355), (159980, 0)])
+        self.metric_list = [(167,325), (2100,380), (8000,400), (159980, 400)]
 
         # Setting up the Simulation
         self.is_running = True
@@ -165,7 +166,6 @@ class Window:
         self.bg.draw_bg()
         self.bg.draw_signpost()
         self.bg.draw_road()
-        self.bg.draw_metric(metric_loc=[(self.traffic_datumn_x-33,325), (2100,380), (8000,400), (159980, 400)])
 
         # Drawing minimap
         self.minimap.draw_slider(self.win)
@@ -206,8 +206,28 @@ class Window:
             self.win.blit(text_surface, text_rect)
 
         # Draw speed limit
+    def assign_section(self, loc, speed):
+        for idx, metric_loc in enumerate(self.metric_list):
+            if idx == 0: # if vehicle is at the first checkpoint
+                if loc[0] <= metric_loc[0]:
+                    self.vehicle_metrics[idx].append(speed)
+            elif loc[0] >= metric_loc[0] - 10 and loc[0] <= metric_loc[0] + 10:
+                self.vehicle_metrics[idx].append(speed)
+
+    def compute_metrics(self, vehicle_metric):
+        realtime_metrics = []
+        for sections in vehicle_metric:
+            num_vehicles = len(sections)
+            if num_vehicles > 0:
+                space_mean_speed = harmonic_mean(sections)
+                flow = int(num_vehicles * space_mean_speed)
+                realtime_metrics.append(flow)
+            else:
+                realtime_metrics.append(0)
+        return realtime_metrics
 
     def refresh_window(self, vehicle_list):
+        self.vehicle_metrics = [[], [], [], []] # 1st, 2nd, middle, last
 
         # Drawing the vehicles
         for vehicle in vehicle_list:
@@ -216,14 +236,17 @@ class Window:
                 for convoy in vehicle.convoy_list:
                     # Indexing the convoy
                     vehicle_id = convoy.vehicle_id()
-                    vehicle_loc = vehicle_id['location']
+                    self.assign_section(loc=vehicle_id['location'], speed=vehicle_id['speed'])
 
-                    self.bg.draw_vehicle(self.acc_image, self.vehicle_length, self.vehicle_width, vehicle_loc=vehicle_loc)
+                    self.bg.draw_vehicle(self.acc_image, self.vehicle_length, self.vehicle_width, vehicle_loc=vehicle_id['location'])
             else:
                 vehicle_id = vehicle.vehicle_id()
-                vehicle_loc = vehicle_id['location']
+                self.assign_section(loc=vehicle_id['location'], speed=vehicle_id['speed'])
 
-                self.bg.draw_vehicle(self.shc_image, self.vehicle_length, self.vehicle_width, vehicle_loc=vehicle_loc)
+                self.bg.draw_vehicle(self.shc_image, self.vehicle_length, self.vehicle_width, vehicle_loc=vehicle_id['location'])
+
+        realtime_flow = self.compute_metrics(self.vehicle_metrics)
+        self.bg.draw_metric(flow_list=realtime_flow, metric_loc=self.metric_list)
 
     def out_bound_check(self, loc, diff):
         tmp = loc - diff

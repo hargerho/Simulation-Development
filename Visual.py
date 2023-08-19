@@ -183,16 +183,11 @@ class Minimap(Slider):
             self.dx = 0
 
 class Metric():
-    def __init__(self, surface, metric_loc):
-        self.surface = surface
+    def __init__(self, metric_loc):
         self.loc_list = metric_loc
 
-    def draw_area(self):
-        for loc in self.loc_list:
-            self.metric_rect = pygame.Rect(loc[0], loc[1], 50, 10)
-            pygame.draw.rect(self.surface, window_params['white'], self.metric_rect)
-
-    # def compute_metrics(self):
+    def compute_metrics(self, vehicle_list):
+        pass
 
 
 class Background():
@@ -262,15 +257,11 @@ class Background():
                 text_surface = font.render(f"{str(interval)}km", True, window_params['black'])
                 self.surface.blit(text_surface, (text_x, text_y))
 
-    def draw_metric(self, metric_loc):
+    def draw_metric(self, flow_list, metric_loc):
         font = pygame.font.Font(None, 30)
-        text = "Centered Text"
 
-        # Render the text
-        text_surface = font.render(text, True, window_params['black'])
-
-        for loc in metric_loc:
-            # Calculate the position to center the text
+        for idx, loc in enumerate(metric_loc):
+            text_surface = font.render(f"{flow_list[idx]} veh/h", True, window_params['black'])
             center_x, center_y = loc[0] - self.scroll_pos * 5, loc[1]
             text_rect = text_surface.get_rect(center=(center_x, center_y))
             self.surface.blit(text_surface, text_rect)
