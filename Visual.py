@@ -1,6 +1,6 @@
 import pygame
 import math
-from common.config import window_params, road_params, driving_params, acc_params
+from common.config import window_params, road_params, driving_params, acc_params, simulation_params
 
 class Objects:
     def __init__(self, x, y, image, scale_x, scale_y):
@@ -118,14 +118,16 @@ class Slider():
         range = self.right_pos - self.left_pos - 1
         value = self.slider_button.centerx - self.left_pos
 
-        flow_value = int((value/range) * (self.max-self.min) + self.min)
+        value = int((value/range) * (self.max-self.min) + self.min)
 
         if self.slider_name == "vehicle_inflow":
-            road_params["vehicle_inflow"] = flow_value
+            road_params["vehicle_inflow"] = value
         if self.slider_name == "onramp_inflow":
-            road_params["onramp_inflow"] = flow_value
+            road_params["onramp_inflow"] = value
+        if self.slider_name == "playback_speed":
+            simulation_params["playback_speed"] = value
 
-        return flow_value
+        return value
 
     def move_slider(self, mouse_loc):
         pos = mouse_loc[0]
@@ -154,7 +156,7 @@ class Minimap(Slider):
         # Display text
         font = pygame.font.Font(None, 30)
         text_surface = font.render('Mini-Map', True, window_params['black'])
-        text_rect = text_surface.get_rect(center=(self.pos[0]+20, self.top_pos-20))
+        text_rect = text_surface.get_rect(center=(self.pos[0]+20, self.top_pos-12))
         surface.blit(text_surface, text_rect)
 
         # Draw minimap
@@ -247,6 +249,31 @@ class Background():
                 text_surface = font.render(f"{str(interval)}km", True, window_params['black'])
                 self.surface.blit(text_surface, (text_x, text_y))
 
+    def draw_metric(self, flow_list, metric_loc, mini_loc):
+        font = pygame.font.Font(None, 30)
+        fontmini = pygame.font.Font(None, 15)
+
+        for idx, loc in enumerate(metric_loc):
+            # Draw near minimap
+            if idx == 0:
+                line_length = 60
+            elif idx == 1:
+                line_length = 55
+            else:
+                line_length = 49
+            text_surface_mini = fontmini.render(f"{flow_list[idx]}", True, window_params['black'])
+            text_rect_mini = text_surface_mini.get_rect(center=(mini_loc[idx][0], mini_loc[idx][1]+line_length+10))
+            text_surface_mini_fixed = fontmini.render(f"veh/h", True, window_params['black'])
+            text_rect_mini_fixed = text_surface_mini.get_rect(center=(mini_loc[idx][0]-3, mini_loc[idx][1]+line_length+18))
+            self.surface.blit(text_surface_mini, text_rect_mini)
+            self.surface.blit(text_surface_mini_fixed, text_rect_mini_fixed)
+            pygame.draw.line(self.surface, window_params['black'], mini_loc[idx], (mini_loc[idx][0], mini_loc[idx][1]+line_length), 1)
+
+            # Draw near the road
+            text_surface = font.render(f"{flow_list[idx]} veh/h", True, window_params['black'])
+            text_rect = text_surface.get_rect(center=(loc[0] - self.scroll_pos * 5, loc[1]))
+            self.surface.blit(text_surface, text_rect)
+
     def draw_vehicle(self, shc_image, veh_length, veh_width, vehicle_loc):
         car_surface = pygame.Surface((veh_length, veh_width))
         car_rect = car_surface.get_rect()
@@ -286,5 +313,3 @@ class Background():
             for img in self.bg_images[-4:]:
                 self.surface.blit(img, ((x * self.bg_width) - bg_speed * self.scroll_pos, 0))
                 # bg_speed += 0.2
-
-

@@ -1,8 +1,8 @@
-# Scale -> 1m:2px, 1km:2000px
+# Testing Scale -> 1m:2px, 1km:2000px
 
 # Helper Functions
 
-SCALE = 10
+SCALE = 10 # 1m:SCALE px
 
 def length_conversion(value):
     # Convert meters to pixels
@@ -65,9 +65,9 @@ road_params = {
 # Left bias = 0.3m/s
 # Lane change threshold = 0.1m/s
 driving_params = {
-    "desired_velocity": speed_conversion(100), # testing: 16.6 real: 70
+    "desired_velocity": speed_conversion(70), # testing: 16.6 real: 70
     "safety_threshold": length_conversion(1.5), # testing: 20px
-    "max_acceleration": length_conversion(4), # IDM Paper # was 0.73 # Testing:50
+    "max_acceleration": length_conversion(0.73), # IDM Paper # was 0.73 # Testing:50
     "comfortable_deceleration": length_conversion(1.67), # IDM Paper # was 1.67 # Testing: 4.61
     "acceleration_component": 4, # IDM Paper
     "left_bias": length_conversion(0.3), # MOBIL Paper
@@ -95,9 +95,11 @@ vehicle_models = [shc_params, acc_params]
 filename = f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}"
 baseline = f"ACCNo_SHC{driving_params['shc_logic']}_Road{road_params['road_closed']}_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}"
 
+# Max Real time FPS = 70
+# Min ts = 0.01, playback_speed = 1
 simulation_params = {
     "ts": 0.1, # was 0.001  testing: 1/60 # Ts < 0.5 same results
-    "playback_speed": 10, # realtime = 1
+    "playback_speed": 2, # realtime = 1
     "folderpath": "data",
     "filename": f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}",
     "record": False, # Default False
