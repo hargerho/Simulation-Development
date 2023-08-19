@@ -1,8 +1,8 @@
-# Scale -> 1m:2px, 1km:2000px
+# Testing Scale -> 1m:2px, 1km:2000px
 
 # Helper Functions
 
-SCALE = 10
+SCALE = 10 # 1m:SCALE px
 
 def length_conversion(value):
     # Convert meters to pixels
