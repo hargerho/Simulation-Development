@@ -26,7 +26,7 @@ def get_params(combination):
         1: ['normal', 'normal', None, 100, 4000],
         2: ['normal', 'normal', None, 150, 4000],
         3: ['normal', 'normal', None, 200, 4000],
-        4: ['normal', 'normal', None, 0, 1000],
+        4: ['normal', 'normal', None, 0, 1000], # Redo Simulation [checkbox] Redo Plots [checkbox]
         5: ['normal', 'normal', None, 0, 2000],
         6: ['normal', 'normal', None, 0, 3000],
         7: ['normal', 'normal', None, 0, 5000],
