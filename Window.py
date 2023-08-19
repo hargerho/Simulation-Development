@@ -65,7 +65,7 @@ class Window:
         self.bg.load_signpost(signpost_file = window_params['signpost_image'])
 
         # Minimap
-        self.minimap = Minimap(pos=(self.width/2-20,20), size=(400,50), start_factor=0, min=0, max=31760, offset=0, slider_name='minimap')
+        self.minimap = Minimap(pos=(self.width/2-20,12), size=(400,50), start_factor=0, min=0, max=31760, offset=0, slider_name='minimap')
         self.minimap.load_map()
 
         # Recording params
@@ -81,6 +81,7 @@ class Window:
         # Creating Real Time Metric Display
         self.realtime_flow = [0,0,0,0]
         self.metric_list = [(167,325), (2100,390), (80000,390), (159980, 390)]
+        self.miniloc_list = [(538,39), (570,44), (754,50), (954, 50)]
 
         # Setting up the Simulation
         self.is_running = True
@@ -99,7 +100,7 @@ class Window:
 
         # Traffic Buttons
         self.global_buttons = pygame.sprite.Group()
-        self.traffic_datumn_x, self.traffic_datumn_y = 200, 200
+        self.traffic_datumn_x, self.traffic_datumn_y = 200, 210
 
         vehicle_button_info = [
             (self.traffic_datumn_x+200, self.traffic_datumn_y, self.off_image, 0.2, 0.2, "acc_off"),
@@ -154,11 +155,11 @@ class Window:
         time_str = f"{minutes:02d}:{seconds:02d}.{milliseconds:02d}"
         timer_font = pygame.font.Font(None, 32)
         timer_text = timer_font.render(time_str, True, window_params["black"])
-        timer_rect = timer_text.get_rect(center=(210, 42))
+        timer_rect = timer_text.get_rect(center=(210, 35))
         self.win.blit(timer_text, timer_rect)
 
         timer_surface = timer_font.render("Elapsed Time:", True, window_params['black'])
-        timer_rect_text = timer_surface.get_rect(center=(85,40))
+        timer_rect_text = timer_surface.get_rect(center=(85,33))
         self.win.blit(timer_surface, timer_rect_text)
 
     def draw_refeshed_objects(self):
@@ -171,13 +172,13 @@ class Window:
         # Drawing minimap
         self.minimap.draw_slider(self.win)
 
+        # Draw metrics
+        self.bg.draw_metric(flow_list=self.realtime_flow, metric_loc=self.metric_list, mini_loc=self.miniloc_list)
+
         # Drawing sliders
         self.inflow_slider.draw_slider(self.win)
         self.onramp_slider.draw_slider(self.win)
         self.speed_slider.draw_slider(self.win)
-
-        # Draw Metric Display
-        # self.metrics.draw_area()
 
         # Draw the recording toggle
         ellipse_rect = pygame.Rect(self.restart_x_loc - 108, 17, 100, 50)
@@ -206,26 +207,33 @@ class Window:
             text_rect = text_surface.get_rect(center=pos)
             self.win.blit(text_surface, text_rect)
 
-    def speed_conversion(self, value, dist):
-        # 1px = 10m
+    def speed_conversion(self, value):
+        # 1m = 10px
         # Converts pixel/seconds -> pixel/h
-        return float((value*3600)/(10*dist))
+        return float(value * (3600/10000))
+
+    def density_conversion(self, value, dist):
+        # Interval of 400 px
+        # 1m = 10px
+        return float(value * (10000/dist))
 
     def assign_section(self, loc, speed, vehicle_metrics):
         for idx, metric_loc in enumerate(self.metric_list):
             if idx == 0: # if vehicle is at the first checkpoint
-                if loc[0] <= metric_loc[0]:
-                    vehicle_metrics[idx].append(self.speed_conversion(speed, metric_loc[0]))
-            elif loc[0] >= metric_loc[0] - 167 and loc[0] <= metric_loc[0] + 167:
-                vehicle_metrics[idx].append(self.speed_conversion(speed, 2*metric_loc[0]))
+                if loc[0] >= metric_loc[0] and loc[0] <= metric_loc[0] + 500:
+                    vehicle_metrics[idx].append((speed, 667))
+            elif loc[0] >= metric_loc[0] - 500 and loc[0] <= metric_loc[0] + 500:
+                vehicle_metrics[idx].append((speed, 1000))
+            # if loc[0] >= metric_loc[0] - 200 and loc[0] <= metric_loc[0] + 200:
+            #     vehicle_metrics[idx].append((speed, 400))
 
     def compute_metrics(self, vehicle_metric, realtime_metrics):
 
         for idx, sections in enumerate(vehicle_metric):
             num_vehicles = len(sections)
             if num_vehicles > 0:
-                space_mean_speed = harmonic_mean(sections)
-                flow = int(num_vehicles * space_mean_speed)
+                space_mean_speed = harmonic_mean([speed[0] for speed in sections])
+                flow = int(self.density_conversion(num_vehicles,sections[0][1]) * self.speed_conversion(space_mean_speed))
                 realtime_metrics[idx] = flow
 
         return realtime_metrics
@@ -250,8 +258,6 @@ class Window:
                 self.bg.draw_vehicle(self.shc_image, self.vehicle_length, self.vehicle_width, vehicle_loc=vehicle_id['location'])
 
         self.realtime_flow = self.compute_metrics(vehicle_metrics, self.realtime_flow)
-
-        self.bg.draw_metric(flow_list=self.realtime_flow, metric_loc=self.metric_list)
 
     def out_bound_check(self, loc, diff):
         tmp = loc - diff
@@ -312,7 +318,6 @@ class Window:
                 self.minimap.move_slider(pygame.mouse.get_pos())
                 x = self.minimap.slider_value()
                 self.bg.scroll_pos = x-1989
-                print(f"bg: {self.bg.scroll_pos}, slider:{x}")
 
             # Event check first
             for event in pygame.event.get():
