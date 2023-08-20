@@ -30,7 +30,7 @@ class Vehicle:
         self.a = driving_params['max_acceleration']
         self.b = driving_params['comfortable_deceleration']
         self.delta = driving_params['acceleration_component']
-        self.veh_length = window_params['vehicle_length'] # in window params
+        self.veh_length = window_params['vehicle_length']
         self.left_bias = driving_params['left_bias']
         self.change_threshold = driving_params['lane_change_threshold']
 

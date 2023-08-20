@@ -92,7 +92,7 @@ class Window:
         self.restart_x_loc = 1440
         self.restart_y_loc = 25
         button_scale = 0.065
-        self.pause_button = Button(self.restart_x_loc - 200, self.restart_y_loc, self.pause_image, button_scale, button_scale)
+        self.pause_button = Button(self.restart_x_loc - 192, self.restart_y_loc, self.pause_image, button_scale, button_scale)
         self.play_button = Button(self.restart_x_loc - 150, self.restart_y_loc, self.play_image, button_scale, button_scale)
         self.record_button = Button(self.restart_x_loc - 100, self.restart_y_loc, self.record_image, button_scale, button_scale)
         self.record_stop = Button(self.restart_x_loc - 50, self.restart_y_loc, self.record_stop_image, button_scale, button_scale)
@@ -162,7 +162,7 @@ class Window:
         timer_rect_text = timer_surface.get_rect(center=(85,33))
         self.win.blit(timer_surface, timer_rect_text)
 
-    def draw_refeshed_objects(self):
+    def draw_refeshed_objects(self, restart):
 
         # Scrolling bg
         self.bg.draw_bg()
@@ -207,6 +207,29 @@ class Window:
             text_rect = text_surface.get_rect(center=pos)
             self.win.blit(text_surface, text_rect)
 
+        # Simulation Button Presses
+        if self.pause_button.draw(self.win):
+            self.is_paused = True
+            self.paused_time = pygame.time.get_ticks() - self.start_time
+
+        if self.play_button.draw(self.win):
+            self.is_paused = False
+            self.start_time = pygame.time.get_ticks() - self.paused_time
+
+        if self.restart_button.draw(self.win):
+            restart = True
+
+        if not self.is_recording:
+            if self.record_button.draw(self.win):
+                self.is_recording = not self.is_recording
+                print(" Start Recording")
+        elif self.record_stop.draw(self.win):
+            self.is_recording = not self.is_recording
+            self.has_recorded = True
+            print("Stopped Recording")
+
+        self.draw_timer(restart=restart)
+
     def speed_conversion(self, value):
         # 1m = 10px
         # Converts pixel/seconds -> pixel/h
@@ -224,8 +247,6 @@ class Window:
                     vehicle_metrics[idx].append((speed, 667))
             elif loc[0] >= metric_loc[0] - 500 and loc[0] <= metric_loc[0] + 500:
                 vehicle_metrics[idx].append((speed, 1000))
-            # if loc[0] >= metric_loc[0] - 200 and loc[0] <= metric_loc[0] + 200:
-            #     vehicle_metrics[idx].append((speed, 400))
 
     def compute_metrics(self, vehicle_metric, realtime_metrics):
 
@@ -268,38 +289,36 @@ class Window:
     def run_window(self):
         clock = pygame.time.Clock()
         frame = 0
-        self.minimap_value=0
-        restarted_time = 0
+        self.minimap_value = 0
         self.create_buttons()
 
         while self.is_running:
             restart = False
-            print("Pause Check")
 
-            self.draw_refeshed_objects()
+            # self.draw_refeshed_objects()
 
-            # Simulation Button Presses
-            if self.pause_button.draw(self.win):
-                self.is_paused = True
-                self.paused_time = pygame.time.get_ticks() - self.start_time
+            # # Simulation Button Presses
+            # if self.pause_button.draw(self.win):
+            #     self.is_paused = True
+            #     self.paused_time = pygame.time.get_ticks() - self.start_time
 
-            if self.play_button.draw(self.win):
-                self.is_paused = False
-                self.start_time = pygame.time.get_ticks() - self.paused_time
+            # if self.play_button.draw(self.win):
+            #     self.is_paused = False
+            #     self.start_time = pygame.time.get_ticks() - self.paused_time
 
-            if self.restart_button.draw(self.win):
-                restart = True
+            # if self.restart_button.draw(self.win):
+            #     restart = True
 
-            if not self.is_recording:
-                if self.record_button.draw(self.win):
-                    self.is_recording = not self.is_recording
-                    print(" Start Recording")
-            elif self.record_stop.draw(self.win):
-                self.is_recording = not self.is_recording
-                self.has_recorded = True
-                print("Stopped Recording")
+            # if not self.is_recording:
+            #     if self.record_button.draw(self.win):
+            #         self.is_recording = not self.is_recording
+            #         print(" Start Recording")
+            # elif self.record_stop.draw(self.win):
+            #     self.is_recording = not self.is_recording
+            #     self.has_recorded = True
+            #     print("Stopped Recording")
 
-            self.draw_timer(restart=restart)
+            # self.draw_timer(restart=restart)
 
             # Background controls
             key = pygame.key.get_pressed()
@@ -356,6 +375,8 @@ class Window:
                     self.speed_slider.move_slider(pygame.mouse.get_pos())
                     simulation_params['playback_speed'] = self.speed_slider.slider_value()
 
+            self.draw_refeshed_objects(restart=restart)
+
             self.global_buttons.update()
             self.global_buttons.draw(self.win)
 
@@ -384,9 +405,6 @@ class Window:
 
                 pygame.display.update()
                 clock.tick(1./self.ts * simulation_params['playback_speed'])
-
-        end_time = time.time() - restarted_time
-        time_taken = end_time - self.start
 
         # Saves Data
         if simulation_params['testing']:
