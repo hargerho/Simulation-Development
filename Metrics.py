@@ -17,7 +17,7 @@ def interval_plots(flow_df):
     # Saving timestep plots
     num_plots = flow_df['section'].max()
     # Create a figure with subplots
-    fig, axes = plt.subplots(nrows=num_plots, figsize=(40, 10*num_plots))  # You can adjust figsize as needed
+    fig, axes = plt.subplots(nrows=num_plots, figsize=(40, 10*num_plots))
 
     for i, ax in enumerate(axes):
         # Filter data for the current section
