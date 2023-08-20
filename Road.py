@@ -86,7 +86,6 @@ class Road:
 
         else:
             tmp_lead = tmp_vehicle.convoy_list[0] # Lead ACC vehicle
-            tmp_vehicle_tail = tmp_vehicle.convoy_list[-1]
             tmp_front = tmp_lead.get_fov(vehicle_list=self.vehicle_list)['front']
 
             # If there is a vehicle infront
@@ -96,7 +95,7 @@ class Road:
                 else:
                     headway = tmp_lead.T
                 # Check the size of the car
-                overlap_flag = (tmp_front.loc_back - tmp_vehicle_tail.loc_front - self.safety_distance) < 0
+                overlap_flag = (tmp_front.loc_back - tmp_lead.loc_front - self.safety_distance) < 0
             else:
                 # If no vehicles infront
                 headway = tmp_lead.T

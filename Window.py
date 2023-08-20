@@ -92,7 +92,7 @@ class Window:
         self.restart_x_loc = 1440
         self.restart_y_loc = 25
         button_scale = 0.065
-        self.pause_button = Button(self.restart_x_loc - 200, self.restart_y_loc, self.pause_image, button_scale, button_scale)
+        self.pause_button = Button(self.restart_x_loc - 192, self.restart_y_loc, self.pause_image, button_scale, button_scale)
         self.play_button = Button(self.restart_x_loc - 150, self.restart_y_loc, self.play_image, button_scale, button_scale)
         self.record_button = Button(self.restart_x_loc - 100, self.restart_y_loc, self.record_image, button_scale, button_scale)
         self.record_stop = Button(self.restart_x_loc - 50, self.restart_y_loc, self.record_stop_image, button_scale, button_scale)
@@ -224,8 +224,6 @@ class Window:
                     vehicle_metrics[idx].append((speed, 667))
             elif loc[0] >= metric_loc[0] - 500 and loc[0] <= metric_loc[0] + 500:
                 vehicle_metrics[idx].append((speed, 1000))
-            # if loc[0] >= metric_loc[0] - 200 and loc[0] <= metric_loc[0] + 200:
-            #     vehicle_metrics[idx].append((speed, 400))
 
     def compute_metrics(self, vehicle_metric, realtime_metrics):
 
@@ -268,8 +266,7 @@ class Window:
     def run_window(self):
         clock = pygame.time.Clock()
         frame = 0
-        self.minimap_value=0
-        restarted_time = 0
+        self.minimap_value = 0
         self.create_buttons()
 
         while self.is_running:
@@ -363,29 +360,21 @@ class Window:
                 vehicle_list, _ = self.sim.update_frame(is_recording=self.is_recording, frame=frame, restart=restart)
 
                 # Display newly updated frame on Window
-                if (len(vehicle_list) != 0):
-                    self.refresh_window(vehicle_list=vehicle_list)
-
+                self.refresh_window(vehicle_list=vehicle_list)
                 frame += 1
-
                 pygame.display.update()
                 clock.tick(1./self.ts * simulation_params['playback_speed'])
+            else:
+                self.refresh_window(vehicle_list=vehicle_list)
+                pygame.display.update()
 
-            if restart:
-                # Updates simulation frame
+            if restart or (self.is_paused and restart):
+                self.realtime_flow = [0,0,0,0]
                 vehicle_list, _ = self.sim.update_frame(is_recording=self.is_recording, frame=frame, restart=restart)
-
-                # Display newly updated frame on Window
-                if (len(vehicle_list) != 0):
-                    self.refresh_window(vehicle_list=vehicle_list)
-
+                self.refresh_window(vehicle_list=vehicle_list)
                 frame = 0
-
                 pygame.display.update()
                 clock.tick(1./self.ts * simulation_params['playback_speed'])
-
-        end_time = time.time() - restarted_time
-        time_taken = end_time - self.start
 
         # Saves Data
         if simulation_params['testing']:

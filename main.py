@@ -38,8 +38,6 @@ def get_params(combination):
     return range_testing.get(combination)
 
 def main():
-    # Data Collection
-
     if testing:
 
         start = time.time()
