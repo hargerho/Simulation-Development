@@ -162,7 +162,7 @@ class Window:
         timer_rect_text = timer_surface.get_rect(center=(85,33))
         self.win.blit(timer_surface, timer_rect_text)
 
-    def draw_refeshed_objects(self, restart):
+    def draw_refeshed_objects(self):
 
         # Scrolling bg
         self.bg.draw_bg()
@@ -206,29 +206,6 @@ class Window:
             text_surface = text_font.render(text, True, window_params['black'])
             text_rect = text_surface.get_rect(center=pos)
             self.win.blit(text_surface, text_rect)
-
-        # Simulation Button Presses
-        if self.pause_button.draw(self.win):
-            self.is_paused = True
-            self.paused_time = pygame.time.get_ticks() - self.start_time
-
-        if self.play_button.draw(self.win):
-            self.is_paused = False
-            self.start_time = pygame.time.get_ticks() - self.paused_time
-
-        if self.restart_button.draw(self.win):
-            restart = True
-
-        if not self.is_recording:
-            if self.record_button.draw(self.win):
-                self.is_recording = not self.is_recording
-                print(" Start Recording")
-        elif self.record_stop.draw(self.win):
-            self.is_recording = not self.is_recording
-            self.has_recorded = True
-            print("Stopped Recording")
-
-        self.draw_timer(restart=restart)
 
     def speed_conversion(self, value):
         # 1m = 10px
@@ -295,30 +272,30 @@ class Window:
         while self.is_running:
             restart = False
 
-            # self.draw_refeshed_objects()
+            self.draw_refeshed_objects()
 
-            # # Simulation Button Presses
-            # if self.pause_button.draw(self.win):
-            #     self.is_paused = True
-            #     self.paused_time = pygame.time.get_ticks() - self.start_time
+            # Simulation Button Presses
+            if self.pause_button.draw(self.win):
+                self.is_paused = True
+                self.paused_time = pygame.time.get_ticks() - self.start_time
 
-            # if self.play_button.draw(self.win):
-            #     self.is_paused = False
-            #     self.start_time = pygame.time.get_ticks() - self.paused_time
+            if self.play_button.draw(self.win):
+                self.is_paused = False
+                self.start_time = pygame.time.get_ticks() - self.paused_time
 
-            # if self.restart_button.draw(self.win):
-            #     restart = True
+            if self.restart_button.draw(self.win):
+                restart = True
 
-            # if not self.is_recording:
-            #     if self.record_button.draw(self.win):
-            #         self.is_recording = not self.is_recording
-            #         print(" Start Recording")
-            # elif self.record_stop.draw(self.win):
-            #     self.is_recording = not self.is_recording
-            #     self.has_recorded = True
-            #     print("Stopped Recording")
+            if not self.is_recording:
+                if self.record_button.draw(self.win):
+                    self.is_recording = not self.is_recording
+                    print(" Start Recording")
+            elif self.record_stop.draw(self.win):
+                self.is_recording = not self.is_recording
+                self.has_recorded = True
+                print("Stopped Recording")
 
-            # self.draw_timer(restart=restart)
+            self.draw_timer(restart=restart)
 
             # Background controls
             key = pygame.key.get_pressed()
@@ -375,8 +352,6 @@ class Window:
                     self.speed_slider.move_slider(pygame.mouse.get_pos())
                     simulation_params['playback_speed'] = self.speed_slider.slider_value()
 
-            self.draw_refeshed_objects(restart=restart)
-
             self.global_buttons.update()
             self.global_buttons.draw(self.win)
 
@@ -385,24 +360,19 @@ class Window:
                 vehicle_list, _ = self.sim.update_frame(is_recording=self.is_recording, frame=frame, restart=restart)
 
                 # Display newly updated frame on Window
-                if (len(vehicle_list) != 0):
-                    self.refresh_window(vehicle_list=vehicle_list)
-
+                self.refresh_window(vehicle_list=vehicle_list)
                 frame += 1
-
                 pygame.display.update()
                 clock.tick(1./self.ts * simulation_params['playback_speed'])
+            else:
+                self.refresh_window(vehicle_list=vehicle_list)
+                pygame.display.update()
 
-            if restart:
-                # Updates simulation frame
+            if restart or (self.is_paused and restart):
+                self.realtime_flow = [0,0,0,0]
                 vehicle_list, _ = self.sim.update_frame(is_recording=self.is_recording, frame=frame, restart=restart)
-
-                # Display newly updated frame on Window
-                if (len(vehicle_list) != 0):
-                    self.refresh_window(vehicle_list=vehicle_list)
-
+                self.refresh_window(vehicle_list=vehicle_list)
                 frame = 0
-
                 pygame.display.update()
                 clock.tick(1./self.ts * simulation_params['playback_speed'])
 
