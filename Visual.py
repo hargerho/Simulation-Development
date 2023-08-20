@@ -56,7 +56,16 @@ class UserButton(pygame.sprite.Sprite):
         height = image.get_height()
         self.image = pygame.transform.scale(image, (int(width * scale_x), int(height * scale_y)))
         self.rect = self.image.get_rect(center=(x,y))
-        self.is_selected = False
+
+        # Setting default params
+        if self.button_name == "road_closed_off":
+            self.is_selected = True
+        elif self.button_name == "acc_logic_normal":
+            self.is_selected = True
+        elif self.button_name == "shc_logic_normal":
+            self.is_selected = True
+        else:
+            self.is_selected = False
 
     def update(self):  # sourcery skip: switch
         if self.is_selected:

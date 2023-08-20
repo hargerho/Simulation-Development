@@ -274,6 +274,7 @@ class Window:
 
         while self.is_running:
             restart = False
+            print("Pause Check")
 
             self.draw_refeshed_objects()
 
