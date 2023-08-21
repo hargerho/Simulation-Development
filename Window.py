@@ -210,20 +210,23 @@ class Window:
     def speed_conversion(self, value):
         # 1m = 10px
         # Converts pixel/seconds -> pixel/h
-        return float(value * (3600/10000))
+        return float(value * (3600/(10*1000)))
 
     def density_conversion(self, value, dist):
         # Interval of 400 px
         # 1m = 10px
-        return float(value * (10000/dist))
+        return float(value * ((10*1000)/dist))
+
+    def length_conversion(self, value):
+        return value * 10
 
     def assign_section(self, loc, speed, vehicle_metrics):
         for idx, metric_loc in enumerate(self.metric_list):
             if idx == 0: # if vehicle is at the first checkpoint
-                if loc[0] >= metric_loc[0] and loc[0] <= metric_loc[0] + 500:
-                    vehicle_metrics[idx].append((speed, 667))
-            elif loc[0] >= metric_loc[0] - 500 and loc[0] <= metric_loc[0] + 500:
-                vehicle_metrics[idx].append((speed, 1000))
+                if loc[0] >= metric_loc[0] and loc[0] <= metric_loc[0] + self.length_conversion(100):
+                    vehicle_metrics[idx].append((speed, self.length_conversion(116.7)))
+            elif loc[0] >= metric_loc[0] - self.length_conversion(500) and loc[0] <= metric_loc[0] + self.length_conversion(500):
+                vehicle_metrics[idx].append((speed, self.length_conversion(1000)))
 
     def compute_metrics(self, vehicle_metric, realtime_metrics):
 
