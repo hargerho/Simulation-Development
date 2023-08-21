@@ -79,7 +79,9 @@ class Window:
         self.start_time = pygame.time.get_ticks()  # Record the start time of the simulation
 
         # Creating Real Time Metric Display
-        self.realtime_flow = [0,0,0,0]
+        # self.realtime_flow = [0,0,0,0]
+        self.realtime_flow = [[], [], [], []]
+        self.mean_flow = []
         self.metric_list = [(167,325), (2100,390), (80000,390), (159980, 390)]
         self.miniloc_list = [(538,39), (570,44), (754,50), (954, 50)]
 
@@ -173,7 +175,7 @@ class Window:
         self.minimap.draw_slider(self.win)
 
         # Draw metrics
-        self.bg.draw_metric(flow_list=self.realtime_flow, metric_loc=self.metric_list, mini_loc=self.miniloc_list)
+        self.bg.draw_metric(flow_list=self.mean_flow, metric_loc=self.metric_list, mini_loc=self.miniloc_list)
 
         # Drawing sliders
         self.inflow_slider.draw_slider(self.win)
@@ -235,11 +237,18 @@ class Window:
             if num_vehicles > 0:
                 space_mean_speed = harmonic_mean([speed[0] for speed in sections])
                 flow = int(self.density_conversion(num_vehicles,sections[0][1]) * self.speed_conversion(space_mean_speed))
-                realtime_metrics[idx] = flow
+                realtime_metrics[idx].append(flow)
 
         return realtime_metrics
 
-    def refresh_window(self, vehicle_list):
+    def average_metrics(self, realtime_metrics):
+        mean_flow = []
+        for section in realtime_metrics:
+            section_mean = int(sum(section) / len(section)) if len(section) > 0 else 0
+            mean_flow.append(section_mean)
+        return mean_flow
+
+    def refresh_window(self, vehicle_list, frame):
         vehicle_metrics = [[], [], [], []] # 1st, 2nd, middle, last
 
         # Drawing the vehicles
@@ -259,6 +268,9 @@ class Window:
                 self.bg.draw_vehicle(self.shc_image, self.vehicle_length, self.vehicle_width, vehicle_loc=vehicle_id['location'])
 
         self.realtime_flow = self.compute_metrics(vehicle_metrics, self.realtime_flow)
+
+        if (frame%10 == 0):
+            self.mean_flow = self.average_metrics(realtime_metrics=self.realtime_flow)
 
     def out_bound_check(self, loc, diff):
         tmp = loc - diff
@@ -363,18 +375,18 @@ class Window:
                 vehicle_list, _ = self.sim.update_frame(is_recording=self.is_recording, frame=frame, restart=restart)
 
                 # Display newly updated frame on Window
-                self.refresh_window(vehicle_list=vehicle_list)
+                self.refresh_window(vehicle_list=vehicle_list, frame=frame)
                 frame += 1
                 pygame.display.update()
                 clock.tick(1./self.ts * simulation_params['playback_speed'])
             else:
-                self.refresh_window(vehicle_list=vehicle_list)
+                self.refresh_window(vehicle_list=vehicle_list, frame=frame)
                 pygame.display.update()
 
             if restart or (self.is_paused and restart):
                 self.realtime_flow = [0,0,0,0]
                 vehicle_list, _ = self.sim.update_frame(is_recording=self.is_recording, frame=frame, restart=restart)
-                self.refresh_window(vehicle_list=vehicle_list)
+                self.refresh_window(vehicle_list=vehicle_list, frame=frame)
                 frame = 0
                 pygame.display.update()
                 clock.tick(1./self.ts * simulation_params['playback_speed'])
