@@ -263,6 +263,11 @@ class Background():
         fontmini = pygame.font.Font(None, 15)
 
         for idx, loc in enumerate(metric_loc):
+            if flow_list is None or len(flow_list) == 0:
+                flow = 0
+            else:
+                flow = flow_list[idx]
+
             # Draw near minimap
             if idx == 0:
                 line_length = 60
@@ -270,7 +275,7 @@ class Background():
                 line_length = 55
             else:
                 line_length = 49
-            text_surface_mini = fontmini.render(f"{flow_list[idx]}", True, window_params['black'])
+            text_surface_mini = fontmini.render(f"{flow}", True, window_params['black'])
             text_rect_mini = text_surface_mini.get_rect(center=(mini_loc[idx][0], mini_loc[idx][1]+line_length+10))
             text_surface_mini_fixed = fontmini.render(f"veh/h", True, window_params['black'])
             text_rect_mini_fixed = text_surface_mini.get_rect(center=(mini_loc[idx][0]-3, mini_loc[idx][1]+line_length+18))
@@ -279,7 +284,7 @@ class Background():
             pygame.draw.line(self.surface, window_params['black'], mini_loc[idx], (mini_loc[idx][0], mini_loc[idx][1]+line_length), 1)
 
             # Draw near the road
-            text_surface = font.render(f"{flow_list[idx]} veh/h", True, window_params['black'])
+            text_surface = font.render(f"{flow} veh/h", True, window_params['black'])
             text_rect = text_surface.get_rect(center=(loc[0] - self.scroll_pos * 5, loc[1]))
             self.surface.blit(text_surface, text_rect)
 
