@@ -1,4 +1,4 @@
-from common.config import simulation_params, driving_params
+from common.config import simulation_params, driving_params, window_params
 from Vehicle import Vehicle
 class Convoy:
     def __init__(self, logic_dict, lead_spawn_loc, vehicle_type, num_subconvoy):
@@ -7,7 +7,6 @@ class Convoy:
             Vehicle(logic_dict, lead_spawn_loc, vehicle_type=vehicle_type)
             for _ in range(num_subconvoy)
         ]
-        self.convoy_dist = logic_dict.get('safe_headway') + driving_params['safety_threshold']/2
 
         # Initialize convoy-level params
         self.lead_vehicle = self.convoy_list[0]
@@ -16,6 +15,9 @@ class Convoy:
         self.loc_back = self.tail_vehicle.loc_back
         self.loc = lead_spawn_loc
         self.v = self.lead_vehicle.v
+        self.veh_length = window_params['vehicle_length']
+
+        self.convoy_dist = logic_dict.get('safe_headway') + driving_params['safety_threshold'] + self.veh_length
 
     def update_convoy(self, global_list, vehicle_type):
 
@@ -33,7 +35,7 @@ class Convoy:
                 front_vehicle = self.convoy_list[i-1]
 
                 # Update road traverse
-                current_vehicle.local_loc[0] = front_vehicle.local_loc[0] -  self.convoy_dist # place holder distance
+                current_vehicle.local_loc[0] = front_vehicle.local_loc[0] -  self.convoy_dist
 
                 # If lead car change lanes
                 current_vehicle.local_loc[1] = self.lead_vehicle.local_loc[1]
