@@ -248,6 +248,18 @@ class Vehicle:
 
         return safe_front and safe_back and safe_side
 
+    def is_safe_onramp(self, new_front, new_back, right):
+        safe_front = (new_front.loc_back > self.loc_front) if new_front is not None else True
+        safe_back = (new_back.loc_front < self.loc_back) if new_back is not None else True
+        safe_side = False
+
+        if right is None:
+            safe_side = True
+
+        print(f"side{safe_side}, right{right}")
+
+        return safe_front and safe_back and safe_side
+
     def calc_lane_change(self, change_dir, current_front, new_front, new_back, right, left):
         # Checking if onramp
         onramp_flag = (self.loc[1] == self.onramp)
@@ -298,18 +310,23 @@ class Vehicle:
         is_safe = self.is_safe_to_change(change_dir, new_front, new_back, right, left)
 
         # For front vehicle stopped at onramp
-        if is_safe and current_front is None and (self.loc[0] >= self.onramp_length - self.loc_front - self.veh_length - self.s_0) and self.v >= 0 and onramp_flag:
-            return True
+        # if is_safe and (current_front is None) and (self.loc_front >= self.onramp_length - self.loc_front - self.veh_length - self.s_0) and self.v >= 0 and onramp_flag:
+        #     return True
 
-        if (self.v == 0) and is_safe:
-            if current_front is not None:
-                if current_front_v == 0:
-                    change_incentive = True
+        if onramp_flag and (self.loc_front >= self.onramp_length - self.loc_front - self.veh_length - self.s_0) and self.v >= 0:
+            onrampsafe = self.is_safe_onramp(new_front, new_back, right)
+            print("onrampsafe?", onrampsafe)
+            if onrampsafe:
+                return True
+
+        if (self.v == 0) and is_safe and (current_front is not None):
+            if current_front_v == 0:
+                change_incentive = True
 
         return change_incentive and is_safe
 
     def check_lane_change(self, surrounding):
-        if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] == self.rightlane: # Left change
+        if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] == self.rightlane: # Right change
             change_flag = self.calc_lane_change(change_dir='left', current_front=surrounding['front'],
                                                 new_front=surrounding['front_left'], new_back=surrounding['back_left'], right=surrounding['right'], left=surrounding['left'])
             if change_flag:
@@ -321,7 +338,7 @@ class Vehicle:
             if change_flag:
                 self.local_loc[1] += self.lanewidth
         # For special case on-ramp
-        if self.loc[1] == self.onramp and (self.loc_front > self.onramp_length/2): # Start changing in the middle of onramp to prevent lane hogging from the main road spawn
+        if self.loc[1] == self.onramp and (self.loc_front >= self.onramp_length/2): # Start changing in the middle of onramp to prevent lane hogging from the main road spawn
             change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
                                                 new_front=surrounding['front_right'], new_back=surrounding['back_right'], right=surrounding['right'], left=surrounding['left'])
             if change_flag:

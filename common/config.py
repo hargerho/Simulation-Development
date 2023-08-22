@@ -40,7 +40,7 @@ road_params = {
     "num_lanes": 4, # including an onramp
     "lanewidth": 10, # arbitary
     "vehicle_inflow": 0, # 1000 approx 1veh/3.6sec testing: 10000
-    "onramp_inflow": 1000,
+    "onramp_inflow": 200,
     "num_convoy_vehicles": 3,
     "road_closed": 'left'
 }
