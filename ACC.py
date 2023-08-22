@@ -8,7 +8,6 @@ class Convoy:
             for _ in range(num_subconvoy)
         ]
 
-
         # Initialize convoy-level params
         self.lead_vehicle = self.convoy_list[0]
         self.tail_vehicle = self.convoy_list[-1]
@@ -16,7 +15,7 @@ class Convoy:
         self.loc_back = self.tail_vehicle.loc_back
         self.loc = lead_spawn_loc
         self.v = self.lead_vehicle.v
-        self.veh_length = window_params['vehicle_length']
+        # self.subvehicle_length = window_params['vehicle_length']
         self.veh_length = self.loc_front - self.loc_back
 
         self.convoy_dist = logic_dict.get('safe_headway') + driving_params['safety_threshold']
@@ -37,7 +36,7 @@ class Convoy:
                 front_vehicle = self.convoy_list[i-1]
 
                 # Update road traverse
-                current_vehicle.local_loc[0] = front_vehicle.local_loc[0] - self.convoy_dist
+                current_vehicle.local_loc[0] = front_vehicle.local_loc[0] - self.convoy_dist - 20
 
                 # If lead car change lanes
                 current_vehicle.local_loc[1] = self.lead_vehicle.local_loc[1]
@@ -51,5 +50,7 @@ class Convoy:
         # Update convoy level position
         self.loc_front = self.convoy_list[0].loc_front
         self.loc_back = self.convoy_list[-1].loc_back
-        self.loc = [(self.loc_back + (self.loc_front - self.loc_back)/2), self.lead_vehicle.loc[1]]
+        self.veh_length = self.loc_front - self.loc_back
+        x_pos = self.loc_back + self.veh_length/2
+        self.loc = [x_pos, self.lead_vehicle.loc[1]]
         self.v = self.lead_vehicle.v

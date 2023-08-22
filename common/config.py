@@ -20,7 +20,7 @@ window_params = {
     "green": (0,255,0),
     "grey": (128, 128, 128),
     "red": (255,0,0),
-    "vehicle_length": 10, #5m
+    "vehicle_length": 20, #5m
     "vehicle_width": 5, #2+m
     "road_image": 'common/assets/road.png',
     "road_border": 'common/assets/road_mask.png',
