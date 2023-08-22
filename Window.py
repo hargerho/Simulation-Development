@@ -187,6 +187,8 @@ class Window:
                     sys.exit()
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
                     self.is_running = False
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
+                    road_params["vehicle_inflow"] = 0
 
             if not self.is_paused:
                 # Updates simulation frame

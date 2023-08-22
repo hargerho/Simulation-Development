@@ -36,7 +36,7 @@ class Convoy:
                 front_vehicle = self.convoy_list[i-1]
 
                 # Update road traverse
-                current_vehicle.local_loc[0] = front_vehicle.local_loc[0] - self.convoy_dist # place holder distance
+                current_vehicle.local_loc[0] = front_vehicle.local_loc[0] - self.convoy_dist
 
                 # If lead car change lanes
                 current_vehicle.local_loc[1] = self.lead_vehicle.local_loc[1]
