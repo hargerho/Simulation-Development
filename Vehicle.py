@@ -301,8 +301,7 @@ class Vehicle:
         return change_incentive and is_safe
 
     def check_lane_change(self, surrounding):
-        # if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] == self.rightlane: # Left change
-        if self.loc[1] == self.rightlane:
+        if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] == self.rightlane: # Left change
             change_flag = self.calc_lane_change(change_dir='left', current_front=surrounding['front'],
                                                 new_front=surrounding['front_left'], new_back=surrounding['back_left'], right=surrounding['right'], left=surrounding['left'])
             if change_flag:
