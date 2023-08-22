@@ -84,6 +84,20 @@ class Vehicle:
         }
 
     @staticmethod
+    def get_distance_and_velocity(self, front_vehicle):
+        if front_vehicle is None:
+            distance = (
+                self.onramp_length
+                if self.loc[1] == self.onramp
+                else self.road_length
+            )
+            velocity = self.v
+        else:
+            distance = front_vehicle.loc_back - self.loc_front
+            velocity = front_vehicle.v
+        return distance, velocity
+
+    @staticmethod
     def get_closest_vehicle(vehicle, current_closest):
         if current_closest is None or vehicle.loc[0] < current_closest.loc[0]:
             return vehicle
@@ -236,37 +250,26 @@ class Vehicle:
 
     def calc_lane_change(self, change_dir, current_front, new_front, new_back, right, left):
         # Checking if onramp
-        onramp_flag = self.loc[1] == self.onramp
+        onramp_flag = (self.loc[1] == self.onramp)
 
-        # Current timestep
-        # Getting distance of front vehicle
-        if current_front is None: # No vehicles infront
-            current_front_dist = self.onramp_length if onramp_flag else self.road_length
-            current_front_v = self.v
+        # Calculate distance and velocity of current and new front vehicles
+        if onramp_flag and current_front is None:
+            current_front_dist = self.onramp_length - self.loc_front
+            current_front_v = 0
+            new_front_dist, new_front_v = Vehicle.get_distance_and_velocity(self, new_front)
         else:
-            # If there is a front shc vehicle
-            current_front_dist = current_front.loc_back - self.loc_front
-            current_front_v = current_front.v
+            current_front_dist, current_front_v = Vehicle.get_distance_and_velocity(self, current_front)
+            new_front_dist, new_front_v = Vehicle.get_distance_and_velocity(self, new_front)
 
-        # Next timestep
-        # Getting distance of new front vehicle
-        if new_front is None: # No vehicles infront
-            new_front_dist = self.onramp_length if onramp_flag else self.road_length
-            new_front_v = self.v
-        else:
-            # If there is a front shc vehicle
-            new_front_dist = new_front.loc_back - self.loc_front
-            new_front_v = new_front.v
-        # Considering the vehicle behind
+        # Calculate the disadvantage and new back acceleration if there is a vehicle behind
         if new_back is None:
-            # If there is no vehicle behind
             disadvantage, new_back_accel = 0, 0
         else:
             new_back_front = new_back.loc_front
             new_back_v = new_back.v
             # Getting the correct new_back assignment
             if not isinstance(new_back, Vehicle):
-                new_back = new_back.convoy_list[-1] # i think should be new_back.convoy_list[0]
+                new_back = new_back.convoy_list[-1]
 
             # Current timestep
             if new_front is None:
@@ -275,13 +278,18 @@ class Vehicle:
             else:
                 current_back_dist = new_front.loc_back - new_back_front
                 current_back_v = new_front.v
+
+            if onramp_flag and current_front is None:
+                current_back_dist = self.onramp_length - self.loc_back
+                current_back_v = self.v
+
             new_back_dist = self.loc_back - new_back_front
             new_back_v = self.v
 
             # Getting the disadvantage in changing
             # Consider effects to back vehicle
             disadvantage, new_back_accel = new_back.driver.calc_disadvantage(v=new_back.v, new_surrounding_v=new_back_v, new_surrounding_dist=new_back_dist,
-                                                                     old_surrounding_v=current_back_v, old_surrounding_dist=current_back_dist)
+                                                                        old_surrounding_v=current_back_v, old_surrounding_dist=current_back_dist)
 
         # Considering front vehicle
         change_incentive = self.driver.calc_incentive(change_direction=change_dir, v=self.v, new_front_v=new_front_v, new_front_dist=new_front_dist, old_front_v=current_front_v,
