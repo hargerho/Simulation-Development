@@ -136,10 +136,15 @@ class Vehicle:
         y_right_check = vehicle.loc[1] == current_y_coord + self.lanewidth
         y_left_check = vehicle.loc[1] == current_y_coord - self.lanewidth
 
-        x_check = ((vehicle.loc_back < self.loc_back) and (vehicle.loc_front < self.loc_front)) or ((vehicle.loc_back > self.loc_back) and (vehicle.loc_front > self.loc_front))
+        # Vehicle aligning with each other
+        # x_check = ((vehicle.loc_back < self.loc_front) and (vehicle.loc_front < self.loc_front + self.veh_length)) or ((vehicle.loc_back > self.loc_back - self.veh_length) and (vehicle.loc_front < self.loc_front))
+        x_check = ((vehicle.loc_back <= self.loc_back) and (vehicle.loc_front >= self.loc_front))
 
         right_check = y_right_check and x_check
         left_check = y_left_check and x_check
+
+        # right_check = y_right_check
+        # left_check = y_left_check
 
         front_check = vehicle.loc_back > self.loc_front
         back_check = vehicle.loc_front < self.loc_back
@@ -163,7 +168,9 @@ class Vehicle:
         y_right_check = convoy.loc[1] == current_y_coord + self.lanewidth
         y_left_check = convoy.loc[1] == current_y_coord - self.lanewidth
 
-        x_check = ((convoy.loc_back < self.loc_back) and (convoy.loc_front > self.loc_front)) or ((convoy.loc_back > self.loc_back) and (convoy.loc_front > self.loc_front)) or ((convoy.loc_back < self.loc_back) and (convoy.loc_front < self.loc_front))
+        # Convoy Infront, Middle, Behind
+        # x_check = ((convoy.loc_back < self.loc_front) and (convoy.loc_front < self.loc_front + convoy.veh_length)) or ((convoy.loc_back < self.loc_back) and (convoy.loc_front > self.loc_front)) or ((convoy.loc_back > self.loc_back - convoy.veh_length) and (convoy.loc_front > self.loc_back))
+        x_check = ((convoy.loc_back < self.loc_back) and (convoy.loc_front > self.loc_front))
 
         right_check = y_right_check and x_check
         left_check = y_left_check and x_check
@@ -241,10 +248,21 @@ class Vehicle:
         safe_back = (new_back.loc_front < self.loc_back and self.headway_check(new_back)) if new_back is not None else True
         safe_side = False
 
-        if (change_dir == 'left') and (left is None):
-            safe_side = True
-        elif (change_dir == 'right') and (right is None):
-            safe_side = True
+        # if (change_dir == 'left') and (left is None):
+        #     safe_side = True
+        # elif (change_dir == 'right') and (right is None):
+        #     safe_side = True
+
+        # if change_dir == 'right':
+        #     if right is None:
+        #         safe_side = True
+        #     elif (right.loc_back > self.loc_front + right.veh_length + 50):
+        #         safe_side = True
+        # if change_dir == 'left':
+        #     if left is None:
+        #         safe_side = True
+        #     elif (left.loc_back > self.loc_front + left.veh_length + 50):
+        #         safe_side = True
 
         return safe_front and safe_back and safe_side
 
@@ -255,8 +273,9 @@ class Vehicle:
 
         if right is None:
             safe_side = True
-
-        print(f"side{safe_side}, right{right}")
+        elif right is not None:
+            if ((right.loc_back > self.loc_front) or (right.loc_front < self.loc_back)):
+                safe_side = True
 
         return safe_front and safe_back and safe_side
 
@@ -315,7 +334,6 @@ class Vehicle:
 
         if onramp_flag and (self.loc_front >= self.onramp_length - self.loc_front - self.veh_length - self.s_0) and self.v >= 0:
             onrampsafe = self.is_safe_onramp(new_front, new_back, right)
-            print("onrampsafe?", onrampsafe)
             if onrampsafe:
                 return True
 
