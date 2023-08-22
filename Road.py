@@ -6,6 +6,7 @@ from tqdm import tqdm
 from common.config import road_params, driving_params, vehicle_models, simulation_params
 from Vehicle import Vehicle
 from ACC import Convoy
+random.seed(42)
 
 class Road:
     def __init__(self):
