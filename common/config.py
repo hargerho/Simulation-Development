@@ -52,7 +52,7 @@ road_params = {
 # Lane change threshold = 0.1m/s = 0.2px/s
 driving_params = {
     "desired_velocity": speed_conversion(70), # testing: 16.6
-    "safety_threshold": length_conversion(1.5), # testing: 20px
+    "safety_threshold": length_conversion(5), # testing: 20px 1.5
     "max_acceleration": 1.46, # IDM Paper # was 0.73 -> 1.46 # Testing:50
     "comfortable_deceleration": 3.34, # IDM Paper # was 1.67 # Testing: 4.61
     "acceleration_component": 4, # IDM Paper
@@ -66,15 +66,26 @@ driving_params = {
 # Irratinal Speed Variation = 10m/s = 20px/s
 # Normal = 10 variation, irrational = 20
 # Headway in seconds
+# shc_params = {
+#     "normal": {"safe_headway": 3.1, "speed_variation": 0, "politeness_factor": 0.25},
+#     "irrational": {"safe_headway": 1.5, "speed_variation": 0, "politeness_factor": 0.15},
+# }
+
+# acc_params = {
+#     "acc_spawnrate": 0.5, # Init 0.2
+#     "normal": {"safe_headway": 3.1, "speed_variation": 0, "politeness_factor": 0.5},
+#     "cautious": {"safe_headway": 4, "speed_variation": 0, "politeness_factor": 0.8},
+# }
+
 shc_params = {
-    "normal": {"safe_headway": 3.1, "speed_variation": 0, "politeness_factor": 0.25},
-    "irrational": {"safe_headway": 1.5, "speed_variation": 0, "politeness_factor": 0.15},
+    "normal": {"safe_headway": 3.1, "speed_variation": 0, "politeness_factor": 0},
+    "irrational": {"safe_headway": 1.5, "speed_variation": 0, "politeness_factor": 0},
 }
 
 acc_params = {
-    "acc_spawnrate": 0.5, # Init 0.2
-    "normal": {"safe_headway": 3.1, "speed_variation": 0, "politeness_factor": 0.5},
-    "cautious": {"safe_headway": 4, "speed_variation": 0, "politeness_factor": 0.8},
+    "acc_spawnrate": 0, # Init 0.2
+    "normal": {"safe_headway": 3.1, "speed_variation": 0, "politeness_factor": 0},
+    "cautious": {"safe_headway": 4, "speed_variation": 0, "politeness_factor": 0},
 }
 
 vehicle_models = [shc_params, acc_params]
@@ -84,7 +95,7 @@ baseline = f"ACCNo_SHC{driving_params['shc_logic']}_Road{road_params['road_close
 
 simulation_params = {
     "ts": 0.01, # was 0.001 for realtime  testing: 0.2 # Ts < 0.5 same results
-    "playback_speed": 2, # realtime = 1
+    "playback_speed": 3, # realtime = 1
     "folderpath": "data",
     "filename": f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}",
     "record": False,

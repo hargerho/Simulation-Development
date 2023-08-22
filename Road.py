@@ -94,6 +94,7 @@ class Road:
                 else:
                     headway = tmp_lead.T
                 # Check the size of the car
+                # TODO CHECK i think is tmp_lead.loc_front
                 overlap_flag = (tmp_front.loc_back - tmp_vehicle_tail.loc_front - self.safety_distance) < 0
             else:
                 # If no vehicles infront
@@ -202,7 +203,7 @@ class Road:
             elif self.road_closed is not None:
                 if vehicle.loc_front > self.road_length/2 and vehicle.loc[1] == self.road_closed:
                     vehicle.v = 0
-            if vehicle.loc_front > self.road_length:
+            if isinstance(vehicle, Vehicle) and vehicle.loc_front > self.road_length:
                 self.vehicle_list.remove(vehicle)
                 self.vehicle_despawn += 1
                 # self.progress_bar.update(1)
