@@ -35,7 +35,7 @@ window_params = {
 
 road_params = {
     "toplane_loc": (0,500), #(x, y)
-    "road_length": length_conversion(600), #16000m
+    "road_length": length_conversion(500), #16000m
     "onramp_length": length_conversion(140), # 140m
     "num_lanes": 4, # including an onramp
     "lanewidth": 10, # arbitary

@@ -179,12 +179,13 @@ class Road:
             self.vehicle_list = []
 
         # Update vehicle local state
-        for vehicle in self.vehicle_list:
-
+        for idx, vehicle in enumerate(self.vehicle_list):
+            tmp_list = self.vehicle_list.copy()
+            tmp_list.pop(idx)
             if isinstance(vehicle, Convoy):
-                vehicle.update_convoy(self.vehicle_list, vehicle_type='acc')
+                vehicle.update_convoy(tmp_list, vehicle_type='acc')
             else:
-                vehicle.update_local(self.vehicle_list, vehicle_type='shc')
+                vehicle.update_local(tmp_list, vehicle_type='shc')
 
         for vehicle in self.vehicle_list:
             if not isinstance(vehicle, Convoy):
@@ -201,7 +202,7 @@ class Road:
                             vehicle.convoy_list.remove(convoy)
             # Simulate roadblock by setting a SHC vehicle to 0m/s
             elif self.road_closed is not None:
-                if vehicle.loc_front > self.road_length/2 - 100 and vehicle.loc[1] == self.road_closed:
+                if vehicle.loc_front > self.road_length/2 and vehicle.loc[1] == self.road_closed:
                     vehicle.v = 0
             if isinstance(vehicle, Vehicle) and vehicle.loc_front > self.road_length:
                 self.vehicle_list.remove(vehicle)
