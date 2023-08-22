@@ -79,7 +79,6 @@ class Window:
         self.start_time = pygame.time.get_ticks()  # Record the start time of the simulation
 
         # Creating Real Time Metric Display
-        # self.realtime_flow = [0,0,0,0]
         self.realtime_flow = [[], [], [], []]
         self.mean_flow = []
         self.metric_list = [(167,325), (2100,390), (80000,390), (159980, 390)]
@@ -384,7 +383,7 @@ class Window:
                 pygame.display.update()
 
             if restart or (self.is_paused and restart):
-                self.realtime_flow = [0,0,0,0]
+                self.realtime_flow = [[], [], [], []]
                 vehicle_list, _ = self.sim.update_frame(is_recording=self.is_recording, frame=frame, restart=restart)
                 self.refresh_window(vehicle_list=vehicle_list, frame=frame)
                 frame = 0
