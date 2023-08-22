@@ -99,17 +99,25 @@ class Vehicle:
         if in_between_check and left_check:
             left = vehicle if (left is None) else left
 
-        if not_right_lane and front_check and right_check and (front_right is None or x_coord < front_right.loc[0]):
+        if not_right_lane and front_check and right_check and (front_right is None or vehicle.loc_front < front_right.loc_back):
             front_right = vehicle
+        else:
+            front_right = front_right
 
-        if not_right_lane and back_check and right_check and (back_right is None or x_coord > back_right.loc[0]):
+        if not_right_lane and back_check and right_check and (back_right is None or vehicle.loc_back > back_right.loc_front):
             back_right = vehicle
+        else:
+            back_right = back_right
 
-        if not_left_lane and front_check and left_check and (front_left is None or x_coord < front_left.loc[0]):
+        if not_left_lane and front_check and left_check and (front_left is None or vehicle.loc_front < front_left.loc_back):
             front_left = vehicle
+        else:
+            front_left = front_left
 
-        if not_left_lane and back_check and left_check and (back_left is None or x_coord > back_left.loc[0]):
+        if not_left_lane and back_check and left_check and (back_left is None or vehicle.loc_back > back_left.loc_front):
             back_left = vehicle
+        else:
+            back_left = back_left
 
         return front_left, front_right, back_left, back_right, right, left
 
@@ -127,15 +135,51 @@ class Vehicle:
             velocity = front_vehicle.v
         return distance, velocity
 
+    # def get_fov_params(self, vehicle):
+    #     x_coord = vehicle.loc[0]
+    #     current_y_coord = self.loc[1]
+    #     x_diff = x_coord - self.loc[0]
+    #     y_diff = vehicle.loc[1] - current_y_coord
+    #     right_check = vehicle.loc[1] == current_y_coord + self.lanewidth
+    #     left_check = vehicle.loc[1] == current_y_coord - self.lanewidth
+    #     front_check = x_coord > self.loc[0]
+    #     back_check = x_coord < self.loc[0]
+
+    #     not_right_lane = current_y_coord != self.rightlane
+    #     not_left_lane = current_y_coord != self.leftlane
+
+    #     # in_between_check = vehicle.loc_front > self.loc_front and vehicle.loc_back < self.loc_back
+    #     if isinstance(vehicle, Vehicle):
+    #         # cond1 = ((vehicle.loc_front >= self.loc_back) and (vehicle.loc_back <= self.loc_back)) # veh behind selfveh
+    #         # cond2 = ((vehicle.loc_front <= self.loc_front) and (vehicle.loc_back >= self.loc_back)) # veh between selfveh
+    #         # cond3 = ((vehicle.loc_front >= self.loc_front) and (vehicle.loc_back <= self.loc_front)) # veh infront selfveh
+    #         # cond4 = ((vehicle.loc_front == self.loc_front) or (vehicle.loc_back == self.loc_back)) # veh inline as selfveh
+    #         # cond1 = ((vehicle.loc_front <= self.loc_front) and (vehicle.loc_back <= self.loc_back)) # convoy behind selfconvoy
+    #         cond2 = ((vehicle.loc_front == self.loc_front) or (vehicle.loc_back == self.loc_back)) # convoy same line as selfconvoy
+    #         # cond3 = ((vehicle.loc_front >= self.loc_front) and (vehicle.loc_back >= self.loc_back)) # convoy infront selfconvoy
+    #         in_between_check = cond2
+    #     else:
+    #         # ACC
+    #         cond1 = ((vehicle.loc_front - vehicle.veh_length <= self.loc_front) and (vehicle.loc_back - vehicle.veh_length <= self.loc_back)) # convoy behind selfconvoy
+    #         cond2 = ((vehicle.loc_front == self.loc_front) or (vehicle.loc_back == self.loc_back)) # convoy same line as selfconvoy
+    #         cond3 = ((vehicle.loc_front + vehicle.veh_length >= self.loc_front) and (vehicle.loc_back + vehicle.veh_length >= self.loc_back)) # convoy infront selfconvoy
+    #         # SHC
+    #         cond4 = ((vehicle.loc_front + vehicle.veh_length >= self.loc_back) and (vehicle.loc_back - vehicle.veh_length <= self.loc_back)) # veh behind selfconvoy
+    #         cond5 = ((vehicle.loc_front <= self.loc_front) and (vehicle.loc_back >= self.loc_back)) # veh between selfconvoy
+    #         cond6 = ((vehicle.loc_front - vehicle.veh_length >= self.loc_front) and (vehicle.loc_back - vehicle.veh_length <= self.loc_front)) # veh infront selfconvoy
+    #         in_between_check = cond1 or cond2 or cond3 or cond4 or cond5 or cond6
+
+    #     return x_coord, x_diff, y_diff, right_check, left_check, front_check, back_check, not_right_lane, not_left_lane, in_between_check
+
     def get_fov_params(self, vehicle):
-        x_coord = vehicle.loc[0]
+        x_coord = vehicle.loc_back
         current_y_coord = self.loc[1]
-        x_diff = x_coord - self.loc[0]
+        x_diff = x_coord - self.loc_front
         y_diff = vehicle.loc[1] - current_y_coord
         right_check = vehicle.loc[1] == current_y_coord + self.lanewidth
         left_check = vehicle.loc[1] == current_y_coord - self.lanewidth
-        front_check = x_coord > self.loc[0]
-        back_check = x_coord < self.loc[0]
+        front_check = vehicle.loc_back  > self.loc_front
+        back_check = vehicle.loc_front < self.loc_back
 
         not_right_lane = current_y_coord != self.rightlane
         not_left_lane = current_y_coord != self.leftlane
@@ -143,22 +187,22 @@ class Vehicle:
         # in_between_check = vehicle.loc_front > self.loc_front and vehicle.loc_back < self.loc_back
         if isinstance(vehicle, Vehicle):
             # cond1 = ((vehicle.loc_front >= self.loc_back) and (vehicle.loc_back <= self.loc_back)) # veh behind selfveh
-            # cond2 = ((vehicle.loc_front <= self.loc_front) and (vehicle.loc_back >= self.loc_back)) # veh between selfveh
+            cond2 = ((vehicle.loc_front <= self.loc_front) and (vehicle.loc_back >= self.loc_back)) # veh between selfveh
             # cond3 = ((vehicle.loc_front >= self.loc_front) and (vehicle.loc_back <= self.loc_front)) # veh infront selfveh
             # cond4 = ((vehicle.loc_front == self.loc_front) or (vehicle.loc_back == self.loc_back)) # veh inline as selfveh
-            cond1 = ((vehicle.loc_front <= self.loc_front) and (vehicle.loc_back <= self.loc_back)) # convoy behind selfconvoy
-            cond2 = ((vehicle.loc_front == self.loc_front) or (vehicle.loc_back == self.loc_back)) # convoy same line as selfconvoy
-            cond3 = ((vehicle.loc_front >= self.loc_front) and (vehicle.loc_back >= self.loc_back)) # convoy infront selfconvoy
-            in_between_check = cond1 or cond2 or cond3
+            # cond1 = ((vehicle.loc_front <= self.loc_front) and (vehicle.loc_back <= self.loc_back)) # convoy behind selfconvoy
+            # cond2 = ((vehicle.loc_front == self.loc_front) or (vehicle.loc_back == self.loc_back)) # convoy same line as selfconvoy # redundant because of cond3
+            cond3 = ((vehicle.loc_front - vehicle.veh_length >= self.loc_front) and (vehicle.loc_back + vehicle.veh_length >= self.loc_back)) # convoy infront selfconvoy
+            in_between_check = cond3 or cond2
         else:
             # ACC
-            cond1 = ((vehicle.loc_front <= self.loc_front) and (vehicle.loc_back <= self.loc_back)) # convoy behind selfconvoy
+            cond1 = ((vehicle.loc_front - vehicle.veh_length <= self.loc_front) and (vehicle.loc_back + vehicle.veh_length <= self.loc_back)) # convoy behind selfconvoy
             cond2 = ((vehicle.loc_front == self.loc_front) or (vehicle.loc_back == self.loc_back)) # convoy same line as selfconvoy
-            cond3 = ((vehicle.loc_front >= self.loc_front) and (vehicle.loc_back >= self.loc_back)) # convoy infront selfconvoy
+            cond3 = ((vehicle.loc_front - vehicle.veh_length >= self.loc_front) and (vehicle.loc_back + vehicle.veh_length >= self.loc_back)) # convoy infront selfconvoy
             # SHC
-            cond4 = ((vehicle.loc_front >= self.loc_back) and (vehicle.loc_back <= self.loc_back)) # veh behind selfconvoy
+            cond4 = ((vehicle.loc_front - vehicle.veh_length >= self.loc_back) and (vehicle.loc_back + vehicle.veh_length <= self.loc_back)) # veh behind selfconvoy
             cond5 = ((vehicle.loc_front <= self.loc_front) and (vehicle.loc_back >= self.loc_back)) # veh between selfconvoy
-            cond6 = ((vehicle.loc_front >= self.loc_front) and (vehicle.loc_back <= self.loc_front)) # veh infront selfconvoy
+            cond6 = ((vehicle.loc_front - vehicle.veh_length >= self.loc_front) and (vehicle.loc_back + vehicle.veh_length <= self.loc_front)) # veh infront selfconvoy
             in_between_check = cond1 or cond2 or cond3 or cond4 or cond5 or cond6
 
         return x_coord, x_diff, y_diff, right_check, left_check, front_check, back_check, not_right_lane, not_left_lane, in_between_check

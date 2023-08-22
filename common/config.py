@@ -53,7 +53,7 @@ road_params = {
 driving_params = {
     "desired_velocity": speed_conversion(70), # testing: 16.6
     "safety_threshold": length_conversion(5), # testing: 20px 1.5
-    "max_acceleration": 50, # IDM Paper # was 0.73 -> 1.46 # Testing:50
+    "max_acceleration": 100, # IDM Paper # was 0.73 -> 1.46 # Testing:50
     "comfortable_deceleration": 3.34, # IDM Paper # was 1.67 # Testing: 4.61
     "acceleration_component": 4, # IDM Paper
     "left_bias": 0.6, # MOBIL Paper
