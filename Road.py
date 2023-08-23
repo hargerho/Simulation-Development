@@ -215,7 +215,7 @@ class Road:
             if isinstance(vehicle, Vehicle) and vehicle.loc_front > self.road_length:
                 self.vehicle_list.remove(vehicle)
                 self.vehicle_despawn += 1
-                # self.progress_bar.update(1)
+                self.progress_bar.update(1)
 
         # Update spawn_timer
         if road_params['vehicle_inflow'] > 0:

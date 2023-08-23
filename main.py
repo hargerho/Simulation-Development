@@ -39,7 +39,7 @@ def get_params(combination):
     }
 
     # Change here
-    return range_testing.get(combination)
+    return testing_params.get(combination)
 
 def main():
     # Data Collection
