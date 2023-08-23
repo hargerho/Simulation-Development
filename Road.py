@@ -13,7 +13,7 @@ class Road:
         # General params
         self.num_lanes = road_params['num_lanes']
         self.toplane_loc = road_params['toplane_loc']
-        self.onramp_x = self.toplane_loc[0] + 100
+        self.onramp_x = self.toplane_loc[0] + road_params['onramp_offset']
         self.lanewidth = road_params['lanewidth']
         self.road_length = road_params['road_length']
         self.onramp_length = road_params['onramp_length']
