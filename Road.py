@@ -109,7 +109,7 @@ class Road:
                     headway = tmp_lead.T
                 # Check the size of the car
                 # TODO CHECK i think is tmp_lead.loc_front
-                overlap_flag = (tmp_front.loc_back - tmp_vehicle_tail.loc_front - self.safety_distance) < 0
+                overlap_flag = (tmp_front.loc_back - tmp_lead.loc_front  - self.safety_distance) < 0
 
             else:
                 # If no vehicles infront
