@@ -13,6 +13,7 @@ class Road:
         # General params
         self.num_lanes = road_params['num_lanes']
         self.toplane_loc = road_params['toplane_loc']
+        self.onramp_x = self.toplane_loc[0] + 100
         self.lanewidth = road_params['lanewidth']
         self.road_length = road_params['road_length']
         self.onramp_length = road_params['onramp_length']
@@ -162,7 +163,7 @@ class Road:
         logic_level = driving_params["shc_logic"]
         logic_dict = vehicle_models[0][logic_level]
         vehicle_type = 'shc'
-        spawn_loc = self.toplane_loc
+        spawn_loc = [self.onramp_x, self.toplane_loc[1]]
 
         # Create a tmp Vehicle Object
         tmp_vehicle = Vehicle(logic_dict=logic_dict, spawn_loc=spawn_loc, vehicle_type=vehicle_type)

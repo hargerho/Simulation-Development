@@ -30,6 +30,7 @@ class Window:
 
         # Getting road y-coordinates
         self.toplane_loc = road_params['toplane_loc']
+        self.onramp_x = self.toplane_loc[0] + 100
         self.onramp = self.toplane_loc[1]
         self.leftlane = self.toplane_loc[1] + self.lanewidth
         self.middlelane = self.toplane_loc[1] + (self.lanewidth * 2)
@@ -102,7 +103,7 @@ class Window:
         onrampSurface = pygame.Surface((self.onramp_length, self.lanewidth))
         onrampSurface.fill(window_params['grey'])
         rampRect = onrampSurface.get_rect()
-        rampRect.topleft = (self.toplane_loc[0], self.toplane_loc[1] - self.vehicle_width)
+        rampRect.topleft = (self.onramp_x, self.toplane_loc[1] - self.vehicle_width)
         self.win.blit(onrampSurface, rampRect.topleft)
 
         # Drawing the road
