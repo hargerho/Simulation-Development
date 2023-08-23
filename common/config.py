@@ -42,7 +42,8 @@ road_params = {
     "vehicle_inflow": 4000, # 1000 approx 1veh/3.6sec testing: 10000
     "onramp_inflow": 0,
     "num_convoy_vehicles": 3,
-    "road_closed": 'left'
+    "road_closed": 'right',
+    "partial_close": True
 }
 
 # Safety threshold = 1.5m = 3px

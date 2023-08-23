@@ -25,6 +25,18 @@ class Vehicle:
         self.middlelane = self.toplane_loc[1] + (self.lanewidth * 2)
         self.rightlane = self.toplane_loc[1] + self.lanewidth * (self.num_lanes - 1)
 
+        # Getting road closure
+        if road_params["road_closed"] == "left":
+            self.road_closed = self.leftlane
+        elif road_params["road_closed"] == "middle":
+            self.road_closed = self.middlelane
+        elif road_params["road_closed"] == "right":
+            self.road_closed = self.rightlane
+        else:
+            self.road_closed = None
+        self.partial_close = road_params['partial_close']
+
+        # Vehicle params
         self.v_0 = driving_params['desired_velocity']
         self.s_0 = driving_params['safety_threshold']
         self.a = driving_params['max_acceleration']
@@ -256,14 +268,29 @@ class Vehicle:
         if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] == self.rightlane: # Right change
             change_flag = self.calc_lane_change(change_dir='left', current_front=surrounding['front'],
                                                 new_front=surrounding['front_left'], new_back=surrounding['back_left'], right=surrounding['right'], left=surrounding['left'])
-            if change_flag:
-                self.local_loc[1] -= self.lanewidth
+            if self.partial_close: # ACC can return back to blocked lane
+                if change_flag:
+                    self.local_loc[1] -= self.lanewidth
+            elif self.road_closed: # if there is a road closure
+                if change_flag and (self.local_loc[1] - self.lanewidth != self.road_closed): # if lane changed into not closed
+                    self.local_loc[1] -= self.lanewidth
+            elif change_flag: # if can change but road is closed
+                self.local_loc[1] = self.local_loc[1]
+
         # Right change
         if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] in [self.leftlane, self.middlelane]: # Left change
             change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
                                                 new_front=surrounding['front_right'], new_back=surrounding['back_right'], right=surrounding['right'], left=surrounding['left'])
-            if change_flag:
-                self.local_loc[1] += self.lanewidth
+
+            if self.partial_close: # ACC can return back to blocked lane
+                    if change_flag:
+                        self.local_loc[1] += self.lanewidth
+            elif self.road_closed: # if there is a road closure
+                if change_flag and (self.local_loc[1] + self.lanewidth != self.road_closed): # if lane changed into not closed
+                    self.local_loc[1] += self.lanewidth
+            elif change_flag: # if can change but road is closed
+                self.local_loc[1] = self.local_loc[1]
+
         # For special case on-ramp
         if self.loc[1] == self.onramp:
             change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
@@ -298,36 +325,50 @@ class Vehicle:
 
         self.local_accel = self.driver.calc_acceleration(v=self.local_v, surrounding_v=front_v, s=dist) * self.ts
 
+    # def partial_road_close(self, surrounding):
+    #     # for partial road close
+    #     if (surrounding['front_left'] is None and surrounding['back_left'] is None): # if no vehicle in front and back of to change lane
+    #         self.local_loc[1] -= self.lanewidth
+    #     if (surrounding['front_left'] is None and surrounding['back_left'] is not None):
+    #         if surrounding['back_left'].loc_front + self.s_0 < self.loc_back:
+    #             self.local_loc[1] -= self.lanewidth
+    #     if (surrounding['back_left'] is None and surrounding['front_left'] is not None and surrounding['front_left'].v != 0):
+    #         if surrounding['front_left'].loc_back - self.s_0 > self.loc_front:
+    #             self.local_loc[1] -= self.lanewidth
+    #     if (surrounding['front_left'] is not None and surrounding['front_left'].v != 0 and surrounding['back_left'] is not None):
+    #         if (surrounding['front_left'].loc_back - self.s_0 > self.loc_front and surrounding['back_left'].loc_front + self.s_0 < self.loc_back): # if there are vehicles but no possible collision
+    #             self.local_loc[1] -= self.lanewidth
+
     def update_local(self, vehicle_list, vehicle_type):
         # Get surrounding vehicles
-        surrounding = self.get_fov(vehicle_list)
+        surrounding_dict = self.get_fov(vehicle_list)
 
         if vehicle_type == 'shc':
             # Lane change flag and update lane location
             # Right change
-            self.check_lane_change(surrounding=surrounding)
+            self.check_lane_change(surrounding=surrounding_dict)
         else:
             # Change right if front vehicle is stationary and currently on left lane
-            if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] == self.leftlane:
-                change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
-                                                    new_front=surrounding['front_right'], new_back=surrounding['back_right'], right=surrounding['right'], left=surrounding['left'])
+            if surrounding_dict['front'] is not None and (surrounding_dict['front'].v == 0) and self.loc[1] == self.leftlane:
+                change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding_dict['front'],
+                                                    new_front=surrounding_dict['front_right'], new_back=surrounding_dict['back_right'], right=surrounding_dict['right'], left=surrounding_dict['left'])
                 if change_flag:
                     self.local_loc[1] += self.lanewidth
             # Left change if it is on middle or right lane
             if self.loc[1] in [self.middlelane, self.rightlane]:
-                if (surrounding['front_left'] is None and surrounding['back_left'] is None): # if no vehicle in front and back of to change lane
-                    self.local_loc[1] -= self.lanewidth
-                if (surrounding['front_left'] is None and surrounding['back_left'] is not None):
-                    if surrounding['back_left'].loc_front + self.s_0 < self.loc_back:
-                        self.local_loc[1] -= self.lanewidth
-                if (surrounding['back_left'] is None and surrounding['front_left'] is not None and surrounding['front_left'].v != 0):
-                    if surrounding['front_left'].loc_back - self.s_0 > self.loc_front:
-                        self.local_loc[1] -= self.lanewidth
-                if (surrounding['front_left'] is not None and surrounding['front_left'].v != 0 and surrounding['back_left'] is not None):
-                    if (surrounding['front_left'].loc_back - self.s_0 > self.loc_front and surrounding['back_left'].loc_front + self.s_0 < self.loc_back): # if there are vehicles but no possible collision
-                        self.local_loc[1] -= self.lanewidth
+                change_flag = self.calc_lane_change(change_dir='left', current_front=surrounding_dict['front'],
+                                                        new_front=surrounding_dict['front_left'], new_back=surrounding_dict['back_left'], right=surrounding_dict['right'], left=surrounding_dict['left'])
 
-        self.update_driving_params(surrounding)
+                if self.partial_close: # ACC can return back to blocked lane
+                    if change_flag:
+                        self.local_loc[1] -= self.lanewidth
+                elif self.road_closed: # if there is a road closure
+                    if change_flag and (self.local_loc[1] - self.lanewidth != self.road_closed): # if lane changed into not closed
+                        self.local_loc[1] -= self.lanewidth
+                elif change_flag: # if can change but road is closed
+                    self.local_loc[1] = self.local_loc[1]
+
+        self.update_driving_params(surrounding_dict)
 
     def update_global(self):
         """Update global timestep
