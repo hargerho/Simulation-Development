@@ -110,7 +110,7 @@ class Vehicle:
                 right = vehicle
             elif (abs(self.loc_front - right.loc_front) + abs(self.loc_back - right.loc_back)) > (abs(self.loc_front - vehicle.loc_front) + abs(self.loc_back - vehicle.loc_back)): # update to the new right vehicle
                 right = vehicle
-            elif not (front_check or back_check) and (abs(self.loc_front - left.loc_front) + abs(self.loc_back - left.loc_back)) > 10 * self.veh_length:
+            elif not (front_check or back_check) and (abs(self.loc_front - left.loc_front) + abs(self.loc_back - left.loc_back)) > 2 * self.veh_length:
                 right = None
 
         if in_between_check and left_check:
@@ -329,6 +329,22 @@ class Vehicle:
 
         self.local_accel = self.driver.calc_acceleration(v=self.local_v, surrounding_v=front_v, s=dist) * self.ts
 
+    def partial_road_close(self, surrounding_dict):
+        # for partial road close
+        if (surrounding_dict['front_left'] is None and surrounding_dict['back_left'] is None): # if no vehicle in front and back of to change lane
+            self.local_loc[1] -= self.lanewidth
+        if (surrounding_dict['front_left'] is None and surrounding_dict['back_left'] is not None):
+            if surrounding_dict['back_left'].loc_front + self.s_0 + self.veh_length < self.loc_back:
+                x = surrounding_dict['back_left'].loc_front + self.s_0 + 2*self.veh_length
+                print(f'backdist{x}, myback{self.loc_back}')
+                self.local_loc[1] -= self.lanewidth
+        if (surrounding_dict['back_left'] is None and surrounding_dict['front_left'] is not None and surrounding_dict['front_left'].v != 0):
+            if surrounding_dict['front_left'].loc_back - self.s_0 - self.veh_length > self.loc_front:
+                self.local_loc[1] -= self.lanewidth
+        if (surrounding_dict['front_left'] is not None and surrounding_dict['front_left'].v != 0 and surrounding_dict['back_left'] is not None):
+            if (surrounding_dict['front_left'].loc_back - self.s_0 - self.veh_length > self.loc_front and surrounding_dict['back_left'].loc_front + self.s_0 < self.loc_back): # if there are vehicles but no possible collision
+                self.local_loc[1] -= self.lanewidth
+
     def update_local(self, vehicle_list, vehicle_type):
         # Get surrounding vehicles
         surrounding_dict = self.get_fov(vehicle_list)
@@ -351,7 +367,7 @@ class Vehicle:
 
                 if self.partial_close: # ACC can return back to blocked lane
                     if change_flag:
-                        self.local_loc[1] -= self.lanewidth
+                        self.partial_road_close(surrounding_dict=surrounding_dict)
                 elif self.road_closed: # if there is a road closure
                     if change_flag and (self.local_loc[1] - self.lanewidth != self.road_closed): # if lane changed into not closed
                         self.local_loc[1] -= self.lanewidth

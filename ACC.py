@@ -12,31 +12,6 @@ class Convoy:
     def __init__(self, logic_dict, lead_spawn_loc, vehicle_type, num_subconvoy):
         self.ts = simulation_params['ts']
 
-        # # Vehicle params
-        # self.v_0 = driving_params['desired_velocity']
-        # self.s_0 = driving_params['safety_threshold']
-        # self.a = driving_params['max_acceleration']
-        # self.b = driving_params['comfortable_deceleration']
-        # self.delta = driving_params['acceleration_component']
-        # self.T = logic_dict.get('safe_headway')
-        # self.left_bias = driving_params['left_bias']
-        # self.politeness = logic_dict.get('politeness_factor')
-        # self.change_threshold = driving_params['lane_change_threshold']
-
-        # model_params = {
-        #     "v_0": self.v_0,
-        #     "s_0": self.s_0,
-        #     "a": self.a,
-        #     "b": self.b,
-        #     "delta": self.delta,
-        #     "T": self.T,
-        #     "left_bias": self.left_bias,
-        #     "politeness": self.politeness,
-        #     "change_threshold": self.change_threshold
-        # }
-
-        # self.driver = DM(model_params=model_params)
-
         self.convoy_list = [
             Vehicle(logic_dict, lead_spawn_loc, vehicle_type=vehicle_type)
             for _ in range(num_subconvoy)
@@ -51,7 +26,7 @@ class Convoy:
         self.v = self.lead_vehicle.v
         self.veh_length = abs(self.loc_front - self.loc_back)
 
-        self.convoy_dist = logic_dict.get('safe_headway') + driving_params['safety_threshold'] + 20
+        self.convoy_dist = logic_dict.get('safe_headway') + driving_params['safety_threshold'] + window_params['vehicle_length']/2
 
     def update_convoy_local(self, vehicle_list, vehicle_type):
         for idx, vehicle in enumerate(self.convoy_list):
