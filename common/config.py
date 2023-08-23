@@ -72,7 +72,7 @@ shc_params = {
 }
 
 acc_params = {
-    "acc_spawnrate": 0, # Init 0.2
+    "acc_spawnrate": 0.2, # Init 0.2
     "normal": {"safe_headway": 3.1, "speed_variation": 0, "politeness_factor": 0.5},
     "cautious": {"safe_headway": 4, "speed_variation": 0, "politeness_factor": 0.8},
 }

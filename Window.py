@@ -128,17 +128,23 @@ class Window:
         for vehicle in vehicle_list:
 
             if isinstance(vehicle, Convoy):
-                for convoy in vehicle.convoy_list:
-                    # Indexing the convoy
-                    vehicle_id = convoy.vehicle_id()
-                    vehicleLoc = vehicle_id['location']
+                # for convoy in vehicle.convoy_list:
+                #     # Indexing the convoy
+                vehicle_id = vehicle.vehicle_id()
+                vehicleLoc = vehicle_id['location']
 
-                    # Drawing the convoy
-                    carSurface = pygame.Surface((self.vehicle_length,self.vehicle_width))
-                    carSurface.fill(window_params['white'])
-                    carRect = carSurface.get_rect()
-                    carRect.center = vehicleLoc
-                    self.win.blit(carSurface, carRect)
+                #     # Drawing the convoy
+                #     carSurface = pygame.Surface((self.vehicle_length,self.vehicle_width))
+                #     carSurface.fill(window_params['white'])
+                #     carRect = carSurface.get_rect()
+                #     carRect.center = vehicleLoc
+                #     self.win.blit(carSurface, carRect)
+                # Drawing the convoy
+                carSurface = pygame.Surface((3 * window_params['vehicle_length'],self.vehicle_width))
+                carSurface.fill(window_params['white'])
+                carRect = carSurface.get_rect()
+                carRect.center = vehicleLoc
+                self.win.blit(carSurface, carRect)
             else:
                 vehicle_id = vehicle.vehicle_id()
                 vehicleLoc = vehicle_id['location']

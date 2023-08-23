@@ -1,56 +1,63 @@
 from common.config import simulation_params, driving_params, window_params
 from Vehicle import Vehicle
-class Convoy:
+class Convoy(Vehicle):
     def __init__(self, logic_dict, lead_spawn_loc, vehicle_type, num_subconvoy):
+        super().__init__(logic_dict, lead_spawn_loc, vehicle_type)
         self.ts = simulation_params['ts']
-        self.convoy_list = [
-            Vehicle(logic_dict, lead_spawn_loc, vehicle_type=vehicle_type)
-            for _ in range(num_subconvoy)
-        ]
+        self.num_subconvoy = num_subconvoy
+        self.veh_length = self.num_subconvoy * window_params['vehicle_length']
 
-        # Initialize convoy-level params
-        self.lead_vehicle = self.convoy_list[0]
-        self.tail_vehicle = self.convoy_list[-1]
-        self.loc_front = self.lead_vehicle.loc_front
-        self.loc_back = self.tail_vehicle.loc_back
-        self.loc = lead_spawn_loc
-        self.v = self.lead_vehicle.v
-        # self.subvehicle_length = window_params['vehicle_length']
-        self.veh_length = self.loc_front - self.loc_back
+# class Convoy:
+#     def __init__(self, logic_dict, lead_spawn_loc, vehicle_type, num_subconvoy):
+#         self.ts = simulation_params['ts']
+#         self.convoy_list = [
+#             Vehicle(logic_dict, lead_spawn_loc, vehicle_type=vehicle_type)
+#             for _ in range(num_subconvoy)
+#         ]
 
-        self.convoy_dist = logic_dict.get('safe_headway') + driving_params['safety_threshold']
+#         # Initialize convoy-level params
+#         self.lead_vehicle = self.convoy_list[0]
+#         self.tail_vehicle = self.convoy_list[-1]
+#         self.loc_front = self.lead_vehicle.loc_front
+#         self.loc_back = self.tail_vehicle.loc_back
+#         self.loc = lead_spawn_loc
+#         self.v = self.lead_vehicle.v
+#         # self.subvehicle_length = window_params['vehicle_length']
+#         self.veh_length = self.loc_front - self.loc_back
 
-    def update_convoy(self, global_list, vehicle_type):
+#         self.convoy_dist = logic_dict.get('safe_headway') + driving_params['safety_threshold']
 
-        self.lead_vehicle = self.convoy_list[0]
+#     def update_convoy(self, global_list, vehicle_type):
 
-        # Update the lead_vehicle
-        self.lead_vehicle.update_local(global_list, vehicle_type=vehicle_type)
-        self.lead_vehicle.update_global()
+#         self.lead_vehicle = self.convoy_list[0]
 
-        # Updating the subconvoy local params
-        if len(self.convoy_list) > 1:
-            for i in range(1, len(self.convoy_list)):
+#         # Update the lead_vehicle
+#         self.lead_vehicle.update_local(global_list, vehicle_type=vehicle_type)
+#         self.lead_vehicle.update_global()
 
-                current_vehicle = self.convoy_list[i]
-                front_vehicle = self.convoy_list[i-1]
+#         # Updating the subconvoy local params
+#         if len(self.convoy_list) > 1:
+#             for i in range(1, len(self.convoy_list)):
 
-                # Update road traverse
-                current_vehicle.local_loc[0] = front_vehicle.local_loc[0] - self.convoy_dist - 20
+#                 current_vehicle = self.convoy_list[i]
+#                 front_vehicle = self.convoy_list[i-1]
 
-                # If lead car change lanes
-                current_vehicle.local_loc[1] = self.lead_vehicle.local_loc[1]
+#                 # Update road traverse
+#                 current_vehicle.local_loc[0] = front_vehicle.local_loc[0] - self.convoy_dist - 20
 
-                current_vehicle.local_v = front_vehicle.local_v
-                current_vehicle.local_accel = front_vehicle.local_accel
+#                 # If lead car change lanes
+#                 current_vehicle.local_loc[1] = self.lead_vehicle.local_loc[1]
 
-                # Update the sub-convoy_vehicle's global position
-                current_vehicle.update_global()
+#                 current_vehicle.local_v = front_vehicle.local_v
+#                 current_vehicle.local_accel = front_vehicle.local_accel
 
-        # Update convoy level position
-        self.loc_front = self.convoy_list[0].loc_front
-        self.loc_back = self.convoy_list[-1].loc_back
-        self.veh_length = self.loc_front - self.loc_back
-        x_pos = self.loc_back + self.veh_length/2
-        self.loc = [x_pos, self.lead_vehicle.loc[1]]
-        self.v = self.lead_vehicle.v
+#                 # Update the sub-convoy_vehicle's global position
+#                 current_vehicle.update_global()
+
+#         # Update convoy level position
+#         self.loc_front = self.convoy_list[0].loc_front
+#         self.loc_back = self.convoy_list[-1].loc_back
+#         self.veh_length = self.loc_front - self.loc_back
+#         x_pos = self.loc_back + self.veh_length/2
+#         self.loc = [x_pos, self.lead_vehicle.loc[1]]
+#         self.v = self.lead_vehicle.v

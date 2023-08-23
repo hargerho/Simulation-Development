@@ -66,7 +66,7 @@ class Road:
 
     def spawn_helper(self, tmp_vehicle, vehicle_type):
 
-        if vehicle_type == 'shc':
+        if vehicle_type == 'shc' or vehicle_type == 'acc':
             # Check vehicle surrounding
             tmp_front = tmp_vehicle.get_fov(vehicle_list=self.vehicle_list)['front']
             # If there is a vehicle infront
@@ -185,26 +185,26 @@ class Road:
             tmp_list = self.vehicle_list.copy()
             tmp_list.pop(idx)
             if isinstance(vehicle, Convoy):
-                vehicle.update_convoy(tmp_list, vehicle_type='acc')
+                vehicle.update_local(tmp_list, vehicle_type='acc')
             else:
                 vehicle.update_local(tmp_list, vehicle_type='shc')
 
         for vehicle in self.vehicle_list:
-            if not isinstance(vehicle, Convoy):
-                vehicle.update_global()
+            # if not isinstance(vehicle, Convoy):
+            vehicle.update_global()
 
             # If vehicle reached the end of the road
             # Remove vehicle from road
-            if isinstance(vehicle, Convoy):
-                for convoy in vehicle.convoy_list:
-                    if convoy.loc_front > self.road_length:
-                        if len(vehicle.convoy_list) == 1: # If last convoy in the convoy_list
-                            self.vehicle_list.remove(vehicle)
-                        else: # Remove one vehicle from the convoy
-                            vehicle.convoy_list.remove(convoy)
+            # if isinstance(vehicle, Convoy):
+            #     for convoy in vehicle.convoy_list:
+            #         if convoy.loc_front > self.road_length:
+            #             if len(vehicle.convoy_list) == 1: # If last convoy in the convoy_list
+            #                 self.vehicle_list.remove(vehicle)
+            #             else: # Remove one vehicle from the convoy
+            #                 vehicle.convoy_list.remove(convoy)
             # Simulate roadblock by setting a SHC vehicle to 0m/s
-            elif self.road_closed is not None:
-                if vehicle.loc_front > self.road_length/2 and vehicle.loc[1] == self.road_closed:
+            if self.road_closed is not None:
+                if vehicle.loc_front > self.road_length/2 - 100 and vehicle.loc[1] == self.road_closed:
                     vehicle.v = 0
             if isinstance(vehicle, Vehicle) and vehicle.loc_front > self.road_length:
                 self.vehicle_list.remove(vehicle)
