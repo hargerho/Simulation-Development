@@ -36,15 +36,12 @@ class Road:
             self.onramp_spawn_interval = round(1.0/self.onramp_frequency, 1)
             self.onramp_timer = 0.0
             self.onramp_last_spawn_time = 0
-        else:
-            self.onramp_frequency, self.onramp_spawn_interval, self.onramp_timer, self.onramp_last_spawn_time = 0, 0, 0, 0
 
         # Getting y-coord of lanes
         self.onramp = self.toplane_loc[1]
         self.leftlane = self.toplane_loc[1] + self.lanewidth
         self.middlelane = self.toplane_loc[1] + (self.lanewidth * 2)
         self.rightlane = self.toplane_loc[1] + self.lanewidth * (self.num_lanes - 1)
-
 
         if road_params["road_closed"] == "left":
             self.road_closed = self.leftlane
@@ -59,23 +56,14 @@ class Road:
         # Convoy Params
         self.num_convoy_vehicles = road_params['num_convoy_vehicles']  # Queue counter of 3 acc vehicles to form a convoy
         self.acc_spawn_loc = [self.toplane_loc[0], self.leftlane] # acc vehicle always spawns in left lane
+        self.frames = 0
         self.convoy_spawned = False
 
         # Testing Controls
         self.vehicle_despawn = 0
         self.run_flag = True
         self.total_vehicles = simulation_params['num_vehicles']
-        # self.progress_bar = tqdm(total=self.total_vehicles, desc="Despawning Vehicles")
-
-    def check_road_closed(self):
-        if road_params["road_closed"] == "left":
-            self.road_closed = self.leftlane
-        elif road_params["road_closed"] == "middle":
-            self.road_closed = self.middlelane
-        elif road_params["road_closed"] == "right":
-            self.road_closed = self.rightlane
-        else:
-            self.road_closed = None
+        self.progress_bar = tqdm(total=self.total_vehicles, desc="Despawning Vehicles")
 
     def spawn_helper(self, tmp_vehicle, vehicle_type):
 
@@ -99,6 +87,7 @@ class Road:
 
         else:
             tmp_lead = tmp_vehicle.convoy_list[0] # Lead ACC vehicle
+            tmp_vehicle_tail = tmp_vehicle.convoy_list[-1]
             tmp_front = tmp_lead.get_fov(vehicle_list=self.vehicle_list)['front']
 
             # If there is a vehicle infront
@@ -110,7 +99,6 @@ class Road:
                 # Check the size of the car
                 # TODO CHECK i think is tmp_lead.loc_front
                 overlap_flag = (tmp_front.loc_back - tmp_vehicle_tail.loc_front - self.safety_distance) < 0
-
             else:
                 # If no vehicles infront
                 headway = tmp_lead.T
@@ -189,32 +177,7 @@ class Road:
         # Reset onramp spawn timer if vehicle is not spawn to prevent upstream overcrowding
         self.onramp_last_spawn_time = self.onramp_timer
 
-    def check_inflow(self, timer, last_spawn_time, onramp_timer, onramp_last_spawn_time):
-        # Road Spawning
-        if road_params['vehicle_inflow'] > 0:
-            self.vehicle_frequency = road_params['vehicle_inflow'] / 3600 # per/hour -> per second
-            self.spawn_interval = round(1.0/self.vehicle_frequency, 1) # Round to 1dp since ts is 1dp
-            self.timer = timer
-            self.last_spawn_time = last_spawn_time
-        else:
-            self.vehicle_frequency, self.spawn_interval, self.timer, self.last_spawn_time = 0, 0, 0, 0
-
-        # Onramp frequency
-        if road_params['onramp_inflow'] > 0:
-            self.onramp_frequency = road_params['onramp_inflow'] / 3600
-            self.onramp_spawn_interval = round(1.0/self.onramp_frequency, 1)
-            self.onramp_timer = onramp_timer
-            self.onramp_last_spawn_time = onramp_last_spawn_time
-        else:
-            self.onramp_frequency, self.onramp_spawn_interval, self.onramp_timer, self.onramp_last_spawn_time = 0, 0, 0, 0
-
     def update_road(self, restart):
-
-        self.check_road_closed()
-
-        # Checking for flow updates
-        self.check_inflow(self.timer, self.last_spawn_time, self.onramp_timer, self.onramp_last_spawn_time)
-
         if restart:
             self.vehicle_list = []
 
@@ -256,20 +219,19 @@ class Road:
 
         # Update spawn_timer
         if road_params['vehicle_inflow'] > 0:
-            self.timer += (self.ts * simulation_params['playback_speed'])
+            self.timer += self.ts
             if self.timer - self.last_spawn_time >= self.spawn_interval:
                 self.spawn_vehicle()
 
         if road_params['onramp_inflow'] > 0:
             # Update onramp_spawn_timer
-            self.onramp_timer += (self.ts * simulation_params['playback_speed'])
+            self.onramp_timer += self.ts
             if self.onramp_timer - self.onramp_last_spawn_time >= self.onramp_spawn_interval:
                 self.spawn_onramp()
-        else:
-            self.onramp_timer, self.onramp_last_spawn_time, self.onramp_spawn_interval = 0,0,0
+
+        self.frames += 1
 
         if simulation_params['testing'] and self.vehicle_despawn > self.total_vehicles:
             self.run_flag = False
 
         return self.vehicle_list, self.run_flag # return vehicle list of this frame
-

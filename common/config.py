@@ -1,6 +1,7 @@
 # Testing Scale -> 1m:2px, 1km:2000px
 
 # Helper Functions
+
 SCALE = 2 # 1m:SCALE px
 
 def length_conversion(value):
@@ -22,10 +23,11 @@ window_params = {
     "green": (0,255,0),
     "grey": (128, 128, 128),
     "red": (255,0,0),
-    "vehicle_length": length_conversion(5), #5m
-    "vehicle_width": length_conversion(2), #2+m
-    "road_image": 'common/assets/road.png',
-    "road_border": 'common/assets/road_mask.png',
+    "vehicle_length": length_conversion(5), #5m TESTING: 10PX
+    "vehicle_width": length_conversion(2), #2+m TESTING: 5PX
+    "onramp_image": 'common/assets/onramp.png',
+    "road_image": 'common/assets/roadtile.png',
+    "miniroad": 'common/assets/miniroad.png',
     "acc_image": 'common/assets/acc.png',
     "shc_image": 'common/assets/shc.png',
     "restart_button": 'common/assets/restart.png',
@@ -46,7 +48,7 @@ window_params = {
 }
 
 road_params = {
-    "toplane_loc": (0,500), #(x, y)
+    "toplane_loc": (0,380), #(x, y)
     "road_length": length_conversion(16000), #16000m
     "onramp_length": length_conversion(140), # 140m
     "onramp_offset": length_conversion(50),
@@ -85,7 +87,7 @@ shc_params = {
 }
 
 acc_params = {
-    "acc_spawnrate": 0, # Init 0.2
+    "acc_spawnrate": 0.2, # Init 0.2
     "normal": {"safe_headway": 3.1, "speed_variation": 0, "politeness_factor": 0.5},
     "cautious": {"safe_headway": 4, "speed_variation": 0, "politeness_factor": 0.8},
 }
@@ -99,7 +101,7 @@ baseline = f"ACCNo_SHC{driving_params['shc_logic']}_Road{road_params['road_close
 # Min ts = 0.01, playback_speed = 1
 simulation_params = {
     "ts": 0.1, # was 0.001  testing: 1/60 # Ts < 0.5 same results
-    "playback_speed": 2, # realtime = 1
+    "playback_speed": 10, # realtime = 1
     "folderpath": "data",
     "filename": f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}",
     "record": False, # Default False
