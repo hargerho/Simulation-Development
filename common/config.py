@@ -23,6 +23,7 @@ window_params = {
     "green": (0,255,0),
     "grey": (128, 128, 128),
     "red": (255,0,0),
+
     "vehicle_length": length_conversion(5), #5m TESTING: 10PX
     "vehicle_width": length_conversion(2), #2+m TESTING: 5PX
     "onramp_image": 'common/assets/onramp.png',
@@ -51,12 +52,14 @@ road_params = {
     "toplane_loc": (0,380), #(x, y)
     "road_length": length_conversion(16000), #16000m
     "onramp_length": length_conversion(140), # 140m
+    "onramp_offset": length_conversion(50),
     "num_lanes": 4, # including an onramp
     "lanewidth": length_conversion(5), # arbitary
     "vehicle_inflow": 4000, # 1000 approx 1veh/3.6sec testing: 10000
     "onramp_inflow": 0,
     "num_convoy_vehicles": 3,
-    "road_closed": None
+    "road_closed": 'left',
+    "partial_close": True
 }
 
 # Safety threshold = 1.5m
@@ -76,6 +79,7 @@ driving_params = {
     "shc_logic": "normal", # toggle normal/cautious
 }
 
+
 # Noraml Speed Variation = 5m/s
 # Irratinal Speed Variation = 10m/s
 # Headway in seconds
@@ -85,7 +89,7 @@ shc_params = {
 }
 
 acc_params = {
-    "acc_spawnrate": 0, # Init 0.2
+    "acc_spawnrate": 0.5, # Init 0.2
     "normal": {"safe_headway": 3.1, "speed_variation": 0, "politeness_factor": 0.5},
     "cautious": {"safe_headway": 4, "speed_variation": 0, "politeness_factor": 0.8},
 }

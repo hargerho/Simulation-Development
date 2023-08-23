@@ -31,6 +31,7 @@ class Window:
 
         # Getting road y-coordinates
         self.toplane_loc = road_params['toplane_loc']
+        self.onramp_x = self.toplane_loc[0] + road_params['onramp_offset']
         self.onramp = self.toplane_loc[1]
         self.leftlane = self.toplane_loc[1] + self.lanewidth
         self.middlelane = self.toplane_loc[1] + (self.lanewidth * 2)
@@ -250,16 +251,19 @@ class Window:
     def refresh_window(self, vehicle_list, frame):
         vehicle_metrics = [[], [], [], []] # 1st, 2nd, middle, last
 
+
         # Drawing the vehicles
         for vehicle in vehicle_list:
 
             if isinstance(vehicle, Convoy):
                 for convoy in vehicle.convoy_list:
-                    # Indexing the convoy
+                #     # Indexing the convoy
                     vehicle_id = convoy.vehicle_id()
+
                     self.assign_section(loc=vehicle_id['location'], speed=vehicle_id['speed'], vehicle_metrics=vehicle_metrics)
 
                     self.bg.draw_vehicle(self.acc_image, self.vehicle_length, self.vehicle_width, vehicle_loc=vehicle_id['location'])
+
             else:
                 vehicle_id = vehicle.vehicle_id()
                 self.assign_section(loc=vehicle_id['location'], speed=vehicle_id['speed'], vehicle_metrics=vehicle_metrics)
@@ -336,6 +340,7 @@ class Window:
                     self.is_running = False
                     pygame.quit()
                     sys.exit()
+
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
                         self.is_running = False
@@ -368,6 +373,7 @@ class Window:
 
             self.global_buttons.update()
             self.global_buttons.draw(self.win)
+
 
             if not self.is_paused:
                 # Updates simulation frame

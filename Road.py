@@ -6,12 +6,14 @@ from tqdm import tqdm
 from common.config import road_params, driving_params, vehicle_models, simulation_params
 from Vehicle import Vehicle
 from ACC import Convoy
+random.seed(42)
 
 class Road:
     def __init__(self):
         # General params
         self.num_lanes = road_params['num_lanes']
         self.toplane_loc = road_params['toplane_loc']
+        self.onramp_x = self.toplane_loc[0] + road_params['onramp_offset']
         self.lanewidth = road_params['lanewidth']
         self.road_length = road_params['road_length']
         self.onramp_length = road_params['onramp_length']
@@ -42,6 +44,17 @@ class Road:
         self.leftlane = self.toplane_loc[1] + self.lanewidth
         self.middlelane = self.toplane_loc[1] + (self.lanewidth * 2)
         self.rightlane = self.toplane_loc[1] + self.lanewidth * (self.num_lanes - 1)
+
+
+        if road_params["road_closed"] == "left":
+            self.road_closed = self.leftlane
+        elif road_params["road_closed"] == "middle":
+            self.road_closed = self.middlelane
+        elif road_params["road_closed"] == "right":
+            self.road_closed = self.rightlane
+        else:
+            self.road_closed = None
+        self.partial_close = road_params['partial_close']
 
         # Convoy Params
         self.num_convoy_vehicles = road_params['num_convoy_vehicles']  # Queue counter of 3 acc vehicles to form a convoy
@@ -95,7 +108,9 @@ class Road:
                 else:
                     headway = tmp_lead.T
                 # Check the size of the car
-                overlap_flag = (tmp_front.loc_back - tmp_lead.loc_front - self.safety_distance) < 0
+                # TODO CHECK i think is tmp_lead.loc_front
+                overlap_flag = (tmp_front.loc_back - tmp_vehicle_tail.loc_front - self.safety_distance) < 0
+
             else:
                 # If no vehicles infront
                 headway = tmp_lead.T
@@ -161,7 +176,7 @@ class Road:
         logic_level = driving_params["shc_logic"]
         logic_dict = vehicle_models[0][logic_level]
         vehicle_type = 'shc'
-        spawn_loc = self.toplane_loc
+        spawn_loc = [self.onramp_x, self.toplane_loc[1]]
 
         # Create a tmp Vehicle Object
         tmp_vehicle = Vehicle(logic_dict=logic_dict, spawn_loc=spawn_loc, vehicle_type=vehicle_type)
@@ -204,15 +219,18 @@ class Road:
             self.vehicle_list = []
 
         # Update vehicle local state
-        for vehicle in self.vehicle_list:
-
+        for idx, vehicle in enumerate(self.vehicle_list):
+            tmp_list = self.vehicle_list.copy()
+            tmp_list.pop(idx)
             if isinstance(vehicle, Convoy):
-                vehicle.update_convoy(self.vehicle_list, vehicle_type='acc')
+                vehicle.update_convoy_local(self.vehicle_list, vehicle_type='acc')
             else:
-                vehicle.update_local(self.vehicle_list, vehicle_type='shc')
+                vehicle.update_local(tmp_list, vehicle_type='shc')
 
         for vehicle in self.vehicle_list:
-            if not isinstance(vehicle, Convoy):
+            if isinstance(vehicle, Convoy):
+                vehicle.update_convoy_global()
+            else:
                 vehicle.update_global()
 
             # If vehicle reached the end of the road
@@ -225,14 +243,16 @@ class Road:
                         else: # Remove one vehicle from the convoy
                             vehicle.convoy_list.remove(convoy)
             # Simulate roadblock by setting a SHC vehicle to 0m/s
-            elif self.road_closed is not None:
-                if vehicle.loc_front > self.road_length/2 and vehicle.loc[1] == self.road_closed:
+            if self.road_closed is not None and vehicle.loc[1] == self.road_closed and isinstance(vehicle, Vehicle):
+                if self.partial_close:
+                    if (int(vehicle.loc[0]) >= self.road_length/2) and (int(vehicle.loc[0]) <= self.road_length/2 + 10):
+                        vehicle.v = 0
+                elif (vehicle.loc[0] >= self.road_length/2 - 50):
                     vehicle.v = 0
-            if vehicle.loc_front > self.road_length:
+            if isinstance(vehicle, Vehicle) and vehicle.loc_front > self.road_length:
                 self.vehicle_list.remove(vehicle)
                 self.vehicle_despawn += 1
                 # self.progress_bar.update(1) # For testing
-
         # Update spawn_timer
         if road_params['vehicle_inflow'] > 0:
             self.timer += (self.ts * simulation_params['playback_speed'])
