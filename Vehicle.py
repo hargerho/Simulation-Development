@@ -11,6 +11,7 @@ class Vehicle:
 
         self.id = str(uuid.uuid4()) # unique id for each vehicle
         self.ts = simulation_params['ts']
+        self.name = 'vehicle'
 
         # Road Params
         self.num_lanes = road_params['num_lanes']
@@ -105,22 +106,6 @@ class Vehicle:
     def update_positions(self, vehicle, x_coord, not_left_lane, not_right_lane, front_check, back_check, left_check, right_check,
                          front_left, front_right, back_left, back_right, in_between_check, right, left):
 
-        if in_between_check and right_check:
-            if right is None:
-                right = vehicle
-            elif (abs(self.loc_front - right.loc_front) + abs(self.loc_back - right.loc_back)) > (abs(self.loc_front - vehicle.loc_front) + abs(self.loc_back - vehicle.loc_back)): # update to the new right vehicle
-                right = vehicle
-            elif not (front_check or back_check) and (abs(self.loc_front - left.loc_front) + abs(self.loc_back - left.loc_back)) > 2 * self.veh_length:
-                right = None
-
-        if in_between_check and left_check:
-            if left is None:
-                left = vehicle
-            elif (abs(self.loc_front - left.loc_front) + abs(self.loc_back - left.loc_back)) > (abs(self.loc_front - vehicle.loc_front) + abs(self.loc_back - vehicle.loc_back)): # update to the new right vehicle
-                left = vehicle
-            elif not (front_check or back_check) and (abs(self.loc_front - left.loc_front) + abs(self.loc_back - left.loc_back)) > 10 * self.veh_length:
-                left = None
-
         if not_right_lane and front_check and right_check and (front_right is None or x_coord < front_right.loc[0]):
             front_right = vehicle
 
@@ -133,15 +118,44 @@ class Vehicle:
         if not_left_lane and back_check and left_check and (back_left is None or x_coord > back_left.loc[0]):
             back_left = vehicle
 
+        if isinstance(vehicle, Vehicle):
+            if in_between_check and right_check:
+                if right is None:
+                    right = vehicle
+                elif (abs(self.loc_front - right.loc_front) + abs(self.loc_back - right.loc_back)) < (abs(self.loc_front - vehicle.loc_front) + abs(self.loc_back - vehicle.loc_back)): # update to the new right vehicle
+                    right = vehicle
+                elif not (front_check or back_check) and ((abs(self.loc_front - left.loc_front) + abs(self.loc_back - left.loc_back)) > 2 * self.veh_length):
+                    right = None
+
+            if in_between_check and left_check:
+                if left is None:
+                    left = vehicle
+                elif ((abs(self.loc_back - vehicle.loc_front) <= abs(self.loc_back - left.loc_front)) or (abs(self.loc_front - vehicle.loc_back) <= abs(self.loc_front - left.loc_front))):
+                    left = vehicle
+                elif not (front_left or back_left) and ((left.loc_back - self.loc_front > 2*left.veh_length) or (self.loc_back - left.loc_front > 2*left.veh_length)):
+                    left = None
+        else:
+            for vehicle in vehicle.convoy_list:
+                if in_between_check and right_check:
+                    if right is None:
+                        right = vehicle
+                    elif (abs(self.loc_front - right.loc_front) + abs(self.loc_back - right.loc_back)) < (abs(self.loc_front - vehicle.loc_front) + abs(self.loc_back - vehicle.loc_back)): # update to the new right vehicle
+                        right = vehicle
+                    elif not (front_check or back_check) and ((abs(self.loc_front - left.loc_front) + abs(self.loc_back - left.loc_back)) > 2 * self.veh_length):
+                        right = None
+
+                if in_between_check and left_check:
+                    if left is None:
+                        left = vehicle
+                    elif ((abs(self.loc_back - vehicle.loc_front) <= abs(self.loc_back - left.loc_front)) or (abs(self.loc_front - vehicle.loc_back) <= abs(self.loc_front - left.loc_front))):
+                        left = vehicle
+                    elif not (front_left or back_left) and ((left.loc_back - self.loc_front > 2*left.veh_length) or (self.loc_back - left.loc_front > 2*left.veh_length)):
+                        left = None
         return front_left, front_right, back_left, back_right, right, left
 
     def get_distance_and_velocity(self, front_vehicle):
         if front_vehicle is None:
-            distance = (
-                self.onramp_length
-                if self.loc[1] == self.onramp
-                else self.road_length
-            )
+            distance = self.onramp_length if self.loc[1] == self.onramp else self.road_length
             velocity = self.v
         else:
             distance = front_vehicle.loc_back - self.loc_front
@@ -149,9 +163,9 @@ class Vehicle:
         return distance, velocity
 
     def get_side_params(self, vehicle, front_check, back_check):
-        cond1 = back_check and (self.loc_back - vehicle.loc_front <= self.veh_length + self.s_0) # Vehicle behind self
+        cond1 = back_check and ((self.loc_back - vehicle.loc_front <= 3*vehicle.veh_length) and (self.loc_front > vehicle.loc_front)) # Vehicle behind self
         cond2 = ((self.loc_back >= vehicle.loc_back) and (self.loc_front <= vehicle.loc_front)) # vehicle and self inline
-        cond3 = front_check and (vehicle.loc_back - self.loc_front <= self.veh_length + self.s_0) # Vehicle infront of self
+        cond3 = front_check and ((vehicle.loc_back - self.loc_front <= 3*vehicle.veh_length) and (self.loc_front > vehicle.loc_back)) # Vehicle infront of self
         return (cond1 or cond2 or cond3)
 
     def get_fov_params(self, vehicle):
@@ -167,7 +181,14 @@ class Vehicle:
         not_right_lane = current_y_coord != self.rightlane
         not_left_lane = current_y_coord != self.leftlane
 
-        in_between_check = self.get_side_params(vehicle=vehicle, front_check=front_check, back_check=back_check)
+        if isinstance(vehicle, Vehicle):
+            in_between_check = self.get_side_params(vehicle=vehicle, front_check=front_check, back_check=back_check)
+        else:
+            checklist = []
+            for convoy in vehicle.convoy_list:
+                side_check = self.get_side_params(vehicle=convoy, front_check=front_check, back_check=back_check)
+                checklist.append(side_check)
+            in_between_check = any(checklist)
 
         return x_coord, x_diff, y_diff, right_check, left_check, front_check, back_check, not_right_lane, not_left_lane, in_between_check
 
@@ -335,8 +356,6 @@ class Vehicle:
             self.local_loc[1] -= self.lanewidth
         if (surrounding_dict['front_left'] is None and surrounding_dict['back_left'] is not None):
             if surrounding_dict['back_left'].loc_front + self.s_0 + self.veh_length < self.loc_back:
-                x = surrounding_dict['back_left'].loc_front + self.s_0 + 2*self.veh_length
-                print(f'backdist{x}, myback{self.loc_back}')
                 self.local_loc[1] -= self.lanewidth
         if (surrounding_dict['back_left'] is None and surrounding_dict['front_left'] is not None and surrounding_dict['front_left'].v != 0):
             if surrounding_dict['front_left'].loc_back - self.s_0 - self.veh_length > self.loc_front:
@@ -366,7 +385,7 @@ class Vehicle:
                                                         new_front=surrounding_dict['front_left'], new_back=surrounding_dict['back_left'], right=surrounding_dict['right'], left=surrounding_dict['left'])
 
                 if self.partial_close: # ACC can return back to blocked lane
-                    if change_flag:
+                    if change_flag and surrounding_dict['left'] is None:
                         self.partial_road_close(surrounding_dict=surrounding_dict)
                 elif self.road_closed: # if there is a road closure
                     if change_flag and (self.local_loc[1] - self.lanewidth != self.road_closed): # if lane changed into not closed

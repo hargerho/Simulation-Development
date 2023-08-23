@@ -8,6 +8,32 @@ from DriverModel import DriverModel as DM
 #         self.num_subconvoy = num_subconvoy
 #         self.veh_length = self.num_subconvoy * window_params['vehicle_length']
 
+class ConvoyMetrics:
+    def __init__(self, convoy_list):
+        self.convoy_list = convoy_list
+        self.name = 'metrics'
+        self.lead_vehicle = self.convoy_list[0]
+        self.tail_vehicle = self.convoy_list[-1]
+        self.loc_front = self.lead_vehicle.loc_front
+        self.loc_back = self.tail_vehicle.loc_back
+        self.veh_length = abs(self.loc_front - self.loc_back)
+        new_x_convoy = self.loc_front - self.veh_length/2
+        new_y_convoy = self.lead_vehicle.loc[1]
+        self.loc = [new_x_convoy, new_y_convoy]
+        self.v = self.lead_vehicle.v
+
+    def update_convoy_params(self):
+        # Convoy Level Params
+        self.lead_vehicle = self.convoy_list[0]
+        self.tail_vehicle = self.convoy_list[-1]
+        self.loc_front = self.lead_vehicle.loc_front
+        self.loc_back = self.tail_vehicle.loc_back
+        self.veh_length = abs(self.loc_front - self.loc_back)
+        new_x_convoy = self.loc_front - self.veh_length/2
+        new_y_convoy = self.lead_vehicle.loc[1]
+        self.loc = [new_x_convoy, new_y_convoy]
+        self.v = self.lead_vehicle.v
+
 class Convoy:
     def __init__(self, logic_dict, lead_spawn_loc, vehicle_type, num_subconvoy):
         self.ts = simulation_params['ts']
@@ -16,6 +42,8 @@ class Convoy:
             Vehicle(logic_dict, lead_spawn_loc, vehicle_type=vehicle_type)
             for _ in range(num_subconvoy)
         ]
+
+        self.convoy_metrics = ConvoyMetrics(self.convoy_list)
 
         # Initialize convoy-level params
         self.lead_vehicle = self.convoy_list[0]
@@ -51,7 +79,9 @@ class Convoy:
                 vehicle.loc_front = vehicle.loc[0] + (vehicle.veh_length/2)
                 vehicle.loc_back = vehicle.loc[0] - (vehicle.veh_length/2)
 
-        # Convoy Level Params
+        self.convoy_metrics.update_convoy_params()
+
+        # # Convoy Level Params
         self.lead_vehicle = self.convoy_list[0]
         self.tail_vehicle = self.convoy_list[-1]
         self.loc_front = self.lead_vehicle.loc_front
@@ -60,4 +90,3 @@ class Convoy:
         new_x_convoy = self.loc_front - self.veh_length/2
         new_y_convoy = self.lead_vehicle.loc[1]
         self.loc = [new_x_convoy, new_y_convoy]
-        # self.v = self.lead_vehicle.v

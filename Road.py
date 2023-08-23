@@ -208,7 +208,7 @@ class Road:
             # Simulate roadblock by setting a SHC vehicle to 0m/s
             if self.road_closed is not None and vehicle.loc[1] == self.road_closed and isinstance(vehicle, Vehicle):
                 if self.partial_close:
-                    if (int(vehicle.loc[0]) == self.road_length/2):
+                    if (int(vehicle.loc[0]) >= self.road_length/2) and (int(vehicle.loc[0]) <= self.road_length/2 + 10):
                         vehicle.v = 0
                 elif (vehicle.loc[0] >= self.road_length/2 - 50):
                     vehicle.v = 0
