@@ -316,16 +316,16 @@ class Vehicle:
             # Left change if it is on middle or right lane
             if self.loc[1] in [self.middlelane, self.rightlane]:
                 if (surrounding['front_left'] is None and surrounding['back_left'] is None): # if no vehicle in front and back of to change lane
-                    change_flag = self.calc_lane_change(change_dir='left', current_front=surrounding['front'],
-                                                        new_front=surrounding['front_left'], new_back=surrounding['back_left'], right=surrounding['right'], left=surrounding['left'])
-                    if change_flag:
+                    self.local_loc[1] -= self.lanewidth
+                if (surrounding['front_left'] is None and surrounding['back_left'] is not None):
+                    if surrounding['back_left'].loc_front + self.s_0 < self.loc_back:
                         self.local_loc[1] -= self.lanewidth
-                if (surrounding['front_left'] is not None and surrounding['back_left'] is not None):
+                if (surrounding['back_left'] is None and surrounding['front_left'] is not None and surrounding['front_left'].v != 0):
+                    if surrounding['front_left'].loc_back - self.s_0 > self.loc_front:
+                        self.local_loc[1] -= self.lanewidth
+                if (surrounding['front_left'] is not None and surrounding['front_left'].v != 0 and surrounding['back_left'] is not None):
                     if (surrounding['front_left'].loc_back - self.s_0 > self.loc_front and surrounding['back_left'].loc_front + self.s_0 < self.loc_back): # if there are vehicles but no possible collision
-                        change_flag = self.calc_lane_change(change_dir='left', current_front=surrounding['front'],
-                                                            new_front=surrounding['front_left'], new_back=surrounding['back_left'], right=surrounding['right'], left=surrounding['left'])
-                        if change_flag:
-                            self.local_loc[1] -= self.lanewidth
+                        self.local_loc[1] -= self.lanewidth
 
         self.update_driving_params(surrounding)
 
