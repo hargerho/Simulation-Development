@@ -42,36 +42,30 @@ def get_params(combination):
     return range_testing.get(combination)
 
 def main():
-    # Data Collection
-
     if testing:
         simulation_params['record'] = testing
         simulation_params['testing'] = testing
 
         start = time.time()
 
-        # for i in range(1):
-        print("----------------------")
-        # print("Testing Combination:", i)
-        startite = time.time()
-        # testing_list = get_params(i)
-        # road_params["vehicle_inflow"] = testing_list[4]
-        # road_params["onramp_inflow"] = testing_list[3]
-        # road_params["road_closed"] = testing_list[2]
-        # driving_params["shc_logic"] = testing_list[1]
-        # driving_params["acc_logic"] = testing_list[0]
-        road_params["vehicle_inflow"] = 4000
-        road_params["onramp_inflow"] = 0
-        road_params["road_closed"] = None
-        driving_params["shc_logic"] = 'normal'
-        driving_params["acc_logic"] = 'normal'
-        acc_params["acc_spawnrate"] = 0.2
-        simulation_params["filename"] = f"testACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_Road{road_params['road_closed']}_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}_ranged"
-        # simulation_params["filename"] = f"NoVariation"
-        test = Test()
-        test.run_test()
-        endite = time.time()
-        # print(f"Combination {i} took {endite-startite}")
+        for i in range(10):
+            print("----------------------")
+            print("Testing Combination:", i)
+            startite = time.time()
+            testing_list = get_params(i)
+            road_params["vehicle_inflow"] = testing_list[4]
+            road_params["onramp_inflow"] = testing_list[3]
+            road_params["road_closed"] = testing_list[2]
+            driving_params["shc_logic"] = testing_list[1]
+            driving_params["acc_logic"] = testing_list[0]
+            acc_params["acc_spawnrate"] = 0 if i == 0 else 0.2
+            simulation_params["filename"] = f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}"
+            simulation_params['testing'] = testing
+            simulation_params['record'] = testing
+            test = Test()
+            test.run_test()
+            endite = time.time()
+            print(f"Combination {i} took {endite-startite}")
 
         end = time.time()
         print("============================")

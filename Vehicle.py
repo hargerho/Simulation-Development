@@ -44,7 +44,7 @@ class Vehicle:
         self.a = driving_params['max_acceleration']
         self.b = driving_params['comfortable_deceleration']
         self.delta = driving_params['acceleration_component']
-        self.veh_length = window_params['vehicle_length'] # in window params
+        self.veh_length = window_params['vehicle_length']
         self.left_bias = driving_params['left_bias']
         self.change_threshold = driving_params['lane_change_threshold']
 
@@ -252,8 +252,7 @@ class Vehicle:
         else:
             new_back_front = new_back.loc_front
             new_back_v = new_back.v
-            # Getting the correct new_back assignment
-
+            
             # Current timestep
             if new_front is None:
                 current_back_dist = self.onramp_length if onramp_flag else self.road_length
@@ -288,6 +287,25 @@ class Vehicle:
             return True
 
         return change_incentive and is_safe
+
+    def check_lane_change(self, surrounding):
+        if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] == self.rightlane: # Right change
+            change_flag = self.calc_lane_change(change_dir='left', current_front=surrounding['front'],
+                                                new_front=surrounding['front_left'], new_back=surrounding['back_left'], right=surrounding['right'], left=surrounding['left'])
+            if change_flag:
+                self.local_loc[1] -= self.lanewidth
+        # Right change
+        if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] in [self.leftlane, self.middlelane]: # Left change
+            change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
+                                                new_front=surrounding['front_right'], new_back=surrounding['back_right'], right=surrounding['right'], left=surrounding['left'])
+            if change_flag:
+                self.local_loc[1] += self.lanewidth
+        # For special case on-ramp
+        if self.loc[1] == self.onramp and (self.loc_front > self.onramp_length/2): # Start changing in the middle of onramp to prevent lane hogging from the main road spawn
+            change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
+                                                new_front=surrounding['front_right'], new_back=surrounding['back_right'], right=surrounding['right'], left=surrounding['left'])
+            if change_flag:
+                self.local_loc[1] += self.lanewidth
 
     def update_driving_params(self, surrounding):
         # IDM Updates
