@@ -3,7 +3,7 @@ from Test import Test
 import time
 
 from common.config import *
-testing = False
+testing = True
 
 def get_params(combination):
 
@@ -17,8 +17,17 @@ def get_params(combination):
         5: ['normal', 'normal', "left", 0, 4000],
         6: ['normal', 'normal', "middle", 0, 4000],
         7: ['normal', 'normal', "right", 0, 4000],
-        8: ['normal', 'normal', None, range(200), 4000], # Manual testing range(200)
-        9: ['normal', 'normal', None, 0, range(1000,7000)], # Manual testing
+        8: ['normal', 'normal', None, 50, 4000],
+        9: ['normal', 'normal', None, 100, 4000],
+        10: ['normal', 'normal', None, 150, 4000],
+        11: ['normal', 'normal', None, 200, 4000],
+        12: ['normal', 'normal', None, 0, 1000],
+        13: ['normal', 'normal', None, 0, 2000],
+        14: ['normal', 'normal', None, 0, 3000],
+        15: ['normal', 'normal', None, 0, 5000],
+        16: ['normal', 'normal', None, 0, 6000],
+        17: ['normal', 'normal', None, 0, 7000],
+
     }
 
     # range_testing = {
@@ -26,7 +35,7 @@ def get_params(combination):
     #     1: ['normal', 'normal', None, 100, 4000],
     #     2: ['normal', 'normal', None, 150, 4000],
     #     3: ['normal', 'normal', None, 200, 4000],
-    #     4: ['normal', 'normal', None, 0, 1000], # Redo Simulation [checkbox] Redo Plots [checkbox]
+    #     4: ['normal', 'normal', None, 0, 1000],
     #     5: ['normal', 'normal', None, 0, 2000],
     #     6: ['normal', 'normal', None, 0, 3000],
     #     7: ['normal', 'normal', None, 0, 5000],
@@ -34,9 +43,8 @@ def get_params(combination):
     #     9: ['normal', 'normal', None, 0, 7000],
     # }
 
-    range_testing = {
-        4: ['normal', 'normal', None, 0, 1000],
-    }
+    # 8: ['normal', 'normal', None, range(200), 4000], # Manual testing range(200)
+    # 9: ['normal', 'normal', None, 0, range(1000,7000)], # Manual testing
 
     # Change here
     return testing_params.get(combination)
@@ -48,7 +56,7 @@ def main():
 
         start = time.time()
 
-        for i in range(10):
+        for i in range(18):
             print("----------------------")
             print("Testing Combination:", i)
             startite = time.time()
@@ -59,7 +67,12 @@ def main():
             driving_params["shc_logic"] = testing_list[1]
             driving_params["acc_logic"] = testing_list[0]
             acc_params["acc_spawnrate"] = 0 if i == 0 else 0.2
-            simulation_params["filename"] = f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}"
+            if i == 0:
+                simulation_params["filename"] = f"BaseACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_Road{road_params['road_closed']}_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}"
+            elif i <= 7:
+                simulation_params["filename"] = f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_Road{road_params['road_closed']}_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}"
+            else:
+                simulation_params["filename"] = f"RangeACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_Road{road_params['road_closed']}_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}"
             simulation_params['testing'] = testing
             simulation_params['record'] = testing
             test = Test()

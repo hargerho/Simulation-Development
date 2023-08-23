@@ -102,9 +102,9 @@ baseline = f"ACCNo_SHC{driving_params['shc_logic']}_Road{road_params['road_close
 simulation_params = {
     "ts": 0.1, # was 0.001  testing: 1/60 # Ts < 0.5 same results
     "playback_speed": 10, # realtime = 1
-    "folderpath": "data",
-    "filename": f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}",
-    "record": False, # Default False
-    "num_vehicles": 1000,
-    "testing": False # Default False
+    "folderpath": "data/new_data",
+    "filename": f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_Road{road_params['road_closed']}_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}",
+    "record": True, # Default False
+    "num_vehicles": 10,
+    "testing": True # Default False
 }
