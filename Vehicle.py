@@ -135,7 +135,6 @@ class Vehicle:
 
         return front_left, front_right, back_left, back_right, right, left
 
-    @staticmethod
     def get_distance_and_velocity(self, front_vehicle):
         if front_vehicle is None:
             distance = (
@@ -176,8 +175,7 @@ class Vehicle:
         front, front_left, front_right, back_left, back_right, right, left = None, None, None, None, None, None, None
 
         for vehicle in vehicle_list:
-                # If convoy left 1 vehicle, treat it like a shc vehicle
-            if not isinstance(vehicle, Vehicle):
+            if not isinstance(vehicle, Vehicle) and len(vehicle.convoy_list) == 1:
                 vehicle = vehicle.convoy_list[0]
             x_coord, x_diff, y_diff, right_check, left_check, front_check, back_check, not_right_lane, not_left_lane, in_between_check = self.get_fov_params(vehicle)
 
@@ -211,14 +209,21 @@ class Vehicle:
 
         onramp_flag = (self.loc[1] == self.onramp)
 
+        if not isinstance(current_front, Vehicle) and (current_front is not None):
+            current_front = current_front.convoy_list[-1]
+        if not isinstance(new_front, Vehicle) and (new_front is not None):
+            new_front = new_front.convoy_list[-1]
+        if not isinstance(new_back, Vehicle) and (new_back is not None):
+            new_back = new_back.convoy_list[0]
+
         # Calculate distance and velocity of current and new front vehicles
         if onramp_flag and current_front is None:
             current_front_dist = self.onramp_length - self.loc_front
             current_front_v = 0
-            new_front_dist, new_front_v = Vehicle.get_distance_and_velocity(self, new_front)
         else:
-            current_front_dist, current_front_v = Vehicle.get_distance_and_velocity(self, current_front)
-            new_front_dist, new_front_v = Vehicle.get_distance_and_velocity(self, new_front)
+            current_front_dist, current_front_v = self.get_distance_and_velocity(current_front)
+
+        new_front_dist, new_front_v = self.get_distance_and_velocity(new_front)
 
         # Calculate the disadvantage and new back acceleration if there is a vehicle behind
         if new_back is None:
@@ -227,8 +232,6 @@ class Vehicle:
             new_back_front = new_back.loc_front
             new_back_v = new_back.v
             # Getting the correct new_back assignment
-            # if not isinstance(new_back, Vehicle):
-            #     new_back = new_back.convoy_list[-1]
 
             # Current timestep
             if new_front is None:
