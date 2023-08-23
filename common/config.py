@@ -41,7 +41,7 @@ road_params = {
     "num_lanes": 4, # including an onramp
     "lanewidth": 10, # arbitary
     "vehicle_inflow": 4000, # 1000 approx 1veh/3.6sec testing: 10000
-    "onramp_inflow": 0,
+    "onramp_inflow": 1000,
     "num_convoy_vehicles": 3,
     "road_closed": 'left',
     "partial_close": True
@@ -86,7 +86,7 @@ baseline = f"ACCNo_SHC{driving_params['shc_logic']}_Road{road_params['road_close
 
 simulation_params = {
     "ts": 0.01, # was 0.001 for realtime  testing: 0.2 # Ts < 0.5 same results
-    "playback_speed": 4, # realtime = 1
+    "playback_speed": 5, # realtime = 1
     "folderpath": "data",
     "filename": f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}",
     "record": False,

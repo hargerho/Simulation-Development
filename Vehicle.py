@@ -122,9 +122,9 @@ class Vehicle:
             if in_between_check and right_check:
                 if right is None:
                     right = vehicle
-                elif (abs(self.loc_front - right.loc_front) + abs(self.loc_back - right.loc_back)) < (abs(self.loc_front - vehicle.loc_front) + abs(self.loc_back - vehicle.loc_back)): # update to the new right vehicle
+                elif ((abs(self.loc_back - vehicle.loc_front) <= abs(self.loc_back - right.loc_front)) or (abs(self.loc_front - vehicle.loc_back) <= abs(self.loc_front - right.loc_front))): # update to the new right vehicle
                     right = vehicle
-                elif not (front_check or back_check) and ((abs(self.loc_front - left.loc_front) + abs(self.loc_back - left.loc_back)) > 2 * self.veh_length):
+                elif not (front_right or back_right) and ((right.loc_back - self.loc_front > 2 * right.veh_length) or (self.loc_back - right.loc_front > 2 * right.veh_length)):
                     right = None
 
             if in_between_check and left_check:
@@ -132,16 +132,16 @@ class Vehicle:
                     left = vehicle
                 elif ((abs(self.loc_back - vehicle.loc_front) <= abs(self.loc_back - left.loc_front)) or (abs(self.loc_front - vehicle.loc_back) <= abs(self.loc_front - left.loc_front))):
                     left = vehicle
-                elif not (front_left or back_left) and ((left.loc_back - self.loc_front > 2*left.veh_length) or (self.loc_back - left.loc_front > 2*left.veh_length)):
+                elif not (front_left or back_left) and ((left.loc_back - self.loc_front > 2 * left.veh_length) or (self.loc_back - left.loc_front > 2 * left.veh_length)):
                     left = None
         else:
             for vehicle in vehicle.convoy_list:
                 if in_between_check and right_check:
                     if right is None:
                         right = vehicle
-                    elif (abs(self.loc_front - right.loc_front) + abs(self.loc_back - right.loc_back)) < (abs(self.loc_front - vehicle.loc_front) + abs(self.loc_back - vehicle.loc_back)): # update to the new right vehicle
+                    elif ((abs(self.loc_back - vehicle.loc_front) <= abs(self.loc_back - right.loc_front)) or (abs(self.loc_front - vehicle.loc_back) <= abs(self.loc_front - right.loc_front))): # update to the new right vehicle
                         right = vehicle
-                    elif not (front_check or back_check) and ((abs(self.loc_front - left.loc_front) + abs(self.loc_back - left.loc_back)) > 2 * self.veh_length):
+                    elif not (front_right or back_right) and ((right.loc_back - self.loc_front > 2 * right.veh_length) or (self.loc_back - right.loc_front > 2 * right.veh_length)):
                         right = None
 
                 if in_between_check and left_check:
@@ -149,7 +149,7 @@ class Vehicle:
                         left = vehicle
                     elif ((abs(self.loc_back - vehicle.loc_front) <= abs(self.loc_back - left.loc_front)) or (abs(self.loc_front - vehicle.loc_back) <= abs(self.loc_front - left.loc_front))):
                         left = vehicle
-                    elif not (front_left or back_left) and ((left.loc_back - self.loc_front > 2*left.veh_length) or (self.loc_back - left.loc_front > 2*left.veh_length)):
+                    elif not (front_left or back_left) and ((left.loc_back - self.loc_front > 2 * left.veh_length) or (self.loc_back - left.loc_front > 2 * left.veh_length)):
                         left = None
         return front_left, front_right, back_left, back_right, right, left
 
@@ -346,7 +346,7 @@ class Vehicle:
             if change_flag:
                 self.local_loc[1] += self.lanewidth
         # For special case on-ramp
-        if self.loc[1] == self.onramp:
+        if self.loc[1] == self.onramp and (self.loc_front > self.onramp_length/2 + road_params['onramp_offset']): # Start changing in the middle of onramp to prevent lane hogging from the main road spawn
             change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
                                                 new_front=surrounding['front_right'], new_back=surrounding['back_right'],
                                                 right=surrounding['right'], left=surrounding['left'])
@@ -355,7 +355,7 @@ class Vehicle:
 
     def acc_check_lane_change(self, surrounding):
         # Change right if front vehicle is stationary and currently on left lane
-        if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] == self.leftlane:
+        if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] == self.leftlane and (surrounding['front'].loc_back - self.loc_front <= 2 * self.veh_length):
             change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
                                                 new_front=surrounding['front_right'], new_back=surrounding['back_right'],
                                                 right=surrounding['right'], left=surrounding['left'])
