@@ -1,4 +1,4 @@
-# Scale -> 1m:2px, 1km:2000px
+# Testing Scale -> 1m:2px, 1km:2000px
 
 # Helper Functions
 SCALE = 2 # 1m:SCALE px
@@ -32,7 +32,17 @@ window_params = {
     "pause_button": 'common/assets/pause_button.png',
     "play_button": 'common/assets/play_button.png',
     "record_button": 'common/assets/record_button.png',
-    "record_stop_button": 'common/assets/record_stop_button.png'
+    "record_stop_button": 'common/assets/record_stop_button.png',
+    "normal_button": 'common/assets/normal.png',
+    "cautious_button": 'common/assets/cautious.png',
+    "irrational_button": 'common/assets/irrational.png',
+    "off_button": 'common/assets/off.png',
+    "left_button": 'common/assets/left.png',
+    "middle_button": 'common/assets/middle.png',
+    "right_button": 'common/assets/right.png',
+    "scroll_limit": 31760,
+    "signpost_image": 'common/assets/signpost.png',
+    "signpost_interval": length_conversion(1000),
 }
 
 road_params = {

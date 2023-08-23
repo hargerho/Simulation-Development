@@ -44,7 +44,7 @@ class Convoy:
                 vehicle.loc_front = vehicle.loc[0] + (vehicle.veh_length/2)
                 vehicle.loc_back = vehicle.loc[0] - (vehicle.veh_length/2)
 
-        # # Convoy Level Params
+        # Convoy Level Params
         self.lead_vehicle = self.convoy_list[0]
         self.tail_vehicle = self.convoy_list[-1]
         self.loc_front = self.lead_vehicle.loc_front
