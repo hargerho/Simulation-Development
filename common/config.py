@@ -26,7 +26,7 @@ window_params = {
 
     "vehicle_length": length_conversion(5), #5m TESTING: 10PX
     "vehicle_width": length_conversion(2), #2+m TESTING: 5PX
-    "onramp_image": 'common/assets/onramp.png',
+    "onramp_image": 'common/assets/onramp-new.png',
     "road_image": 'common/assets/roadtile.png',
     "miniroad": 'common/assets/miniroad.png',
     "acc_image": 'common/assets/acc.png',
@@ -55,11 +55,11 @@ road_params = {
     "onramp_offset": length_conversion(50),
     "num_lanes": 4, # including an onramp
     "lanewidth": length_conversion(5), # arbitary
-    "vehicle_inflow": 4000, # 1000 approx 1veh/3.6sec testing: 10000
-    "onramp_inflow": 0,
+    "vehicle_inflow": 0, # 1000 approx 1veh/3.6sec testing: 10000
+    "onramp_inflow": 1000,
     "num_convoy_vehicles": 3,
-    "road_closed": 'left',
-    "partial_close": True
+    "road_closed": None,
+    "partial_close": False
 }
 
 # Safety threshold = 1.5m

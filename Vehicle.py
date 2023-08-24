@@ -252,7 +252,7 @@ class Vehicle:
         else:
             new_back_front = new_back.loc_front
             new_back_v = new_back.v
-            
+
             # Current timestep
             if new_front is None:
                 current_back_dist = self.onramp_length if onramp_flag else self.road_length

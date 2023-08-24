@@ -197,6 +197,7 @@ class Background():
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.scroll_pos = 0
+        self.onramp_offset = road_params['onramp_offset']
 
         self.bg_images = []
         for panel in range(start_file, end_file):
@@ -206,13 +207,20 @@ class Background():
 
         self.bg_width = self.bg_images[0].get_width()
 
-    def load_road(self, road_file, x, y, road_length, road_width):
+    def load_road(self, road_file, x, y, road_length, road_width, crop_y):
         road_image = pygame.image.load(road_file).convert_alpha()
 
         self.road_image = pygame.transform.scale(road_image, (road_length, road_width))
         self.road_width = self.road_image.get_width()
+        self.road_height = self.road_image.get_height()
         self.road_rect = self.road_image.get_rect()
         self.road_y = y
+
+        crop_rect = pygame.Rect(0, 10, self.road_width - 488, self.road_height - 10)
+        self.cropped_road = self.road_image.subsurface(crop_rect)
+        self.crop_width = self.cropped_road.get_width()
+        self.crop_height = self.cropped_road.get_height()
+        self.crop_y = crop_y
 
     def load_onramp(self, road_file, x, y, onramp_length, onramp_width):
         onramp_image = pygame.image.load(road_file).convert_alpha()
@@ -300,9 +308,16 @@ class Background():
     def draw_road(self):
 
         for x in range(108):
-            self.surface.blit(self.road_image, ((x * self.road_width) - self.scroll_pos * 5, self.road_y))
             if x == 0:
-                self.surface.blit(self.onramp_image, ((x * self.onramp_width) - self.scroll_pos * 5, self.onramp_y))
+                self.surface.blit(self.road_image, ((x * self.road_width) - self.scroll_pos * 5, self.road_y))
+                self.surface.blit(self.onramp_image, (self.onramp_offset + (x * self.onramp_width) - self.scroll_pos * 5, self.onramp_y))
+                self.surface.blit(self.cropped_road, (self.onramp_offset +(x * self.crop_width) - self.scroll_pos * 5, self.crop_y))
+            elif x == 1:
+                self.surface.blit(self.road_image, (524+(x * self.road_width) - self.scroll_pos * 5, self.road_y))
+                self.surface.blit(self.cropped_road, ((x * self.crop_width) - self.scroll_pos * 5, self.crop_y))
+            else:
+                self.surface.blit(self.road_image, ((x * self.road_width) - self.scroll_pos * 5, self.road_y))
+
 
     def draw_bg(self):
 

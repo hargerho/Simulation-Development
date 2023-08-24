@@ -61,8 +61,8 @@ class Window:
         # Background params
         self.road_image = pygame.image.load(window_params["road_image"])
         self.bg = Background(surface=self.win, screen_width=self.width, screen_height=self.height, start_file=1, end_file=8)
-        self.bg.load_road(road_file=window_params['road_image'], x=0, y=410, road_length=self.width, road_width=self.road_width)
-        self.bg.load_onramp(road_file=window_params['onramp_image'], x=0, y=355, onramp_length=self.onramp_length*1.35, onramp_width=self.lanewidth+10)
+        self.bg.load_road(road_file=window_params['road_image'], x=0, y=410, road_length=self.width, road_width=self.road_width, crop_y=420)
+        self.bg.load_onramp(road_file=window_params['onramp_image'], x=0, y=360, onramp_length=self.onramp_length*1.2, onramp_width=self.lanewidth+10)
         self.bg.load_signpost(signpost_file = window_params['signpost_image'])
 
         # Minimap
@@ -333,6 +333,8 @@ class Window:
                 self.minimap.move_slider(pygame.mouse.get_pos())
                 x = self.minimap.slider_value()
                 self.bg.scroll_pos = x-1989
+
+            print("scrollpos:", self.bg.scroll_pos)
 
             # Event check first
             for event in pygame.event.get():
