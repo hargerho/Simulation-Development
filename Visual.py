@@ -150,8 +150,9 @@ class Minimap(Slider):
     def __init__(self, pos, size, start_factor, min, max, offset, slider_name):
         super().__init__(pos, size, start_factor, min, max, offset, slider_name)
 
-        self.rect = self.left_pos + self.start_factor - self.offset, self.top_pos, self.height, self.size[1]
-        self.road_length_custom = self.size[0]+self.height-5
+        self.slider_width = self.height/2
+        self.rect = self.left_pos + self.start_factor - self.offset, self.top_pos, self.slider_width, self.size[1]
+        self.road_length_custom = self.size[0]+self.height/2 - 5
         self.slider_button = pygame.Rect(self.rect)
         self.slide_rect = pygame.Rect(self.left_pos, self.top_pos, self.road_length_custom, self.size[1])
 
@@ -176,10 +177,10 @@ class Minimap(Slider):
 
     def move_slider(self, mouse_loc):
         pos = mouse_loc[0]
-        if pos < self.left_pos + self.height/2:
-            pos = self.left_pos + self.height/2
-        if pos > self.right_pos + self.height/2:
-            pos = self.right_pos + self.height/2 - 1
+        if pos < self.left_pos + self.slider_width/2:
+            pos = self.left_pos + self.slider_width/2
+        if pos > self.right_pos + self.slider_width/2:
+            pos = self.right_pos + self.slider_width/2 - 1
         self.slider_button.centerx = pos
 
     def scroll_slider(self, increment):
@@ -308,13 +309,21 @@ class Background():
     def draw_road(self):
 
         for x in range(108):
-            if x == 0:
+            if x <= 10:
                 self.surface.blit(self.road_image, ((x * self.road_width) - self.scroll_pos * 5, self.road_y))
-                self.surface.blit(self.onramp_image, (self.onramp_offset + (x * self.onramp_width) - self.scroll_pos * 5, self.onramp_y))
-                self.surface.blit(self.cropped_road, (self.onramp_offset +(x * self.crop_width) - self.scroll_pos * 5, self.crop_y))
-            elif x == 1:
-                self.surface.blit(self.road_image, (524+(x * self.road_width) - self.scroll_pos * 5, self.road_y))
-                self.surface.blit(self.cropped_road, ((x * self.crop_width) - self.scroll_pos * 5, self.crop_y))
+            if x == 11:
+                self.surface.blit(self.road_image, ((x * self.road_width) - self.scroll_pos * 5, self.road_y))
+                self.surface.blit(self.road_image, (2500+(x * self.road_width) - self.scroll_pos * 5, self.road_y))
+                # self.surface.blit(self.road_image, ((x * self.road_width) - self.scroll_pos * 5, self.road_y))
+            elif x == 12:
+                self.surface.blit(self.road_image, ((x * self.road_width) - self.scroll_pos * 5, self.road_y))
+                self.surface.blit(self.road_image, (3500+(x * self.road_width) - self.scroll_pos * 5, self.road_y))
+                self.surface.blit(self.cropped_road, (8356+(x * self.crop_width) - self.scroll_pos * 5, self.crop_y))
+                self.surface.blit(self.onramp_image, (340+(x * self.onramp_width) - self.scroll_pos * 5, self.onramp_y))
+            elif x == 15:
+                 self.surface.blit(self.road_image, ((x * self.road_width) - self.scroll_pos * 5, self.road_y))
+            elif x > 12 and x < 15:
+                pass
             else:
                 self.surface.blit(self.road_image, ((x * self.road_width) - self.scroll_pos * 5, self.road_y))
 

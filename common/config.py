@@ -52,7 +52,7 @@ road_params = {
     "toplane_loc": (0,380), #(x, y)
     "road_length": length_conversion(16000), #16000m
     "onramp_length": length_conversion(140), # 140m
-    "onramp_offset": length_conversion(50),
+    "onramp_offset": length_conversion(2050),
     "num_lanes": 4, # including an onramp
     "lanewidth": length_conversion(5), # arbitary
     "vehicle_inflow": 0, # 1000 approx 1veh/3.6sec testing: 10000

@@ -66,7 +66,7 @@ class Window:
         self.bg.load_signpost(signpost_file = window_params['signpost_image'])
 
         # Minimap
-        self.minimap = Minimap(pos=(self.width/2-20,12), size=(400,50), start_factor=0, min=0, max=31760, offset=0, slider_name='minimap')
+        self.minimap = Minimap(pos=(self.width/2-20,12), size=(800,50), start_factor=0, min=0, max=31762, offset=0, slider_name='minimap')
         self.minimap.load_map()
 
         # Recording params
@@ -332,7 +332,8 @@ class Window:
             if self.minimap.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
                 self.minimap.move_slider(pygame.mouse.get_pos())
                 x = self.minimap.slider_value()
-                self.bg.scroll_pos = x-1989
+                # self.bg.scroll_pos = x-1989
+                self.bg.scroll_pos = x - 447
 
             print("scrollpos:", self.bg.scroll_pos)
 
