@@ -82,8 +82,8 @@ class Window:
         # Creating Real Time Metric Display
         self.realtime_flow = [[], [], [], []]
         self.mean_flow = []
-        self.metric_list = [(167,325), (2100,390), (80000,390), (159980, 390)]
-        self.miniloc_list = [(538,39), (570,44), (754,50), (954, 50)]
+        self.metric_list = [(10000,390), (30000,390), (80000,390), (159980, 390)]
+        self.miniloc_list = [(387,45), (487,45), (740,45), (1138, 45)]
 
         # Setting up the Simulation
         self.is_running = True
@@ -224,10 +224,7 @@ class Window:
 
     def assign_section(self, loc, speed, vehicle_metrics):
         for idx, metric_loc in enumerate(self.metric_list):
-            if idx == 0: # if vehicle is at the first checkpoint
-                if loc[0] >= metric_loc[0] and loc[0] <= metric_loc[0] + self.length_conversion(100):
-                    vehicle_metrics[idx].append((speed, self.length_conversion(116.7)))
-            elif loc[0] >= metric_loc[0] - self.length_conversion(500) and loc[0] <= metric_loc[0] + self.length_conversion(500):
+            if loc[0] >= metric_loc[0] - self.length_conversion(500) and loc[0] <= metric_loc[0] + self.length_conversion(500):
                 vehicle_metrics[idx].append((speed, self.length_conversion(1000)))
 
     def compute_metrics(self, vehicle_metric, realtime_metrics):
@@ -332,10 +329,9 @@ class Window:
             if self.minimap.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
                 self.minimap.move_slider(pygame.mouse.get_pos())
                 x = self.minimap.slider_value()
-                # self.bg.scroll_pos = x-1989
                 self.bg.scroll_pos = x - 447
 
-            print("scrollpos:", self.bg.scroll_pos)
+            print(f"scrollpos:{self.bg.scroll_pos}, x{ self.minimap.slider_value()}" )
 
             # Event check first
             for event in pygame.event.get():
