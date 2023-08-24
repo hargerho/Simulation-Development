@@ -14,7 +14,7 @@ def loc_conversion(value):
     return value*2
 
 def interval_plots(flow_df):
-    folderpath1 = 'data/new_data/plots/interval_plots'
+    folderpath1 = 'data/shifted_onramp/plots/interval_plots'
     # Saving timestep plots
     num_plots = flow_df['section'].max()
     # Create a figure with subplots
@@ -45,12 +45,11 @@ def interval_plots(flow_df):
     plt.tight_layout()
 
     # Save the figure as a single image
-    plot_name = filename.replace(".json", "").replace("data/new_data","")
+    plot_name = filename.replace(".json", "").replace("data/shifted_onramp","")
     plt.savefig(f'{folderpath1}/{plot_name}.png', dpi=300)
-    print("Saved timesteps")
 
 def fundamental_plots(flow_df):
-    folderpath2 = 'data/new_data/plots/fundamental_plots'
+    folderpath2 = 'data/shifted_onramp/plots/fundamental_plots'
     # Fundamental Diagrams
     # Calculate linear fit
     m, c = np.polyfit(flow_df['num_vehicles'], flow_df['space_mean_speed'], 1)
@@ -103,12 +102,11 @@ def fundamental_plots(flow_df):
     # Adjust layout and display plots
     plt.tight_layout()
     # Save the figure as a single image
-    plot_name2 = filename.replace(".json", "").replace("data/new_data","")
+    plot_name2 = filename.replace(".json", "").replace("data/shifted_onramp","")
     plt.savefig(f'{folderpath2}/{plot_name2}_plots.png', dpi=300)  # Change filename and format as needed
-    print("Saved fundamental")
 
 def metrics_plots(flow_df):
-    folderpath3 = 'data/new_data/plots/metrics_plots'
+    folderpath3 = 'data/shifted_onramp/plots/metrics_plots'
     # Find the indices of the maximum values for space_mean_speed and num_vehicles
     maxv_idx = flow_df['space_mean_speed'].idxmax()
     maxd_idx = flow_df['num_vehicles'].idxmax()
@@ -187,10 +185,10 @@ def metrics_plots(flow_df):
     # Adjust layout and display plots
     plt.tight_layout()
     # Save the figure as a single image
-    plot_name3 = filename.replace(".json", "").replace("data/new_data","")
+    plot_name3 = filename.replace(".json", "").replace("data/shifted_onramp","")
     plt.savefig(f'{folderpath3}/{plot_name3}_points.png', dpi=300)
 
-folderpath = "data/new_data/"
+folderpath = "data/shifted_onramp/"
 
 road_length = road_params['road_length']
 
@@ -221,9 +219,13 @@ for filename in tqdm(os.listdir(folderpath), desc="Files"):
 
         df = initdf.copy()
         df = df.drop(columns=['vehicle_type', 'timestamp'])
+        df = df[~df['location'].apply(lambda pair: pair[0] < 0)] # remove the rows which x is negative
+
         section_length = loc_conversion(1000)
+
         def assign_section(location):
             return int(location[0]//section_length)
+
         df['section'] = df['location'].apply(assign_section)
         df['speed'] *= (3600/2000)
         df['num_vehicles'] = df.groupby(['frame', 'section'])['uuid'].transform('count')
