@@ -55,8 +55,8 @@ road_params = {
     "onramp_offset": length_conversion(2050),
     "num_lanes": 4, # including an onramp
     "lanewidth": length_conversion(5), # arbitary
-    "vehicle_inflow": 0, # 1000 approx 1veh/3.6sec testing: 10000
-    "onramp_inflow": 1000,
+    "vehicle_inflow": 4000, # 1000 approx 1veh/3.6sec testing: 10000
+    "onramp_inflow": 0,
     "num_convoy_vehicles": 3,
     "road_closed": None,
     "partial_close": False
@@ -69,8 +69,8 @@ road_params = {
 # Lane change threshold = 0.1m/s
 driving_params = {
     "desired_velocity": speed_conversion(70), # testing: 16.6 real: 70
-    "safety_threshold": length_conversion(1.5), # testing: 20px 1.5
-    "max_acceleration": length_conversion(0.73), # IDM Paper # was 0.73 # Testing:50
+    "safety_threshold": length_conversion(3), # testing: 20px 1.5
+    "max_acceleration": length_conversion(50), # IDM Paper # was 0.73 # Testing:50
     "comfortable_deceleration": length_conversion(1.67), # IDM Paper # was 1.67 # Testing: 4.61
     "acceleration_component": 4, # IDM Paper
     "left_bias": length_conversion(0.3), # MOBIL Paper
