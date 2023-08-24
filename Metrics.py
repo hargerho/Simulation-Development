@@ -13,19 +13,26 @@ pd.options.mode.chained_assignment = None  # default='warn'
 def loc_conversion(value):
     return value*2
 
-def interval_plots(flow_df):
-    folderpath1 = 'data/shifted_onramp/plots/interval_plots'
+def interval_plots(flow_df):  # sourcery skip: remove-unused-enumerate
+    folderpath1 = 'data/shifted_onramp/plots/interval_plots - Cropped'
     # Saving timestep plots
-    num_plots = flow_df['section'].max()
-    # Create a figure with subplots
-    fig, axes = plt.subplots(nrows=num_plots, figsize=(40, 10*num_plots))
+    intervals_to_plot = [0,1,2,3,4,7,8,14,15]
 
-    for i, ax in enumerate(axes):
+    num_rows = 3
+    num_cols = 3
+    # Create a figure with subplots arranged in a grid
+    fig, axes = plt.subplots(nrows=num_rows, ncols=num_cols, figsize=(30, 20))
+
+    max_flows = []
+
+    for i, (interval_index, ax) in enumerate(zip(intervals_to_plot, axes.flatten())):
         # Filter data for the current section
-        visual = flow_df[flow_df['section'] == i]
+        visual = flow_df[flow_df['section'] == interval_index]
 
         # Calculate the average traffic flow
         averaged = visual['traffic_flow'].mean()
+
+        max_flows.append(visual['traffic_flow'].max())
 
         # Plot the average line
         ax.axhline(y=averaged, color='red', linestyle='--', label=f'Average: {averaged:.3f}')
@@ -34,12 +41,16 @@ def interval_plots(flow_df):
         ax.plot(visual['frame'], visual['traffic_flow'], label='Traffic Flow')
 
         # Set title, xlabel, and ylabel
-        ax.set_title(f"Traffic Flow vs Timestep: Interval {i}")
+        ax.set_title(f"Traffic Flow vs Timestep: Interval {interval_index}")
         ax.set_xlabel("Timestep")
         ax.set_ylabel("Traffic Flow (veh/h)")
 
         # Add legend
         ax.legend()
+
+    # Set the same y-axis range for all plots
+    for ax in axes.flatten():
+        ax.set_ylim(0, max(max_flows))
 
     # Adjust layout and spacing
     plt.tight_layout()
@@ -106,7 +117,7 @@ def fundamental_plots(flow_df):
     plt.savefig(f'{folderpath2}/{plot_name2}_plots.png', dpi=300)  # Change filename and format as needed
 
 def metrics_plots(flow_df):
-    folderpath3 = 'data/shifted_onramp/plots/metrics_plots'
+    folderpath3 = 'data/shifted_onramp/plots/metrics_plots_new'
     # Find the indices of the maximum values for space_mean_speed and num_vehicles
     maxv_idx = flow_df['space_mean_speed'].idxmax()
     maxd_idx = flow_df['num_vehicles'].idxmax()
@@ -174,7 +185,7 @@ def metrics_plots(flow_df):
     axs[2].scatter(flow_df['num_vehicles'], flow_df['traffic_flow'], s=0.01)
     axs[2].scatter(corr_qd, max_q, color='red', label=f'Max Flow: {max_q:.2f}')
     axs[2].scatter(max_d, corr_dq, color='blue', label=f'Max Density: {max_d}')
-    axs[2].scatter(combi_d, combi_q, color='green', label=f'Max (v&d) combination')
+    axs[2].scatter(combi_d, combi_q, color='green', label=f'Max (q&d) combination')
     for index, row in combi_qd.iterrows():
         axs[2].annotate(f'Density={int(row["num_vehicles"])}\nFlow={row["traffic_flow"]:.2f}', (row["num_vehicles"], row["traffic_flow"]), textcoords="offset points", xytext=(0, 10), ha='center')
     axs[2].set_xlabel('Traffic Density (veh/h)')
@@ -241,8 +252,8 @@ for filename in tqdm(os.listdir(folderpath), desc="Files"):
         flow_df = flow_df.drop_duplicates(subset=['frame', 'section'])
         flow_df.dropna(subset=['traffic_flow'], inplace=True)
 
-        interval_plots(flow_df)
+        # interval_plots(flow_df)
 
-        fundamental_plots(flow_df)
+        # fundamental_plots(flow_df)
 
         metrics_plots(flow_df)
