@@ -49,12 +49,12 @@ window_params = {
 
 road_params = {
     "toplane_loc": (0,380), #(x, y)
-    "road_length": length_conversion(16000), #16000m
+    "road_length": length_conversion(500), #16000m
     "onramp_length": length_conversion(140), # 140m
     "onramp_offset": length_conversion(50),
     "num_lanes": 4, # including an onramp
     "lanewidth": length_conversion(5), # arbitary
-    "vehicle_inflow": 4000, # 1000 approx 1veh/3.6sec testing: 10000
+    "vehicle_inflow": 6000, # 1000 approx 1veh/3.6sec testing: 10000
     "onramp_inflow": 0,
     "num_convoy_vehicles": 3,
     "road_closed": None,

@@ -14,6 +14,7 @@ def loc_conversion(value):
     return value*2
 
 def interval_plots(flow_df):
+    folderpath1 = 'data/new_data/plots/interval_plots'
     # Saving timestep plots
     num_plots = flow_df['section'].max()
     # Create a figure with subplots
@@ -44,11 +45,12 @@ def interval_plots(flow_df):
     plt.tight_layout()
 
     # Save the figure as a single image
-    plot_name = filename.replace(".json", "").replace("/content/drive/MyDrive/Colab Notebooks/","")
-    plt.savefig(f'{plot_name}.png', dpi=300)
+    plot_name = filename.replace(".json", "").replace("data/new_data","")
+    plt.savefig(f'{folderpath1}/{plot_name}.png', dpi=300)
     print("Saved timesteps")
 
 def fundamental_plots(flow_df):
+    folderpath2 = 'data/new_data/plots/fundamental_plots'
     # Fundamental Diagrams
     # Calculate linear fit
     m, c = np.polyfit(flow_df['num_vehicles'], flow_df['space_mean_speed'], 1)
@@ -101,11 +103,12 @@ def fundamental_plots(flow_df):
     # Adjust layout and display plots
     plt.tight_layout()
     # Save the figure as a single image
-    plot_name2 = filename.replace(".json", "").replace("/content/drive/MyDrive/Colab Notebooks/","")
-    plt.savefig(f'{plot_name2}_plots.png', dpi=300)  # Change filename and format as needed
+    plot_name2 = filename.replace(".json", "").replace("data/new_data","")
+    plt.savefig(f'{folderpath2}/{plot_name2}_plots.png', dpi=300)  # Change filename and format as needed
     print("Saved fundamental")
 
 def metrics_plots(flow_df):
+    folderpath3 = 'data/new_data/plots/metrics_plots'
     # Find the indices of the maximum values for space_mean_speed and num_vehicles
     maxv_idx = flow_df['space_mean_speed'].idxmax()
     maxd_idx = flow_df['num_vehicles'].idxmax()
@@ -184,16 +187,12 @@ def metrics_plots(flow_df):
     # Adjust layout and display plots
     plt.tight_layout()
     # Save the figure as a single image
-    plot_name3 = filename.replace(".json", "").replace("data/1000_vehicles/","")
-    plt.savefig(f'{plot_name3}_points.png', dpi=300)
+    plot_name3 = filename.replace(".json", "").replace("data/new_data","")
+    plt.savefig(f'{folderpath3}/{plot_name3}_points.png', dpi=300)
 
-folderpath = "data/redo_data/"
+folderpath = "data/new_data/"
 
 road_length = road_params['road_length']
-
-testDict = {
-    '0-16km': (0, loc_conversion(16000)),
-}
 
 # Iterate through the files in the folder
 for filename in tqdm(os.listdir(folderpath), desc="Files"):

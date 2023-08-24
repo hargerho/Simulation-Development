@@ -210,7 +210,7 @@ class Road:
                 if self.partial_close:
                     if (int(vehicle.loc[0]) >= self.road_length/2) and (int(vehicle.loc[0]) <= self.road_length/2 + 10):
                         vehicle.v = 0
-                elif (vehicle.loc[0] >= self.road_length/2 - 50):
+                elif (vehicle.loc[0] >= self.road_length/2):
                     vehicle.v = 0
             if isinstance(vehicle, Vehicle) and vehicle.loc_front > self.road_length:
                 self.vehicle_list.remove(vehicle)
