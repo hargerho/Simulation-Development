@@ -233,6 +233,7 @@ class Window:
             num_vehicles = len(sections)
             if num_vehicles > 0:
                 space_mean_speed = harmonic_mean([speed[0] for speed in sections])
+                # print(f'idx{idx}, sections{sections}, dist{sections[0][1]}')
                 flow = int(self.density_conversion(num_vehicles,sections[0][1]) * self.speed_conversion(space_mean_speed))
                 realtime_metrics[idx].append(flow)
 
@@ -330,8 +331,6 @@ class Window:
                 self.minimap.move_slider(pygame.mouse.get_pos())
                 x = self.minimap.slider_value()
                 self.bg.scroll_pos = x - 447
-
-            print(f"scrollpos:{self.bg.scroll_pos}, x{ self.minimap.slider_value()}" )
 
             # Event check first
             for event in pygame.event.get():
