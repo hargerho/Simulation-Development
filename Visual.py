@@ -304,11 +304,11 @@ class Background():
         self.draw_minivehicle(img, veh_length, veh_width, vehicle_loc)
 
     def draw_minivehicle(self, img, veh_length, veh_width, vehicle_loc):
-        scale = 0.15
+        scale = 0.2
         mini_surface = pygame.Surface((veh_length*scale, veh_width*scale))
         mini_img = pygame.transform.scale(img,(veh_length*scale, veh_width*scale))
         mini_rect = mini_surface.get_rect()
-        mini_x = int((vehicle_loc[0]/200) + 330)
+        mini_x = int((vehicle_loc[0]/(1600/9)) + 282)
         mini_y = int((vehicle_loc[1]/3) - 95)
         mini_rect.center = [mini_x, mini_y]
         x_pos = mini_rect.centerx

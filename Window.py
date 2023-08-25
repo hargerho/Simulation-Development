@@ -66,7 +66,7 @@ class Window:
         self.bg.load_signpost(signpost_file = window_params['signpost_image'])
 
         # Minimap
-        self.minimap = Minimap(pos=(self.width/2-20,12), size=(800,50), start_factor=0, min=0, max=31762, offset=0, slider_name='minimap')
+        self.minimap = Minimap(pos=(self.width/2-20,5), size=(900,60), start_factor=0, min=0, max=31762, offset=0, slider_name='minimap')
         self.minimap.load_map()
 
         # Recording params
@@ -83,7 +83,7 @@ class Window:
         self.realtime_flow = [[], [], [], []]
         self.mean_flow = []
         self.metric_list = [(10000,390), (30000,390), (80000,390), (159980, 390)]
-        self.miniloc_list = [(387,45), (487,45), (740,45), (1138, 45)]
+        self.miniloc_list = [(345,45), (460,45), (740,45), (1190, 45)]
 
         # Setting up the Simulation
         self.is_running = True
