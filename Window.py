@@ -235,6 +235,8 @@ class Window:
                 space_mean_speed = harmonic_mean([speed[0] for speed in sections])
                 flow = int(self.density_conversion(num_vehicles,sections[0][1]) * self.speed_conversion(space_mean_speed))
                 realtime_metrics[idx].append(flow)
+            else:
+                realtime_metrics[idx] = []
 
         return realtime_metrics
 
@@ -268,8 +270,15 @@ class Window:
 
         self.realtime_flow = self.compute_metrics(vehicle_metrics, self.realtime_flow)
 
+        # flow_change_check = self.mean_flow
+
         if (frame%10 == 0):
             self.mean_flow = self.average_metrics(realtime_metrics=self.realtime_flow)
+            # if flow_change_check != self.mean_flow:
+            #     flow_change_check = self.mean_flow
+            # else:
+            #     self.mean_flow = []
+
 
     def out_bound_check(self, loc, diff):
         tmp = loc - diff
@@ -369,7 +378,6 @@ class Window:
 
             self.global_buttons.update()
             self.global_buttons.draw(self.win)
-
 
             if not self.is_paused:
                 # Updates simulation frame
