@@ -152,7 +152,7 @@ class Minimap(Slider):
 
         self.slider_width = self.height/2
         self.rect = self.left_pos + self.start_factor - self.offset, self.top_pos, self.slider_width, self.size[1]
-        self.road_length_custom = self.size[0]+self.height/2 - 5
+        self.road_length_custom = self.size[0] + self.slider_width - 10
         self.slider_button = pygame.Rect(self.rect)
         self.slide_rect = pygame.Rect(self.left_pos, self.top_pos, self.road_length_custom, self.size[1])
 
@@ -179,8 +179,8 @@ class Minimap(Slider):
         pos = mouse_loc[0]
         if pos < self.left_pos + self.slider_width/2:
             pos = self.left_pos + self.slider_width/2
-        if pos > self.right_pos + self.slider_width/2:
-            pos = self.right_pos + self.slider_width/2 - 1
+        if pos > self.right_pos + self.slider_width/4:
+            pos = self.right_pos + self.slider_width/4 - 1
         self.slider_button.centerx = pos
 
     def scroll_slider(self, increment):
@@ -245,7 +245,7 @@ class Background():
         font = pygame.font.Font(None, 32)
         box_y = 340
 
-        for interval in range(1,17):
+        for interval in range(17):
             box_width, box_height = 200, 100
             box_x = interval*window_params['signpost_interval'] - self.scroll_pos * 5
             # Render text

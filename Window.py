@@ -66,7 +66,7 @@ class Window:
         self.bg.load_signpost(signpost_file = window_params['signpost_image'])
 
         # Minimap
-        self.minimap = Minimap(pos=(self.width/2-20,12), size=(800,50), start_factor=0, min=0, max=31762, offset=0, slider_name='minimap')
+        self.minimap = Minimap(pos=(self.width/2-20,12), size=(400,50), start_factor=0, min=0, max=31760, offset=0, slider_name='minimap')
         self.minimap.load_map()
 
         # Recording params
@@ -83,7 +83,7 @@ class Window:
         self.realtime_flow = [[], [], [], []]
         self.mean_flow = []
         self.metric_list = [(10000,390), (30000,390), (80000,390), (159980, 390)]
-        self.miniloc_list = [(387,45), (487,45), (740,45), (1138, 45)]
+        self.miniloc_list = [(558,45), (608,45), (735,45), (938, 45)]
 
         # Setting up the Simulation
         self.is_running = True
@@ -233,7 +233,6 @@ class Window:
             num_vehicles = len(sections)
             if num_vehicles > 0:
                 space_mean_speed = harmonic_mean([speed[0] for speed in sections])
-                # print(f'idx{idx}, sections{sections}, dist{sections[0][1]}')
                 flow = int(self.density_conversion(num_vehicles,sections[0][1]) * self.speed_conversion(space_mean_speed))
                 realtime_metrics[idx].append(flow)
 

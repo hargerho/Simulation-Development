@@ -28,7 +28,7 @@ window_params = {
     "vehicle_width": length_conversion(2), #2+m TESTING: 5PX
     "onramp_image": 'common/assets/onramp-new.png',
     "road_image": 'common/assets/roadtile.png',
-    "miniroad": 'common/assets/miniroad.png',
+    "miniroad": 'common/assets/miniroadv1.png',
     "acc_image": 'common/assets/acc.png',
     "shc_image": 'common/assets/shc.png',
     "restart_button": 'common/assets/restart.png',
