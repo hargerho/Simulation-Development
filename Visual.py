@@ -292,14 +292,29 @@ class Background():
             text_rect = text_surface.get_rect(center=(loc[0] - self.scroll_pos * 5, loc[1]))
             self.surface.blit(text_surface, text_rect)
 
-    def draw_vehicle(self, shc_image, veh_length, veh_width, vehicle_loc):
+    def draw_vehicle(self, img, veh_length, veh_width, vehicle_loc):
         car_surface = pygame.Surface((veh_length, veh_width))
         car_rect = car_surface.get_rect()
         car_rect.center = vehicle_loc
         x_pos = car_rect.centerx
         y_pos = car_rect.centery
 
-        self.surface.blit(shc_image, (x_pos - self.scroll_pos * 5, y_pos))
+        self.surface.blit(img, (x_pos - self.scroll_pos * 5, y_pos))
+
+        self.draw_minivehicle(img, veh_length, veh_width, vehicle_loc)
+
+    def draw_minivehicle(self, img, veh_length, veh_width, vehicle_loc):
+        scale = 0.15
+        mini_surface = pygame.Surface((veh_length*scale, veh_width*scale))
+        mini_img = pygame.transform.scale(img,(veh_length*scale, veh_width*scale))
+        mini_rect = mini_surface.get_rect()
+        mini_x = int((vehicle_loc[0]/200) + 330)
+        mini_y = int((vehicle_loc[1]/3) - 95)
+        mini_rect.center = [mini_x, mini_y]
+        x_pos = mini_rect.centerx
+        y_pos = mini_rect.centery
+
+        self.surface.blit(mini_img, (x_pos, y_pos))
 
     def draw_road(self):
 
