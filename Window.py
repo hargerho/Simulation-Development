@@ -83,7 +83,7 @@ class Window:
         self.realtime_flow = [[], [], [], []]
         self.mean_flow = []
         self.metric_list = [(10000,390), (30000,390), (80000,390), (159980, 390)]
-        self.miniloc_list = [(387,45), (487,45), (740,45), (1138, 45)]
+        self.miniloc_list = [(387,45), (487,45), (740,45), (1140, 45)]
 
         # Setting up the Simulation
         self.is_running = True
@@ -331,8 +331,6 @@ class Window:
                 self.minimap.move_slider(pygame.mouse.get_pos())
                 x = self.minimap.slider_value()
                 self.bg.scroll_pos = x - 447
-
-            print(f"scrollpos:{self.bg.scroll_pos}, x{ self.minimap.slider_value()}" )
 
             # Event check first
             for event in pygame.event.get():

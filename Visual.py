@@ -152,7 +152,7 @@ class Minimap(Slider):
 
         self.slider_width = self.height/2
         self.rect = self.left_pos + self.start_factor - self.offset, self.top_pos, self.slider_width, self.size[1]
-        self.road_length_custom = self.size[0]+self.height/2 - 5
+        self.road_length_custom = self.size[0]+self.height/2 - 2
         self.slider_button = pygame.Rect(self.rect)
         self.slide_rect = pygame.Rect(self.left_pos, self.top_pos, self.road_length_custom, self.size[1])
 
