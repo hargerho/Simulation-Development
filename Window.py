@@ -136,7 +136,7 @@ class Window:
         # Create Sliders
         self.inflow_slider = Slider((self.traffic_datumn_x+934,self.traffic_datumn_y-25), (258,15), 4/7, 0, 7000, 10, "vehicle_inflow")
         self.onramp_slider = Slider((self.traffic_datumn_x+934,self.traffic_datumn_y), (258,15), 0, 0, 200, 10, "onramp_inflow")
-        self.speed_slider = Slider((158, 51), (80,10), 2/7, 1, 7, 5, "playback_speed")
+        self.speed_slider = Slider((158, 43), (80,10), 2/7, 1, 7, 5, "playback_speed")
         self.inflow_value = road_params['vehicle_inflow']
         self.onramp_value = road_params['onramp_inflow']
 
@@ -157,11 +157,11 @@ class Window:
         time_str = f"{minutes:02d}:{seconds:02d}.{milliseconds:02d}"
         timer_font = pygame.font.Font(None, 32)
         timer_text = timer_font.render(time_str, True, window_params["black"])
-        timer_rect = timer_text.get_rect(center=(210, 35))
+        timer_rect = timer_text.get_rect(center=(210, 27))
         self.win.blit(timer_text, timer_rect)
 
         timer_surface = timer_font.render("Elapsed Time:", True, window_params['black'])
-        timer_rect_text = timer_surface.get_rect(center=(85,33))
+        timer_rect_text = timer_surface.get_rect(center=(85,25))
         self.win.blit(timer_surface, timer_rect_text)
 
     def draw_refeshed_objects(self):
@@ -197,8 +197,8 @@ class Window:
             ("On-ramp Flow", (self.traffic_datumn_x+742, self.traffic_datumn_y+15), 20),
             (f"{self.inflow_value} veh/h", (self.traffic_datumn_x+1110, self.traffic_datumn_y-13), 20),
             (f"{self.onramp_value} veh/h", (self.traffic_datumn_x+1110, self.traffic_datumn_y+13), 20),
-            ("Playback Speed", (60,60), 20),
-            (f"{simulation_params['playback_speed']} times", (230,60), 20),
+            ("Playback Speed", (60,52), 20),
+            (f"{simulation_params['playback_speed']} times", (230,52), 20),
         ]
 
         text_font = pygame.font.Font(None, 20)
@@ -330,8 +330,8 @@ class Window:
             if self.minimap.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
                 self.minimap.move_slider(pygame.mouse.get_pos())
                 x = self.minimap.slider_value()
-                self.bg.scroll_pos = x - 447
-
+                self.bg.scroll_pos = x - 385
+            print(f'scrollbg:{self.bg.scroll_pos}, x:{self.minimap.slider_value()}')
             # Event check first
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
