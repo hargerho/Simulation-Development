@@ -83,7 +83,7 @@ class Window:
         self.realtime_flow = [[], [], [], []]
         self.mean_flow = []
         self.metric_list = [(10000,390), (30000,390), (80000,390), (159980, 390)]
-        self.miniloc_list = [(387,45), (487,45), (740,45), (1140, 45)]
+        self.miniloc_list = [(387,45), (487,45), (740,45), (1138, 45)]
 
         # Setting up the Simulation
         self.is_running = True
@@ -233,9 +233,10 @@ class Window:
             num_vehicles = len(sections)
             if num_vehicles > 0:
                 space_mean_speed = harmonic_mean([speed[0] for speed in sections])
-                # print(f'idx{idx}, sections{sections}, dist{sections[0][1]}')
                 flow = int(self.density_conversion(num_vehicles,sections[0][1]) * self.speed_conversion(space_mean_speed))
                 realtime_metrics[idx].append(flow)
+            else:
+                realtime_metrics[idx] = []
 
         return realtime_metrics
 
@@ -249,13 +250,12 @@ class Window:
     def refresh_window(self, vehicle_list, frame):
         vehicle_metrics = [[], [], [], []] # 1st, 2nd, middle, last
 
-
         # Drawing the vehicles
         for vehicle in vehicle_list:
 
             if isinstance(vehicle, Convoy):
                 for convoy in vehicle.convoy_list:
-                #     # Indexing the convoy
+                    # Indexing the convoy
                     vehicle_id = convoy.vehicle_id()
 
                     self.assign_section(loc=vehicle_id['location'], speed=vehicle_id['speed'], vehicle_metrics=vehicle_metrics)
@@ -371,7 +371,6 @@ class Window:
 
             self.global_buttons.update()
             self.global_buttons.draw(self.win)
-
 
             if not self.is_paused:
                 # Updates simulation frame
