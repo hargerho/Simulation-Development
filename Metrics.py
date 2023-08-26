@@ -14,7 +14,7 @@ def loc_conversion(value):
     return value*2
 
 def interval_plots(flow_df):  # sourcery skip: remove-unused-enumerate
-    folderpath1 = 'data/shifted_onramp/plots/interval_plots - Cropped'
+    folderpath1 = 'data/no_acc/plots/interval_plots'
     # Saving timestep plots
     intervals_to_plot = [0,1,2,3,4,7,8,14,15]
 
@@ -56,11 +56,11 @@ def interval_plots(flow_df):  # sourcery skip: remove-unused-enumerate
     plt.tight_layout()
 
     # Save the figure as a single image
-    plot_name = filename.replace(".json", "").replace("data/shifted_onramp","")
+    plot_name = filename.replace(".json", "").replace("data/no_acc","")
     plt.savefig(f'{folderpath1}/{plot_name}.png', dpi=300)
 
 def fundamental_plots(flow_df):
-    folderpath2 = 'data/shifted_onramp/plots/fundamental_plots'
+    folderpath2 = 'data/no_acc/plots/fundamental_plots'
     # Fundamental Diagrams
     # Calculate linear fit
     m, c = np.polyfit(flow_df['num_vehicles'], flow_df['space_mean_speed'], 1)
@@ -113,11 +113,11 @@ def fundamental_plots(flow_df):
     # Adjust layout and display plots
     plt.tight_layout()
     # Save the figure as a single image
-    plot_name2 = filename.replace(".json", "").replace("data/shifted_onramp","")
+    plot_name2 = filename.replace(".json", "").replace("data/no_acc","")
     plt.savefig(f'{folderpath2}/{plot_name2}_plots.png', dpi=300)  # Change filename and format as needed
 
 def metrics_plots(flow_df):
-    folderpath3 = 'data/shifted_onramp/plots/metrics_plots_new'
+    folderpath3 = 'data/no_acc/plots/metrics_plots'
     # Find the indices of the maximum values for space_mean_speed and num_vehicles
     maxv_idx = flow_df['space_mean_speed'].idxmax()
     maxd_idx = flow_df['num_vehicles'].idxmax()
@@ -196,10 +196,10 @@ def metrics_plots(flow_df):
     # Adjust layout and display plots
     plt.tight_layout()
     # Save the figure as a single image
-    plot_name3 = filename.replace(".json", "").replace("data/shifted_onramp","")
+    plot_name3 = filename.replace(".json", "").replace("data/no_acc","")
     plt.savefig(f'{folderpath3}/{plot_name3}_points.png', dpi=300)
 
-folderpath = "data/shifted_onramp/"
+folderpath = "data/no_acc/"
 
 road_length = road_params['road_length']
 
@@ -252,8 +252,8 @@ for filename in tqdm(os.listdir(folderpath), desc="Files"):
         flow_df = flow_df.drop_duplicates(subset=['frame', 'section'])
         flow_df.dropna(subset=['traffic_flow'], inplace=True)
 
-        # interval_plots(flow_df)
+        interval_plots(flow_df)
 
-        # fundamental_plots(flow_df)
+        fundamental_plots(flow_df)
 
         metrics_plots(flow_df)
