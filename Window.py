@@ -331,7 +331,6 @@ class Window:
                 self.minimap.move_slider(pygame.mouse.get_pos())
                 x = self.minimap.slider_value()
                 self.bg.scroll_pos = x - 385
-            print(f'scrollbg:{self.bg.scroll_pos}, x:{self.minimap.slider_value()}')
             # Event check first
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
