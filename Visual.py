@@ -152,7 +152,8 @@ class Minimap(Slider):
 
         self.slider_width = self.height/2
         self.rect = self.left_pos + self.start_factor - self.offset, self.top_pos, self.slider_width, self.size[1]
-        self.road_length_custom = self.size[0]+self.height/2 - 2
+        self.road_length_custom = self.size[0]+self.slider_width - 2
+        self.road_length_custom = self.size[0]+self.slider_width - 2
         self.slider_button = pygame.Rect(self.rect)
         self.slide_rect = pygame.Rect(self.left_pos, self.top_pos, self.road_length_custom, self.size[1])
 
@@ -178,14 +179,14 @@ class Minimap(Slider):
     def move_slider(self, mouse_loc):
         pos = mouse_loc[0]
         if pos < self.left_pos + self.slider_width/2:
-            pos = self.left_pos + self.slider_width/2
+            pos = self.left_pos + self.slider_width/2 - 1
         if pos > self.right_pos + self.slider_width/2:
             pos = self.right_pos + self.slider_width/2 - 1
         self.slider_button.centerx = pos
 
     def scroll_slider(self, increment):
         self.dx += increment
-        if self.dx >= window_params['scroll_limit']/self.size[0]:
+        if self.dx >=(window_params['scroll_limit']/self.size[0]):
             self.slider_button.centerx += 1
             self.dx = 0
         if self.dx <= -(window_params['scroll_limit']/self.size[0]):
@@ -270,7 +271,7 @@ class Background():
     def draw_metric(self, flow_list, metric_loc, mini_loc):
         font = pygame.font.Font(None, 30)
         fontmini = pygame.font.Font(None, 15)
-        line_length = 49
+        line_length = 65
 
         for idx, loc in enumerate(metric_loc):
             if flow_list is None or len(flow_list) == 0:
@@ -292,14 +293,30 @@ class Background():
             text_rect = text_surface.get_rect(center=(loc[0] - self.scroll_pos * 5, loc[1]))
             self.surface.blit(text_surface, text_rect)
 
-    def draw_vehicle(self, shc_image, veh_length, veh_width, vehicle_loc):
+    def draw_vehicle(self, img, veh_length, veh_width, vehicle_loc):
         car_surface = pygame.Surface((veh_length, veh_width))
         car_rect = car_surface.get_rect()
         car_rect.center = vehicle_loc
         x_pos = car_rect.centerx
         y_pos = car_rect.centery
 
-        self.surface.blit(shc_image, (x_pos - self.scroll_pos * 5, y_pos))
+        self.surface.blit(img, (x_pos - self.scroll_pos * 5, y_pos))
+
+        # self.draw_minivehicle(img, veh_length, veh_width, vehicle_loc)
+
+    # Visual does not look good
+    def draw_minivehicle(self, img, veh_length, veh_width, vehicle_loc):
+        scale = 0.3
+        mini_surface = pygame.Surface((veh_length*scale, veh_width*scale))
+        mini_img = pygame.transform.scale(img,(veh_length*scale*0.5, veh_width*scale*0.8))
+        mini_rect = mini_surface.get_rect()
+        mini_x = int((vehicle_loc[0]/(800/7)) + 30)
+        mini_y = int((vehicle_loc[1]/2.5) - 90)
+        mini_rect.center = [mini_x, mini_y]
+        x_pos = mini_rect.centerx
+        y_pos = mini_rect.centery
+
+        self.surface.blit(mini_img, (x_pos, y_pos))
 
     def draw_road(self):
 

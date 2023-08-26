@@ -22,7 +22,7 @@ window_params = {
     "blue": (0, 0, 255),
     "green": (0,255,0),
     "grey": (128, 128, 128),
-    "red": (255,0,0),
+    "yellow": (255,255,0),
 
     "vehicle_length": length_conversion(5), #5m TESTING: 10PX
     "vehicle_width": length_conversion(2), #2+m TESTING: 5PX
