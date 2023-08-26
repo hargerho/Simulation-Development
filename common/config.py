@@ -46,6 +46,7 @@ window_params = {
     "scroll_limit": 31760,
     "signpost_image": 'common/assets/signpost.png',
     "signpost_interval": length_conversion(1000),
+    "speed_limit": 'common/assets/70.png'
 }
 
 road_params = {

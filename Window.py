@@ -57,6 +57,10 @@ class Window:
         self.left_image = pygame.image.load(window_params["left_button"])
         self.middle_image = pygame.image.load(window_params["middle_button"])
         self.right_image = pygame.image.load(window_params["right_button"])
+        speed_limit = pygame.image.load(window_params["speed_limit"])
+        speed_limit_height = speed_limit.get_height()
+        speed_limit_width = speed_limit.get_width()
+        self.speed_limit = pygame.transform.scale(speed_limit, (int(speed_limit_height*0.08), int(speed_limit_width*0.08)))
 
         # Background params
         self.road_image = pygame.image.load(window_params["road_image"])
@@ -176,6 +180,9 @@ class Window:
 
         # Draw metrics
         self.bg.draw_metric(flow_list=self.mean_flow, metric_loc=self.metric_list, mini_loc=self.miniloc_list)
+
+        # Drawing speed limit
+        self.win.blit(self.speed_limit, (1158, 42))
 
         # Drawing sliders
         self.inflow_slider.draw_slider(self.win)
