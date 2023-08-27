@@ -57,20 +57,16 @@ class Window:
         self.left_image = pygame.image.load(window_params["left_button"])
         self.middle_image = pygame.image.load(window_params["middle_button"])
         self.right_image = pygame.image.load(window_params["right_button"])
-        speed_limit = pygame.image.load(window_params["speed_limit"])
-        speed_limit_height = speed_limit.get_height()
-        speed_limit_width = speed_limit.get_width()
-        self.speed_limit = pygame.transform.scale(speed_limit, (int(speed_limit_height*0.08), int(speed_limit_width*0.08)))
 
         # Background params
         self.road_image = pygame.image.load(window_params["road_image"])
         self.bg = Background(surface=self.win, screen_width=self.width, screen_height=self.height, start_file=1, end_file=8)
         self.bg.load_road(road_file=window_params['road_image'], x=0, y=410, road_length=self.width, road_width=self.road_width, crop_y=420)
         self.bg.load_onramp(road_file=window_params['onramp_image'], x=0, y=360, onramp_length=self.onramp_length*1.2, onramp_width=self.lanewidth+10)
-        self.bg.load_signpost(signpost_file = window_params['signpost_image'])
+        self.bg.load_signpost(signpost_file = window_params['signpost_image'], speed_limit_file = window_params['speed_limit'])
 
         # Minimap
-        self.minimap = Minimap(pos=(self.width/2-20,12), size=(800,50), start_factor=0, min=0, max=31762, offset=0, slider_name='minimap')
+        self.minimap = Minimap(pos=(self.width/2-20,30), size=(1400,70), start_factor=0, min=0, max=31783, offset=0, slider_name='minimap')
         self.minimap.load_map()
 
         # Recording params
@@ -87,7 +83,7 @@ class Window:
         self.realtime_flow = [[], [], [], []]
         self.mean_flow = []
         self.metric_list = [(10000,390), (30000,390), (80000,390), (159980, 390)]
-        self.miniloc_list = [(387,45), (487,45), (740,45), (1138, 45)]
+        self.miniloc_list = [(128,75), (306,75), (745,75), (1438, 75)]
 
         # Setting up the Simulation
         self.is_running = True
@@ -180,9 +176,6 @@ class Window:
 
         # Draw metrics
         self.bg.draw_metric(flow_list=self.mean_flow, metric_loc=self.metric_list, mini_loc=self.miniloc_list)
-
-        # Drawing speed limit
-        self.win.blit(self.speed_limit, (1158, 42))
 
         # Drawing sliders
         self.inflow_slider.draw_slider(self.win)

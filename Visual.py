@@ -153,7 +153,6 @@ class Minimap(Slider):
         self.slider_width = self.height/2
         self.rect = self.left_pos + self.start_factor - self.offset, self.top_pos, self.slider_width, self.size[1]
         self.road_length_custom = self.size[0]+self.slider_width - 2
-        self.road_length_custom = self.size[0]+self.slider_width - 2
         self.slider_button = pygame.Rect(self.rect)
         self.slide_rect = pygame.Rect(self.left_pos, self.top_pos, self.road_length_custom, self.size[1])
 
@@ -192,7 +191,6 @@ class Minimap(Slider):
         if self.dx <= -(window_params['scroll_limit']/self.size[0]):
             self.slider_button.centerx -= 1
             self.dx = 0
-
 class Background():
     def __init__(self, surface, screen_width, screen_height, start_file, end_file):
         self.surface = surface
@@ -235,18 +233,25 @@ class Background():
         self.onramp_x = x
         self.onramp_y = y
 
-    def load_signpost(self, signpost_file):
+    def load_signpost(self, signpost_file, speed_limit_file):
         signpost_image = pygame.image.load(signpost_file).convert_alpha()
+        speed_image = pygame.image.load(speed_limit_file).convert_alpha()
 
         self.signpost_height = signpost_image.get_height()
         self.signpost_width = signpost_image.get_width()
         self.signpost_image = pygame.transform.scale(signpost_image, (self.signpost_width, self.signpost_height))
 
+        self.speed_height = signpost_image.get_height()
+        self.speed_width = signpost_image.get_width()
+        scalex = 0.15
+        scaley = 0.2
+        self.speed_image = pygame.transform.scale(speed_image, (int(self.speed_width*scalex), int(self.speed_height*scaley)))
+
     def draw_signpost(self):
         font = pygame.font.Font(None, 32)
         box_y = 340
 
-        for interval in range(1,17):
+        for interval in range(17):
             box_width, box_height = 200, 100
             box_x = interval*window_params['signpost_interval'] - self.scroll_pos * 5
             # Render text
@@ -259,6 +264,9 @@ class Background():
 
             # Draw signpost
             self.surface.blit(self.signpost_image, (box_x - 180, 150))
+
+            if interval == 0:
+                self.surface.blit(self.speed_image, (box_x + 100, 352))
 
             # Draw text
             self.surface.blit(text_surface, (text_x, text_y))
@@ -302,13 +310,12 @@ class Background():
 
         self.surface.blit(img, (x_pos - self.scroll_pos * 5, y_pos))
 
-        # self.draw_minivehicle(img, veh_length, veh_width, vehicle_loc)
+        self.draw_minivehicle(img, veh_length, veh_width, vehicle_loc)
 
-    # Visual does not look good
     def draw_minivehicle(self, img, veh_length, veh_width, vehicle_loc):
         scale = 0.3
         mini_surface = pygame.Surface((veh_length*scale, veh_width*scale))
-        mini_img = pygame.transform.scale(img,(veh_length*scale*0.5, veh_width*scale*0.8))
+        mini_img = pygame.transform.scale(img,(veh_length*scale*0.3, veh_width*scale*0.8))
         mini_rect = mini_surface.get_rect()
         mini_x = int((vehicle_loc[0]/(800/7)) + 30)
         mini_y = int((vehicle_loc[1]/2.5) - 90)
