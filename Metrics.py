@@ -4,6 +4,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+import csv
+import time
 
 from common.config import road_params
 
@@ -13,8 +15,39 @@ pd.options.mode.chained_assignment = None  # default='warn'
 def loc_conversion(value):
     return value*2
 
+def average_calculator(flow_df):  # sourcery skip: remove-unused-enumerate
+    # folderpath1 = 'data/no_acc/plots/interval_plots'
+    # Saving timestep plots
+    interval_list = list(range(16))
+    save_dict = {}
+    flow_list = []
+    speed_list = []
+    density_list = []
+
+    for interval_index in interval_list:
+        # Filter data for the current section
+        visual = flow_df[flow_df['section'] == interval_index]
+
+        # Calculate the average metrics
+        average_flow = visual['traffic_flow'].mean()
+        average_speed = visual['space_mean_speed'].mean()
+        average_density = visual['num_vehicles'].mean()
+
+        # append to overall list
+        flow_list.append(average_flow)
+        speed_list.append(average_speed)
+        density_list.append(average_density)
+
+        save_dict[interval_index] = [average_speed, average_density, average_flow]
+
+    save_dict[16] = [np.mean(speed_list), int(np.mean(density_list)), np.mean(flow_list)]
+    save_dict[17] = [time.time(), time.time(), time.time()]
+
+    return save_dict
+
+
 def interval_plots(flow_df):  # sourcery skip: remove-unused-enumerate
-    folderpath1 = 'data/no_acc/plots/interval_plots'
+    folderpath1 = 'data/no_acc/100_veh/100_plots/100_interval'
     # Saving timestep plots
     intervals_to_plot = [0,1,2,3,4,7,8,14,15]
 
@@ -60,7 +93,7 @@ def interval_plots(flow_df):  # sourcery skip: remove-unused-enumerate
     plt.savefig(f'{folderpath1}/{plot_name}.png', dpi=300)
 
 def fundamental_plots(flow_df):
-    folderpath2 = 'data/no_acc/plots/fundamental_plots'
+    folderpath2 = 'data/no_acc/100_veh/100_plots/100_fundamental'
     # Fundamental Diagrams
     # Calculate linear fit
     m, c = np.polyfit(flow_df['num_vehicles'], flow_df['space_mean_speed'], 1)
@@ -117,7 +150,8 @@ def fundamental_plots(flow_df):
     plt.savefig(f'{folderpath2}/{plot_name2}_plots.png', dpi=300)  # Change filename and format as needed
 
 def metrics_plots(flow_df):
-    folderpath3 = 'data/no_acc/plots/metrics_plots'
+    folderpath3 = 'data/no_acc/100_veh/100_plots/100_metric'
+
     # Find the indices of the maximum values for space_mean_speed and num_vehicles
     maxv_idx = flow_df['space_mean_speed'].idxmax()
     maxd_idx = flow_df['num_vehicles'].idxmax()
@@ -152,6 +186,8 @@ def metrics_plots(flow_df):
     combi_q = flow_df['traffic_flow'][combi_vq_idx]
     combi_d = flow_df['num_vehicles'][combi_qd_idx]
     combi_q = flow_df['traffic_flow'][combi_qd_idx]
+
+    max_list = [max_v, max_d, max_q, combi_d, combi_v, combi_q, combi_v, combi_d, combi_q]
 
     # Create figure and axis objects
     fig, axs = plt.subplots(3, 1, figsize=(12, 24))
@@ -199,9 +235,14 @@ def metrics_plots(flow_df):
     plot_name3 = filename.replace(".json", "").replace("data/no_acc","")
     plt.savefig(f'{folderpath3}/{plot_name3}_points.png', dpi=300)
 
-folderpath = "data/no_acc/"
+    return max_list
+
+folderpath = "data/no_acc/100_veh"
 
 road_length = road_params['road_length']
+
+average_data = []
+max_data = []
 
 # Iterate through the files in the folder
 for filename in tqdm(os.listdir(folderpath), desc="Files"):
@@ -256,4 +297,33 @@ for filename in tqdm(os.listdir(folderpath), desc="Files"):
 
         fundamental_plots(flow_df)
 
-        metrics_plots(flow_df)
+        max_data.append(metrics_plots(flow_df))
+
+        file_data = average_calculator(flow_df)
+
+        average_data.append(file_data)
+
+csv_name = "data/no_acc/100_veh/averaged_data.csv"
+csv_name_max = "data/no_acc/100_veh/max_data.csv"
+
+# Extract headers from the dictionary
+headers = list(average_data[0].keys())
+
+# Write data to the CSV file
+with open(csv_name, mode='w', newline='') as csv_file:
+    csv_writer = csv.DictWriter(csv_file, fieldnames=headers)
+
+    # Write headers
+    csv_writer.writeheader()
+
+    # Write values from each dictionary
+    for data_dict in average_data:
+        # Write values
+        for i in range(len(data_dict[0])):
+            row_data = {header: data_dict[header][i] for header in headers}
+            csv_writer.writerow(row_data)
+
+with open(csv_name_max, 'w', newline='') as csvfile:
+    csv_writer = csv.writer(csvfile)
+    for row in max_data:
+        csv_writer.writerow(row)

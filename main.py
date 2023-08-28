@@ -63,6 +63,7 @@ def get_params(combination):
         13: ['normal', 'normal', None, 0, 3000],
         14: ['normal', 'normal', None, 0, 5000],
         15: ['normal', 'normal', None, 0, 6000],
+        16: ['normal', 'normal', None, 0, 7000],
     }
     # Change here
     return testing_params_no_acc.get(combination)
@@ -74,7 +75,7 @@ def main():
 
         start = time.time()
 
-        for i in range(16):
+        for i in range(17):
             print("----------------------")
             print("Testing Combination:", i)
             startite = time.time()
@@ -85,7 +86,7 @@ def main():
             driving_params["shc_logic"] = testing_list[1]
             driving_params["acc_logic"] = testing_list[0]
             acc_params["acc_spawnrate"] = 0
-            simulation_params["filename"] = f"NOACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_Road{road_params['road_closed']}_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}"
+            simulation_params["filename"] = f"100NOACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_Road{road_params['road_closed']}_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}"
             simulation_params['testing'] = testing
             simulation_params['record'] = testing
             test = Test()
