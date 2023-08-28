@@ -66,7 +66,7 @@ class Window:
         self.bg.load_signpost(signpost_file = window_params['signpost_image'], speed_limit_file = window_params['speed_limit'])
 
         # Minimap
-        self.minimap = Minimap(pos=(self.width/2-20,30), size=(1400,70), start_factor=0, min=0, max=31783, offset=0, slider_name='minimap')
+        self.minimap = Minimap(pos=(self.width/2-20,28), size=(1400,70), start_factor=0, min=0, max=31783, offset=0, slider_name='minimap')
         self.minimap.load_map()
 
         # Recording params

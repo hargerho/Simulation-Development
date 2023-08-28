@@ -45,7 +45,6 @@ class Road:
         self.middlelane = self.toplane_loc[1] + (self.lanewidth * 2)
         self.rightlane = self.toplane_loc[1] + self.lanewidth * (self.num_lanes - 1)
 
-
         if road_params["road_closed"] == "left":
             self.road_closed = self.leftlane
         elif road_params["road_closed"] == "middle":
@@ -54,7 +53,6 @@ class Road:
             self.road_closed = self.rightlane
         else:
             self.road_closed = None
-        self.partial_close = road_params['partial_close']
 
         # Convoy Params
         self.num_convoy_vehicles = road_params['num_convoy_vehicles']  # Queue counter of 3 acc vehicles to form a convoy
@@ -243,12 +241,12 @@ class Road:
                         else: # Remove one vehicle from the convoy
                             vehicle.convoy_list.remove(convoy)
             # Simulate roadblock by setting a SHC vehicle to 0m/s
-            if self.road_closed is not None and vehicle.loc[1] == self.road_closed and isinstance(vehicle, Vehicle):
-                if self.partial_close:
-                    if (int(vehicle.loc[0]) >= self.road_length/2) and (int(vehicle.loc[0]) <= self.road_length/2 + 10):
+            if self.road_closed is not None:
+                if vehicle.loc[1] == self.road_closed and isinstance(vehicle, Vehicle):
+                    if (vehicle.loc_front >= self.road_length/2) and (vehicle.loc_front <= self.road_length/2 + 20):
                         vehicle.v = 0
-                elif (vehicle.loc[0] >= self.road_length/2):
-                    vehicle.v = 0
+                        vehicle.local_v = 0
+                        vehicle.local_accel = 0
             if isinstance(vehicle, Vehicle) and vehicle.loc_front > self.road_length:
                 self.vehicle_list.remove(vehicle)
                 self.vehicle_despawn += 1

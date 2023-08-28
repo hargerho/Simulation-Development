@@ -60,7 +60,6 @@ road_params = {
     "onramp_inflow": 0,
     "num_convoy_vehicles": 3,
     "road_closed": None,
-    "partial_close": False
 }
 
 # Safety threshold = 1.5m
