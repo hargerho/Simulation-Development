@@ -69,7 +69,7 @@ road_params = {
 # Lane change threshold = 0.1m/s
 driving_params = {
     "desired_velocity": speed_conversion(70), # testing: 16.6 real: 70
-    "safety_threshold": length_conversion(3), # testing: 20px 1.5
+    "safety_threshold": length_conversion(1.5), # testing: 20px 1.5
     "max_acceleration": length_conversion(50), # IDM Paper # was 0.73 # Testing:50
     "comfortable_deceleration": length_conversion(1.67), # IDM Paper # was 1.67 # Testing: 4.61
     "acceleration_component": 4, # IDM Paper
@@ -79,17 +79,16 @@ driving_params = {
     "shc_logic": "normal", # toggle normal/cautious
 }
 
-
 # Noraml Speed Variation = 5m/s
 # Irratinal Speed Variation = 10m/s
 # Headway in seconds
 shc_params = {
-    "normal": {"safe_headway": 3.1, "speed_variation": length_conversion(5), "politeness_factor": 0.25},
-    "irrational": {"safe_headway": 1.5, "speed_variation": length_conversion(10), "politeness_factor": 0.15},
+    "normal": {"safe_headway": 3.1, "speed_variation": length_conversion(5), "politeness_factor": 0}, #0.25
+    "irrational": {"safe_headway": 1.5, "speed_variation": length_conversion(10), "politeness_factor": 0}, #0.15
 }
 
 acc_params = {
-    "acc_spawnrate": 0.5, # Init 0.2
+    "acc_spawnrate": 0.2, # Init 0.2
     "normal": {"safe_headway": 3.1, "speed_variation": 0, "politeness_factor": 0.5},
     "cautious": {"safe_headway": 4, "speed_variation": 0, "politeness_factor": 0.8},
 }

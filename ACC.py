@@ -19,7 +19,7 @@ class Convoy:
         self.v = self.lead_vehicle.v
         self.veh_length = abs(self.loc_front - self.loc_back)
 
-        self.convoy_dist = logic_dict.get('safe_headway') + driving_params['safety_threshold'] + window_params['vehicle_length']/2
+        self.convoy_dist = logic_dict.get('safe_headway') + driving_params['safety_threshold'] + window_params['vehicle_length']
 
     def update_convoy_local(self, vehicle_list, vehicle_type):
         for idx, vehicle in enumerate(self.convoy_list):

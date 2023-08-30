@@ -80,7 +80,7 @@ class Vehicle:
         # Init DriverModel to this Vehicle class
         self.driver = DM(model_params=model_params)
 
-    def variation(self,avg, dev):
+    def variation(self, avg, dev):
         val = abs(np.random.normal(avg, dev))
         return val if avg - 2 * dev <= val <= avg + 2 * dev else avg
 
@@ -332,11 +332,6 @@ class Vehicle:
             front_v = self.local_v
 
         self.local_accel = self.driver.calc_acceleration(v=self.local_v, surrounding_v=front_v, s=dist) * self.ts
-
-        # if self.road_closed:
-        #     if self.local_loc[1] == self.road_closed and self.loc_front >= self.road_length/2 and vehicle_type =='shc':
-        #         self.local_v = 0
-        #         self.local_accel = 0
 
     def shc_check_lane_change(self, surrounding):
         # Left Change

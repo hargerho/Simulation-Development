@@ -136,7 +136,10 @@ class Road:
             vehicle_type = 'shc'
 
         # Choosing a spawn lane from the 3 motorway lanes
+        # prob = [0.7, 0.05, 0.25]
+        # lane = int(np.random.choice(range(1,self.num_lanes), p=prob) * self.lanewidth)
         lane = int(np.random.choice(range(1,self.num_lanes)) * self.lanewidth)
+
 
         # Spawn location
         if vehicle_type == 'acc':
