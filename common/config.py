@@ -57,8 +57,8 @@ road_params = {
     "vehicle_inflow": 4000, # 1000 approx 1veh/3.6sec testing: 10000
     "onramp_inflow": 0,
     "num_convoy_vehicles": 3,
-    "road_closed": 'right',
-    "partial_close": False
+    "road_closed": 'left',
+    "partial_close": False,
 }
 
 # Safety threshold = 1.5m
@@ -76,6 +76,7 @@ driving_params = {
     "lane_change_threshold": length_conversion(0.1), # MOBIL Paper
     "acc_logic": "normal", # toggle normal/irrational
     "shc_logic": "normal", # toggle normal/cautious
+    "convoy_dist": length_conversion(1.5)
 }
 
 # Noraml Speed Variation = 5m/s
@@ -87,8 +88,8 @@ shc_params = {
 }
 
 acc_params = {
-    "acc_spawnrate": 0, # Init 0.2
-    "normal": {"safe_headway": 3.1, "speed_variation": 0, "politeness_factor": 0.5},
+    "acc_spawnrate": 0.5, # Init 0.2
+    "normal": {"safe_headway": 0, "speed_variation": 0, "politeness_factor": 0.5},
     "cautious": {"safe_headway": 4, "speed_variation": 0, "politeness_factor": 0.8},
 }
 
@@ -104,7 +105,7 @@ simulation_params = {
     "playback_speed": 3, # realtime = 1
     "folderpath": "data/no_acc",
     "filename": f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_Road{road_params['road_closed']}_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}",
-    "record": True, # Default False
+    "record": False, # Default False
     "num_vehicles": 100,
-    "testing": True # Default False
+    "testing": False # Default False
 }

@@ -12,31 +12,32 @@ class DriverModel:
         self.politeness = model_params['politeness']
         self.change_threshold = model_params['change_threshold']
 
-    def s_star(self, v, delta_v):
+    def s_star(self, v, delta_v, lead_flag):
+        headway = self.T if lead_flag else 0.1
         return (self.s_0
-            + max(0, self.T * v + (v * delta_v) / (2 * math.sqrt(self.a * self.b)))
+            + max(0, headway * v + (v * delta_v) / (2 * math.sqrt(self.a * self.b)))
             )
 
-    def calc_acceleration(self, v, surrounding_v, s):
+    def calc_acceleration(self, v, surrounding_v, s, lead_flag):
         """Calculates the acceleration of the car based on it's parameters and the surrounding cars
         """
         delta_v = v - surrounding_v
-        s_star = self.s_star(v=v, delta_v=delta_v)
+        s_star = self.s_star(v=v, delta_v=delta_v, lead_flag=lead_flag)
         return (self.a * (1 - math.pow(v/self.v_0, self.delta) - math.pow(s_star/s, 2)))
 
     def calc_disadvantage(self, v, new_surrounding_v, new_surrounding_dist, old_surrounding_v, old_surrounding_dist):
         """Calculates intermediate values to check if a lane change is safe
         """
-        new_acceleration = self.calc_acceleration(v, new_surrounding_v, new_surrounding_dist)
-        old_acceleration = self.calc_acceleration(v, old_surrounding_v, old_surrounding_dist)
+        new_acceleration = self.calc_acceleration(v, new_surrounding_v, new_surrounding_dist, lead_flag=True)
+        old_acceleration = self.calc_acceleration(v, old_surrounding_v, old_surrounding_dist, lead_flag=True)
         disadvantage = old_acceleration - new_acceleration
         return (disadvantage, new_acceleration)
 
     def calc_incentive(self, change_direction, v, new_front_v, new_front_dist, old_front_v, old_front_dist, disadvantage, new_back_accel, onramp_flag):
         """Calculates if a lane change should happen based on the MOBIL model
         """
-        new_acceleration = self.calc_acceleration(v, new_front_v, new_front_dist)
-        old_acceleration = self.calc_acceleration(v, old_front_v, old_front_dist)
+        new_acceleration = self.calc_acceleration(v, new_front_v, new_front_dist, lead_flag=True)
+        old_acceleration = self.calc_acceleration(v, old_front_v, old_front_dist, lead_flag=True)
 
         if change_direction == 'right':
             a_bias = self.left_bias

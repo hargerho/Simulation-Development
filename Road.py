@@ -130,7 +130,6 @@ class Road:
 
         # Spawn location
         if vehicle_type == 'acc':
-
             # Create a tmp convoy
             tmp_convoy = Convoy(logic_dict=logic_dict, lead_spawn_loc=self.acc_spawn_loc, vehicle_type=vehicle_type,
                                 num_subconvoy=self.num_convoy_vehicles)
@@ -188,7 +187,7 @@ class Road:
             if isinstance(vehicle, Convoy):
                 vehicle.update_convoy_local(self.vehicle_list, vehicle_type='acc')
             else:
-                vehicle.update_local(tmp_list, vehicle_type='shc')
+                vehicle.update_local(tmp_list, vehicle_type='shc', lead_flag=False)
 
         for vehicle in self.vehicle_list:
             if isinstance(vehicle, Convoy):
@@ -199,12 +198,19 @@ class Road:
             # If vehicle reached the end of the road
             # Remove vehicle from road
             if isinstance(vehicle, Convoy):
-                for convoy in vehicle.convoy_list:
-                    if convoy.loc_front > self.road_length:
-                        if len(vehicle.convoy_list) == 1: # If last convoy in the convoy_list
-                            self.vehicle_list.remove(vehicle)
-                        else: # Remove one vehicle from the convoy
-                            vehicle.convoy_list.remove(convoy)
+                # for convoy in vehicle.convoy_list:
+                #     if convoy.loc_front > self.road_length:
+                #         if len(vehicle.convoy_list) == 1: # If last convoy in the convoy_list
+                #             self.vehicle_list.remove(vehicle)
+                #         else: # Remove one vehicle from the convoy
+                #             vehicle.convoy_list.remove(convoy)
+                if vehicle.convoy_list[0].loc[0] > self.road_length:
+                    if len(vehicle.convoy_list) == 1:
+                        # print("Removed")
+                        self.vehicle_list.remove(vehicle)
+                    else:
+                        vehicle.convoy_list.remove(vehicle.convoy_list[0])
+
             # Simulate roadblock by setting a SHC vehicle to 0m/s
             if self.road_closed is not None and vehicle.loc[1] == self.road_closed and isinstance(vehicle, Vehicle):
                 if self.partial_close:

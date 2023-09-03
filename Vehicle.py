@@ -47,6 +47,7 @@ class Vehicle:
         self.veh_length = window_params['vehicle_length'] # in window params
         self.left_bias = driving_params['left_bias']
         self.change_threshold = driving_params['lane_change_threshold']
+        self.convoy_dist = driving_params['convoy_dist']
 
         # Driving Logic Dependent Params
         self.T = logic_dict.get('safe_headway')
@@ -66,7 +67,7 @@ class Vehicle:
 
         self.vehicle_type = vehicle_type
 
-        model_params = {
+        self.model_params = {
             "v_0": self.v_0,
             "s_0": self.s_0,
             "a": self.a,
@@ -79,7 +80,7 @@ class Vehicle:
         }
 
         # Init DriverModel to this Vehicle class
-        self.driver = DM(model_params=model_params)
+        self.driver = DM(model_params=self.model_params)
 
     def variation(self,avg, dev):
         val = abs(np.random.normal(avg, dev))
@@ -312,7 +313,30 @@ class Vehicle:
             dist = self.road_length
             front_v = self.local_v
 
-        self.local_accel = self.driver.calc_acceleration(v=self.local_v, surrounding_v=front_v, s=dist) * self.ts
+        self.local_accel = self.driver.calc_acceleration(v=self.local_v, surrounding_v=front_v, s=dist, lead_flag=True) * self.ts
+
+    def update_acc_driving_params(self, surrounding):
+
+        self.local_v = self.v
+
+        # If negative velocity (not allowed)
+        if self.local_v + self.local_accel * self.ts < 0:
+            self.local_loc[0] -= (1/2) * (self.local_v/self.local_accel) # based on IDM paper
+            self.local_v = 0
+        else:
+            self.local_v += self.local_accel * self.ts
+            self.local_loc[0] += (self.local_v * self.ts) + self.local_accel * math.pow(self.ts,2)/2
+
+        if surrounding is not None:
+            # dist_tmp = max(surrounding.loc_back - self.loc_front, self.convoy_dist)
+            # dist = max(dist_tmp, 1e-9)
+            dist = max(surrounding.loc_back - self.loc_front, self.convoy_dist)
+            front_v = surrounding.v
+        else:
+            print("True")
+            dist = self.road_length
+            front_v = self.local_v
+        self.local_accel = self.driver.calc_acceleration(v=self.local_v, surrounding_v=front_v, s=dist, lead_flag=False) * self.ts
 
     def partial_road_close(self, surrounding):
         # for partial road close
@@ -374,7 +398,7 @@ class Vehicle:
             elif change_flag: # if can change but road is closed
                 self.local_loc[1] = self.local_loc[1]
 
-    def update_local(self, vehicle_list, vehicle_type):
+    def update_local(self, vehicle_list, vehicle_type, lead_flag):
         # Get surrounding vehicles
         surrounding = self.get_fov(vehicle_list)
 
@@ -382,10 +406,13 @@ class Vehicle:
             # Lane change flag and update lane location
             # Right change
             self.shc_check_lane_change(surrounding=surrounding)
-        else:
+        elif lead_flag:
             self.acc_check_lane_change(surrounding=surrounding)
 
-        self.update_driving_params(surrounding)
+        if vehicle_type == 'shc' or lead_flag:
+            self.update_driving_params(surrounding)
+        elif not lead_flag:
+            self.update_acc_driving_params(surrounding)
 
     def update_global(self):
         """Update global timestep
