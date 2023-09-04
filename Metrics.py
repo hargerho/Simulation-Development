@@ -4,18 +4,49 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-
+import csv
 from common.config import road_params
+from typing import Dict, List
 
 pd.options.mode.chained_assignment = None  # default='warn'
 
-# 1m : 2px
-def loc_conversion(value):
+def loc_conversion(value: float) -> float:
+
+    """Converts pixel to metre
+
+    Args:
+        value (float): pixel value
+
+    Returns:
+        float: metre value
+    """
+
     return value*2
 
-def interval_plots(flow_df):
+def assign_section(location: float) -> int:
+
+    """Assign vehicle to section of the motorway
+
+    Args:
+        location (float): x-coordinate of vehicle
+
+    Returns:
+        int: section index
+    """
+
+    return int(location[0]//loc_conversion(1000))
+
+def interval_plots(flow_df: pd.DataFrame) -> None:
+
+    """Creating metric vs timestep plots
+
+    Args:
+        flow_df (pd.DataFrame): dataframe of vehicle parameters
+    """
+
     # Saving timestep plots
     num_plots = flow_df['section'].max()
+
     # Create a figure with subplots
     fig, axes = plt.subplots(nrows=num_plots, figsize=(40, 10*num_plots))
 
@@ -44,11 +75,18 @@ def interval_plots(flow_df):
     plt.tight_layout()
 
     # Save the figure as a single image
-    plot_name = filename.replace(".json", "").replace("/content/drive/MyDrive/Colab Notebooks/","")
+    plot_name = filename.replace(".json", "").replace("data/","")
     plt.savefig(f'{plot_name}.png', dpi=300)
     print("Saved timesteps")
 
-def fundamental_plots(flow_df):
+def fundamental_plots(flow_df: pd.DataFrame) -> None:
+
+    """Creating fundamental plots
+
+    Args:
+        flow_df (pd.DataFrame): dataframe of vehicle parameters
+    """
+
     # Fundamental Diagrams
     # Calculate linear fit
     m, c = np.polyfit(flow_df['num_vehicles'], flow_df['space_mean_speed'], 1)
@@ -100,21 +138,33 @@ def fundamental_plots(flow_df):
 
     # Adjust layout and display plots
     plt.tight_layout()
+
     # Save the figure as a single image
-    plot_name2 = filename.replace(".json", "").replace("/content/drive/MyDrive/Colab Notebooks/","")
-    plt.savefig(f'{plot_name2}_plots.png', dpi=300)  # Change filename and format as needed
+    plot_name2 = filename.replace(".json", "").replace("data/","")
+
+    # Change filename and format as needed
+    plt.savefig(f'{plot_name2}_plots.png', dpi=300)
     print("Saved fundamental")
 
-def metrics_plots(flow_df):
+def metrics_plots(flow_df: pd.DataFrame) -> None:
+
+    """Creating fundamental plots without traffic model
+
+    Args:
+        flow_df (pd.DataFrame): dataframe of vehicle parameters
+    """
+
     # Find the indices of the maximum values for space_mean_speed and num_vehicles
     maxv_idx = flow_df['space_mean_speed'].idxmax()
     maxd_idx = flow_df['num_vehicles'].idxmax()
     maxq_idx = flow_df['traffic_flow'].idxmax()
 
+    # Getting the max metrics
     max_v = flow_df.loc[maxv_idx, 'space_mean_speed']
     max_d = flow_df.loc[maxd_idx, 'num_vehicles']
     max_q = flow_df.loc[maxq_idx, 'traffic_flow']
 
+    # Getting the max metric in the respective columns
     corr_vd = flow_df.loc[maxv_idx, 'num_vehicles']
     corr_dv = flow_df.loc[maxd_idx, 'space_mean_speed']
     corr_qv = flow_df.loc[maxq_idx, 'space_mean_speed']
@@ -122,18 +172,22 @@ def metrics_plots(flow_df):
     corr_dq = flow_df.loc[maxd_idx, 'traffic_flow']
     corr_qd = flow_df.loc[maxq_idx, 'num_vehicles']
 
+    # Getting the max metric combinations values
     flow_df['combi_vd'] = flow_df['space_mean_speed'] + flow_df['num_vehicles']
     flow_df['combi_vq'] = flow_df['space_mean_speed'] + flow_df['traffic_flow']
     flow_df['combi_qd'] = flow_df['traffic_flow'] + flow_df['num_vehicles']
 
+    # Getting the max metric combinations index
     combi_vd_idx = flow_df[flow_df['combi_vd'] == flow_df['combi_vd'].max()].index
     combi_vq_idx = flow_df[flow_df['combi_vq'] == flow_df['combi_vq'].max()].index
     combi_qd_idx = flow_df[flow_df['combi_qd'] == flow_df['combi_qd'].max()].index
 
+    # Getting the max metric combinations
     combi_vd = flow_df.loc[combi_vd_idx, ['space_mean_speed', 'num_vehicles']]
     combi_vq = flow_df.loc[combi_vq_idx, ['space_mean_speed', 'traffic_flow']]
     combi_qd = flow_df.loc[combi_qd_idx, ['traffic_flow', 'num_vehicles']]
 
+    # Getting the individual values of the max metric combintions
     combi_v = flow_df['space_mean_speed'][combi_vd_idx]
     combi_d = flow_df['num_vehicles'][combi_vd_idx]
     combi_v = flow_df['space_mean_speed'][combi_vq_idx]
@@ -168,7 +222,6 @@ def metrics_plots(flow_df):
     axs[1].set_title('Traffic Speed vs. Traffic Flow')
     axs[1].legend()
 
-
     # Create the plot Flow vs Density
     axs[2].scatter(flow_df['num_vehicles'], flow_df['traffic_flow'], s=0.01)
     axs[2].scatter(corr_qd, max_q, color='red', label=f'Max Flow: {max_q:.2f}')
@@ -184,16 +237,76 @@ def metrics_plots(flow_df):
     # Adjust layout and display plots
     plt.tight_layout()
     # Save the figure as a single image
-    plot_name3 = filename.replace(".json", "").replace("data/1000_vehicles/","")
+    plot_name3 = filename.replace(".json", "").replace("data/","")
     plt.savefig(f'{plot_name3}_points.png', dpi=300)
 
-folderpath = "data/redo_data/"
 
-road_length = road_params['road_length']
+def average_calculator(flow_df: pd.DataFrame) -> Dict[List[float]]:
 
-testDict = {
-    '0-16km': (0, loc_conversion(16000)),
-}
+    """Computing averaged metrics
+
+    Returns:
+        Dict[List[float]: saved dictionary of averaged metric for each combination
+    """
+
+    interval_list = list(range(16))
+    save_dict = {}
+    flow_list = []
+    speed_list = []
+    density_list = []
+
+    for interval_index in interval_list:
+        # Filter data for the current section
+        visual = flow_df[flow_df['section'] == interval_index]
+
+        # Calculate the average metrics
+        average_flow = visual['traffic_flow'].mean()
+        average_speed = visual['space_mean_speed'].mean()
+        average_density = visual['num_vehicles'].mean()
+
+        # append to overall list
+        flow_list.append(average_flow)
+        speed_list.append(average_speed)
+        density_list.append(average_density)
+
+        save_dict[interval_index] = [average_speed, average_density, average_flow]
+
+    save_dict[16] = [np.mean(speed_list), int(np.mean(density_list)), np.mean(flow_list)]
+
+    return save_dict
+
+
+def saving_csv(csv_name: str, data: List[Dict[int, List[float]]]) -> None:
+
+    """Saving data into csv file
+
+    Args:
+        csv_name (str): _description_
+        data (List[Dict[int, List[float]]]): metric data
+    """
+
+    # Extract headers from the dictionary
+    headers = list(average_data[0].keys())
+
+    # Write data to the CSV file
+    with open(csv_name, mode='w', newline='') as csv_file:
+        csv_writer = csv.DictWriter(csv_file, fieldnames=headers)
+
+        # Write headers
+        csv_writer.writeheader()
+
+        # Write values from each dictionary
+        for data_dict in average_data:
+            # Write values
+            for i in range(len(data_dict[0])):
+                row_data = {header: data_dict[header][i] for header in headers}
+                csv_writer.writerow(row_data)
+
+
+# Main executing section
+folderpath = "data/vehicle_data/"
+average_data = []
+print("Getting metrics")
 
 # Iterate through the files in the folder
 for filename in tqdm(os.listdir(folderpath), desc="Files"):
@@ -222,26 +335,35 @@ for filename in tqdm(os.listdir(folderpath), desc="Files"):
 
         df = initdf.copy()
         df = df.drop(columns=['vehicle_type', 'timestamp'])
-        section_length = loc_conversion(1000)
-        def assign_section(location):
-            return int(location[0]//section_length)
+
+        # Assign the sections
         df['section'] = df['location'].apply(assign_section)
+
+        # Converting pixel/s to km/h
         df['speed'] *= (3600/2000)
+
+        # Counting the number of unique vehicles per section
         df['num_vehicles'] = df.groupby(['frame', 'section'])['uuid'].transform('count')
         df['section'] = df['location'].apply(assign_section)
 
+        # Computing space mean speed and traffic flow
         df['reciprocal_speed'] = 1 / df['speed']
         flow_df = df.drop_duplicates(subset=['frame', 'section','uuid'])
         flow_df['space_mean_speed_denom'] = flow_df.groupby(['frame', 'section'])['reciprocal_speed'].transform('sum')
-
         flow_df['space_mean_speed'] = flow_df['num_vehicles'] / flow_df['space_mean_speed_denom']
         flow_df['traffic_flow'] = flow_df['space_mean_speed'] * flow_df['num_vehicles']
 
+        # Data clean up
         flow_df = flow_df.drop_duplicates(subset=['frame', 'section'])
         flow_df.dropna(subset=['traffic_flow'], inplace=True)
 
-        interval_plots(flow_df)
+        interval_plots(flow_df=flow_df)
 
-        fundamental_plots(flow_df)
+        fundamental_plots(flow_df=flow_df)
 
-        metrics_plots(flow_df)
+        metrics_plots(flow_df=flow_df)
+
+        average_data.append(average_calculator(flow_df=flow_df))
+
+saving_csv(csv_name="data/averaged_data.csv", data=average_data)
+print("Metrics Saved")

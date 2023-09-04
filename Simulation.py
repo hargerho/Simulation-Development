@@ -1,45 +1,73 @@
 import json
 import os
 
-from Vehicle import Vehicle
 from Road import Road
+from Vehicle import Vehicle
 from common.config import simulation_params
 
 class SimulationManager:
+
+    """
+    This class links the Window class to the Road class via `update_frame`
+    """
+
     def __init__(self):
+
+        """
+        Initializes the class by creating instances of the Road class, and initializing
+        dictionaries for displaying vehicles and recording data.
+        """
+
         self.road = Road() # Create Road class
         self.display_vehicles = {}
         self.record_dict = {} # Dict of vehicle_list, key = iteration, value = vehicle_list
 
+
     def converting_objects(self, vehicle_list):
-        # sourcery skip: for-append-to-extend
+
+        """
+        The function "converting_objects" takes a list of vehicles
+        and returns a list of their vehicle IDs, including ACC vehicles.
+
+        Args:
+            vehicle_list: A list of objects representing SHC or ACC.
+
+        Returns:
+            A list of vehicle IDs.
+        """
+
         vehicle_stats = []
+
         for vehicle in vehicle_list:
             if isinstance(vehicle, Vehicle):
                 vehicle_stats.append(vehicle.vehicle_id())
             else:
-                for convoy in vehicle.convoy_list:
-                    vehicle_stats.append(convoy.vehicle_id())
+                vehicle_stats.extend(convoy.vehicle_id() for convoy in vehicle.convoy_list)
+
         return vehicle_stats
+
 
     def update_frame(self, is_recording, frame, restart):
 
-        # print("Frame Count: ", frame)
-        vehicle_list, run_flag = self.road.update_road(restart=restart) # List of vehicle objects
+        vehicle_list, run_flag = self.road.update_road(restart=restart)
 
+        # Records the simulation
         if is_recording:
             self.record_dict[frame] = self.converting_objects(vehicle_list=vehicle_list)
 
+        # Resets the recorded dictionary
         if restart:
             self.record_dict = {}
 
         return vehicle_list, run_flag
 
     def saving_record(self):
-        print("Saving data ...")
-        filepath = os.path.join(simulation_params['folderpath'], simulation_params['filename'] + ".json")
         idx = 0
+        filepath = os.path.join(simulation_params['folderpath'], simulation_params['filename'] + ".json")
 
+        print("Saving data ...")
+
+        # If file exist in folder, append an index to the back of the filename
         while os.path.exists(filepath):
             filename = f"{simulation_params['filename']}_{idx}"
             filepath = os.path.join(simulation_params['folderpath'], f"{filename}.json")
@@ -47,4 +75,5 @@ class SimulationManager:
 
         with open(filepath, "w") as file:
             json.dump(self.record_dict, file, indent=4)
+
         print("Data Saved!")
