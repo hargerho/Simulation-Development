@@ -552,8 +552,6 @@ class Vehicle:
                 if self.road_closed:
                     if (self.local_loc[1] - self.lanewidth != self.road_closed): # if lane changed into not closed
                         self.local_loc[1] -= self.lanewidth
-                    else: # if can change but road is closed
-                        self.local_loc[1] = self.local_loc[1]
                 else:
                     self.local_loc[1] -= self.lanewidth
 

@@ -129,29 +129,29 @@ class UserButton(pygame.sprite.Sprite):
 
             # Road closure update
             if self.button_name == "road_closed_off":
-                road_params["road_closed"] = 'off'
+                road_params["road_closed"] = None
             elif self.button_name == "road_closed_left":
-                road_params["road_closed"] = 'left'
+                road_params["road_closed"] = "left"
             elif self.button_name == "road_closed_middle":
-                road_params["road_closed"] = 'middle'
+                road_params["road_closed"] = "middle"
             elif self.button_name == "road_closed_right":
-                road_params["road_closed"] = 'right'
+                road_params["road_closed"] = "right"
 
             # ACC driving logic update
             if self.button_name == "acc_logic_normal":
-                driving_params["acc_logic"] = 'normal'
+                driving_params["acc_logic"] = "normal"
                 acc_params["acc_spawnrate"] = 0.2
             elif self.button_name == "acc_logic_cautious":
-                driving_params["acc_logic"] = 'cautious'
+                driving_params["acc_logic"] = "cautious"
                 acc_params["acc_spawnrate"] = 0.2
             elif self.button_name == "acc_off":
                 acc_params["acc_spawnrate"] = 0
 
             # SHC driving logic update
             if self.button_name == "shc_logic_normal":
-                driving_params["shc_logic"] = 'normal'
+                driving_params["shc_logic"] = "normal"
             elif self.button_name == "shc_logic_irrational":
-                driving_params["shc_logic"] = 'irrational'
+                driving_params["shc_logic"] = "irrational"
         else:
             pygame.draw.rect(self.image, window_params['green'], self.image.get_rect(), 4)
 
