@@ -57,7 +57,7 @@ road_params = {
     "vehicle_inflow": 4000, # 1000 approx 1veh/3.6sec testing: 10000
     "onramp_inflow": 0,
     "num_convoy_vehicles": 3,
-    "road_closed": 'right',
+    "road_closed": 'left',
     "partial_close": False
 }
 
@@ -69,7 +69,7 @@ road_params = {
 driving_params = {
     "desired_velocity": speed_conversion(70), # testing: 16.6 real: 70
     "safety_threshold": length_conversion(1.5), # testing: 20px 1.5
-    "max_acceleration": length_conversion(0.73), # IDM Paper # was 0.73 # Testing:50
+    "max_acceleration": length_conversion(50), # IDM Paper # was 0.73 # Testing:50
     "comfortable_deceleration": length_conversion(1.67), # IDM Paper # was 1.67 # Testing: 4.61
     "acceleration_component": 4, # IDM Paper
     "left_bias": length_conversion(0.3), # MOBIL Paper
@@ -87,7 +87,7 @@ shc_params = {
 }
 
 acc_params = {
-    "acc_spawnrate": 0, # Init 0.2
+    "acc_spawnrate": 0.5, # Init 0.2
     "normal": {"safe_headway": 3.1, "speed_variation": 0, "politeness_factor": 0.5},
     "cautious": {"safe_headway": 4, "speed_variation": 0, "politeness_factor": 0.8},
 }

@@ -29,22 +29,6 @@ def get_params(combination):
         17: ['normal', 'normal', None, 0, 7000],
     }
 
-    # range_testing = {
-    #     0: ['normal', 'normal', None, 50, 4000],
-    #     1: ['normal', 'normal', None, 100, 4000],
-    #     2: ['normal', 'normal', None, 150, 4000],
-    #     3: ['normal', 'normal', None, 200, 4000],
-    #     4: ['normal', 'normal', None, 0, 1000],
-    #     5: ['normal', 'normal', None, 0, 2000],
-    #     6: ['normal', 'normal', None, 0, 3000],
-    #     7: ['normal', 'normal', None, 0, 5000],
-    #     8: ['normal', 'normal', None, 0, 6000],
-    #     9: ['normal', 'normal', None, 0, 7000],
-    # }
-
-    # 8: ['normal', 'normal', None, range(200), 4000], # Manual testing range(200)
-    # 9: ['normal', 'normal', None, 0, range(1000,7000)], # Manual testing
-
 
     testing_params_no_acc = {
         0: ['cautious', 'normal', None, 0, 4000],
