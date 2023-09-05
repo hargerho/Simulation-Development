@@ -160,7 +160,6 @@ class Road:
 
         # Spawn location
         if vehicle_type == 'acc':
-
             # Create a tmp convoy
             tmp_convoy = Convoy(logic_dict=logic_dict, lead_spawn_loc=self.acc_spawn_loc, vehicle_type=vehicle_type,
                                 num_subconvoy=self.num_convoy_vehicles)
