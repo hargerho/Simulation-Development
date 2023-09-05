@@ -21,7 +21,7 @@ class DriverModel:
         self.a = model_params['a'] # Max acceleration
         self.b = model_params['b'] # Comfortable deceleration
         self.delta = model_params['delta'] # Acceleration component
-        self.T = model_params['T'] # Reaction time safe headway
+        self.T = model_params['T'] #  Time safe headway
         self.left_bias = model_params['left_bias'] # Keep left bias
         self.politeness = model_params['politeness'] # Change lane politeness
         self.change_threshold = model_params['change_threshold'] # Change lane threshold

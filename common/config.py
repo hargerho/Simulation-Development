@@ -86,11 +86,11 @@ road_params = {
 driving_params = {
     "desired_velocity": speed_conversion(70),
     "safety_threshold": length_conversion(1.5),
-    "max_acceleration": length_conversion(50), # IDM Paper
+    "max_acceleration": length_conversion(0.73), # IDM Paper
     "comfortable_deceleration": length_conversion(1.67), # IDM Paper
     "acceleration_component": 4, # IDM Paper
     "left_bias": length_conversion(0.3), # MOBIL Paper
-    "lane_change_threshold": length_conversion(0.1), # MOBIL Paper
+    "lane_change_threshold": length_conversion(0.3), # MOBIL Paper
     "acc_logic": "normal", # toggle normal/irrational
     "shc_logic": "normal", # toggle normal/cautious
 }
