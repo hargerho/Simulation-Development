@@ -7,7 +7,12 @@ from DriverModel import DriverModel as DM
 from common.config import driving_params, window_params, road_params, simulation_params
 from typing import List, Dict, Any, Tuple
 
+
 class Vehicle:
+
+    """Create a Vehicle instance
+    """
+
     def __init__(self, logic_dict: Dict[str, float], spawn_loc: List[float], vehicle_type: str) -> None:
 
         """Intializing a Vehicle instance

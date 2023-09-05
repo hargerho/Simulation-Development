@@ -1,5 +1,7 @@
 import math
 from typing import Dict, Tuple
+
+
 class DriverModel:
 
     """Creating the DriverModel specific to the created vehicle
@@ -22,6 +24,7 @@ class DriverModel:
         self.left_bias = model_params['left_bias'] # Keep left bias
         self.politeness = model_params['politeness'] # Change lane politeness
         self.change_threshold = model_params['change_threshold'] # Change lane threshold
+
 
     def s_star(self, v: float, delta_v: float) -> float:
 
@@ -58,7 +61,9 @@ class DriverModel:
 
         return (self.a * (1 - math.pow(v/self.v_0, self.delta) - math.pow(s_star/s, 2)))
 
+
     def calc_disadvantage(self, v: float, new_surrounding_v: float, new_surrounding_dist: float, old_surrounding_v: float, old_surrounding_dist: float) -> Tuple[float, float]:
+
         """Calculates intermediate values to check if a lane change is safe
 
         Args:

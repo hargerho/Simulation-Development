@@ -1,14 +1,16 @@
-import json
 import os
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from tqdm import tqdm
 import csv
+import json
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from tqdm import tqdm
 from common.config import road_params
 from typing import Dict, List
 
 pd.options.mode.chained_assignment = None  # default='warn'
+
 
 def loc_conversion(value: float) -> float:
 
@@ -23,6 +25,7 @@ def loc_conversion(value: float) -> float:
 
     return value*2
 
+
 def assign_section(location: float) -> int:
 
     """Assign vehicle to section of the motorway
@@ -35,6 +38,7 @@ def assign_section(location: float) -> int:
     """
 
     return int(location[0]//loc_conversion(1000))
+
 
 def interval_plots(flow_df: pd.DataFrame) -> None:
 
@@ -78,6 +82,7 @@ def interval_plots(flow_df: pd.DataFrame) -> None:
     plot_name = filename.replace(".json", "").replace("data/","")
     plt.savefig(f'{plot_name}.png', dpi=300)
     print("Saved timesteps")
+
 
 def fundamental_plots(flow_df: pd.DataFrame) -> None:
 
@@ -145,6 +150,7 @@ def fundamental_plots(flow_df: pd.DataFrame) -> None:
     # Change filename and format as needed
     plt.savefig(f'{plot_name2}_plots.png', dpi=300)
     print("Saved fundamental")
+
 
 def metrics_plots(flow_df: pd.DataFrame) -> None:
 

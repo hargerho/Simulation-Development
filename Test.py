@@ -1,5 +1,6 @@
 from Simulation import SimulationManager
 
+
 class Test:
 
     """class to manage testing
@@ -13,6 +14,7 @@ class Test:
         self.sim = SimulationManager()
         self.is_recording = True
         self.is_running = True
+
 
     def run_test(self):
 

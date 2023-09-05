@@ -1,14 +1,15 @@
-import numpy as np
 import random
-from tqdm import tqdm
+import numpy as np
 
-from Vehicle import Vehicle
 from ACC import Convoy
+from Vehicle import Vehicle
 from common.config import road_params, driving_params, vehicle_models, simulation_params
-from typing import List, Type, Any, Tuple, Union
+from tqdm import tqdm
+from typing import List, Type, Any, Tuple
 
 # For repeatabiity
 random.seed(42)
+
 
 class Road:
 
@@ -253,6 +254,7 @@ class Road:
         else:
             self.onramp_frequency, self.onramp_spawn_interval, self.onramp_timer, self.onramp_last_spawn_time = 0, 0, 0, 0
 
+
     def despawn_stop_vehicles(self, vehicle: Any) -> None:
 
         """Remove the vehicle when reach the end of the road.
@@ -285,6 +287,7 @@ class Road:
             self.vehicle_despawn += 1
             if simulation_params['testing']:
                 self.progress_bar.update(1)
+
 
     def update_vehicle(self) -> None:
 

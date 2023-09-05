@@ -1,14 +1,15 @@
-import pygame
 import sys
 import time
-from statistics import harmonic_mean
+import pygame
 
 from Visual import *
 from ACC import Convoy
 from Simulation import SimulationManager
+from statistics import harmonic_mean
 from common.config import window_params, road_params, simulation_params
 
 SCALE = 10
+
 class Window:
 
     """Creating a WIndow class display
@@ -325,6 +326,7 @@ class Window:
                 realtime_metrics[idx] = []
 
         return realtime_metrics
+
 
     def average_metrics(self, realtime_metrics: List[List[float]]) -> List[float]:
 

@@ -4,6 +4,7 @@ import os
 from Road import Road
 from Vehicle import Vehicle
 from common.config import simulation_params
+from typing import Dict, List, Any, Tuple
 
 class SimulationManager:
 
@@ -11,10 +12,9 @@ class SimulationManager:
     This class links the Window class to the Road class via `update_frame`
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
 
-        """
-        Initializes the class by creating instances of the Road class, and initializing
+        """Initializes the class by creating instances of the Road class, and initializing
         dictionaries for displaying vehicles and recording data.
         """
 
@@ -23,17 +23,16 @@ class SimulationManager:
         self.record_dict = {} # Dict of vehicle_list, key = iteration, value = vehicle_list
 
 
-    def converting_objects(self, vehicle_list):
+    def converting_objects(self, vehicle_list: List[Any]) -> List[Dict[str, float]]:
 
-        """
-        The function "converting_objects" takes a list of vehicles
+        """The function "converting_objects" takes a list of vehicles
         and returns a list of their vehicle IDs, including ACC vehicles.
 
         Args:
-            vehicle_list: A list of objects representing SHC or ACC.
+            vehicle_list (List[Any]): list of Vehicles and Convoy
 
         Returns:
-            A list of vehicle IDs.
+            List[Dict[str, float]]: list of dictionary vehicle attributes
         """
 
         vehicle_stats = []
@@ -47,7 +46,18 @@ class SimulationManager:
         return vehicle_stats
 
 
-    def update_frame(self, is_recording, frame, restart):
+    def update_frame(self, is_recording: bool, frame: int, restart: bool) -> Tuple[List[Any], bool]:
+
+        """Executing functions that is refreshed for each frame
+
+        Args:
+            is_recording (bool): recording flag
+            frame (int): frame index
+            restart (bool): restart flag
+
+        Returns:
+            Tuple[List[Any], bool]: list of Vehicles and Convoy, simulation running flag
+        """
 
         vehicle_list, run_flag = self.road.update_road(restart=restart)
 
@@ -61,7 +71,12 @@ class SimulationManager:
 
         return vehicle_list, run_flag
 
-    def saving_record(self):
+
+    def saving_record(self) -> None:
+
+        """Saves the recorded vehicle attributes
+        """
+
         idx = 0
         filepath = os.path.join(simulation_params['folderpath'], simulation_params['filename'] + ".json")
 

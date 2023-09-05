@@ -1,12 +1,13 @@
 import pygame
+
 from common.config import window_params, road_params, driving_params, acc_params, simulation_params
 from typing import Any, Tuple, List
+
 
 class Objects:
 
     """Creating an Object instance
     """
-
 
     def __init__(self, x: float, y: float, image: Any, scale_x: float, scale_y: float) -> None:
         """Initializing Object parameters
@@ -56,7 +57,6 @@ class Button(Objects):
 
     """Creating a Button class, child of Object class
     """
-
 
     def __init__ (self, x: float, y: float, image: Any, scale_x: float, scale_y: float) -> None:
         super().__init__(x, y, image, scale_x, scale_y)

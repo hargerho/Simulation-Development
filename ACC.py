@@ -2,6 +2,7 @@ from Vehicle import Vehicle
 from common.config import simulation_params, driving_params, window_params
 from typing import List, Dict, Any
 
+
 class Convoy:
 
     """A class instance to represent ACC
@@ -36,6 +37,7 @@ class Convoy:
         self.veh_length = abs(self.loc_front - self.loc_back)
         self.convoy_dist = logic_dict.get('safe_headway') + driving_params['safety_threshold'] + window_params['vehicle_length']
 
+
     def update_convoy_local(self, vehicle_list: List[Any], vehicle_type: str) -> None:
 
         """Updates the convoy local parameters
@@ -56,6 +58,7 @@ class Convoy:
                 # Update driving params
                 vehicle.local_v = self.convoy_list[idx-1].local_v
                 vehicle.local_accel = self.convoy_list[idx-1].local_accel
+
 
     def update_convoy_global(self) -> None:
 
