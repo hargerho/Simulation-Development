@@ -314,20 +314,6 @@ class Vehicle:
 
         self.local_accel = self.driver.calc_acceleration(v=self.local_v, surrounding_v=front_v, s=dist) * self.ts
 
-    def partial_road_close(self, surrounding):
-        # for partial road close
-        if (surrounding['front_left'] is None and surrounding['back_left'] is None): # if no vehicle in front and back of to change lane
-            self.local_loc[1] -= self.lanewidth
-        if (surrounding['front_left'] is None and surrounding['back_left'] is not None):
-            if surrounding['back_left'].loc_front + self.s_0 + self.veh_length < self.loc_back:
-                self.local_loc[1] -= self.lanewidth
-        if (surrounding['back_left'] is None and surrounding['front_left'] is not None and surrounding['front_left'].v != 0):
-            if surrounding['front_left'].loc_back - self.s_0 - self.veh_length > self.loc_front:
-                self.local_loc[1] -= self.lanewidth
-        if (surrounding['front_left'] is not None and surrounding['front_left'].v != 0 and surrounding['back_left'] is not None):
-            if (surrounding['front_left'].loc_back - self.s_0 - self.veh_length > self.loc_front and surrounding['back_left'].loc_front + self.s_0 < self.loc_back): # if there are vehicles but no possible collision
-                self.local_loc[1] -= self.lanewidth
-
     def shc_check_lane_change(self, surrounding):
         # Left Change
         if surrounding['front'] is not None and (surrounding['front'].v == 0) and self.loc[1] == self.rightlane:
@@ -364,15 +350,14 @@ class Vehicle:
             change_flag = self.calc_lane_change(change_dir='left', current_front=surrounding['front'],
                                                     new_front=surrounding['front_left'], new_back=surrounding['back_left'],
                                                     right=surrounding['right'], left=surrounding['left'])
-
-            if self.partial_close: # ACC can return back to blocked lane
-                if change_flag and surrounding['left'] is None:
-                    self.partial_road_close(surrounding=surrounding)
-            elif self.road_closed: # if there is a road closure
-                if change_flag and (self.local_loc[1] - self.lanewidth != self.road_closed): # if lane changed into not closed
+            if change_flag and surrounding['left'] is None:
+                if self.road_closed:
+                    if (self.local_loc[1] - self.lanewidth != self.road_closed): # if lane changed into not closed
+                        self.local_loc[1] -= self.lanewidth
+                    else: # if can change but road is closed
+                        self.local_loc[1] = self.local_loc[1]
+                else:
                     self.local_loc[1] -= self.lanewidth
-            elif change_flag: # if can change but road is closed
-                self.local_loc[1] = self.local_loc[1]
 
     def update_local(self, vehicle_list, vehicle_type):
         # Get surrounding vehicles
