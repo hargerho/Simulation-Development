@@ -464,14 +464,18 @@ class Window:
         while self.is_running:
             restart = False
 
+            # Background controls
+            self.background_controls()
+
             self.draw_refeshed_objects()
+
+            # Road closure and logic buttons buttons
+            self.global_buttons.draw(self.win)
+            self.global_buttons.update()
 
             # Simulation Button Presses
             restart = self.sim_button_press()
             self.draw_timer(restart=restart)
-
-            # Background controls
-            self.background_controls()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -509,9 +513,6 @@ class Window:
                 elif self.speed_slider.slide_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
                     self.speed_slider.move_slider(pygame.mouse.get_pos())
                     simulation_params['playback_speed'] = self.speed_slider.slider_value()
-
-            self.global_buttons.update()
-            self.global_buttons.draw(self.win)
 
             if not self.is_paused:
                 # Updates simulation frame
