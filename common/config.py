@@ -51,13 +51,13 @@ road_params = {
     "toplane_loc": (0,380), #(x, y)
     "road_length": length_conversion(500), #16000m
     "onramp_length": length_conversion(140), # 140m
-    "onramp_offset": length_conversion(2050),
+    "onramp_offset": length_conversion(60),
     "num_lanes": 4, # including an onramp
     "lanewidth": length_conversion(5), # arbitary
     "vehicle_inflow": 4000, # 1000 approx 1veh/3.6sec testing: 10000
-    "onramp_inflow": 0,
+    "onramp_inflow": 1000,
     "num_convoy_vehicles": 3,
-    "road_closed": 'left',
+    "road_closed": None,
     "partial_close": False
 }
 
@@ -87,7 +87,7 @@ shc_params = {
 }
 
 acc_params = {
-    "acc_spawnrate": 0.5, # Init 0.2
+    "acc_spawnrate": 0.2, # Init 0.2
     "normal": {"safe_headway": 3.1, "speed_variation": 0, "politeness_factor": 0.5},
     "cautious": {"safe_headway": 4, "speed_variation": 0, "politeness_factor": 0.8},
 }
