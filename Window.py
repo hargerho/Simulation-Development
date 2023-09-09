@@ -88,7 +88,6 @@ class Window:
         # Pause/Unpause params
         self.is_paused = False
         self.paused_time = 0
-        self.last_pause_start = 0
         self.start_time = pygame.time.get_ticks()  # Record the start time of the simulation
 
         # Creating Real Time Metric Display
@@ -171,7 +170,6 @@ class Window:
         if restart:
             self.start_time = pygame.time.get_ticks()
             self.paused_time = 0
-            self.last_pause_start = 0
 
         if self.is_paused:
             elapsed_time = self.paused_time
