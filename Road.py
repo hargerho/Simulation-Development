@@ -179,11 +179,12 @@ class Road:
                 self.convoy_spawned = True
                 self.vehicle_list.append(tmp_convoy)
 
-        # Reset spawn timer even if vehicle is not spawn to prevent upstream overcrowding
-        if self.convoy_spawned:
-            self.last_spawn_time = self.timer + (2*self.spawn_interval)
-        else:
-            self.last_spawn_time = self.timer
+            if self.convoy_spawned:
+                # ACC spawned equivalent to waiting for 2 more SHC vehicles added
+                self.last_spawn_time = self.timer + (2*self.spawn_interval)
+            else:
+                # SHC spawned
+                self.last_spawn_time = self.timer
 
 
     def spawn_onramp(self) -> None:
