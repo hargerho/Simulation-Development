@@ -42,24 +42,35 @@ def assign_section(location: float) -> int:
 
 def interval_plots(flow_df: pd.DataFrame) -> None:
 
-    """Creating metric vs timestep plots
+    """Creating metric vs timestep plots forsections involving
+    0, 1: Before on-ramp
+    2, 3: After on-ramp
+    7, 8: Midway point
+    14, 15: End of motorway
 
     Args:
         flow_df (pd.DataFrame): dataframe of vehicle parameters
     """
 
-    # Saving timestep plots
-    num_plots = flow_df['section'].max()
+    intervals_to_plot = [0,1,2,3,4,7,8,14,15]
 
     # Create a figure with subplots
-    fig, axes = plt.subplots(nrows=num_plots, figsize=(40, 10*num_plots))
+    num_rows = 3
+    num_cols = 3
+    # Create a figure with subplots arranged in a grid
+    fig, axes = plt.subplots(nrows=num_rows, ncols=num_cols, figsize=(30, 20))
 
-    for i, ax in enumerate(axes):
+    # Used to scale the y-axis
+    max_flows = []
+
+    for i, (interval_index, ax) in enumerate(zip(intervals_to_plot, axes.flatten())):
         # Filter data for the current section
-        visual = flow_df[flow_df['section'] == i]
+        visual = flow_df[flow_df['section'] == interval_index]
 
         # Calculate the average traffic flow
         averaged = visual['traffic_flow'].mean()
+
+        max_flows.append(visual['traffic_flow'].max())
 
         # Plot the average line
         ax.axhline(y=averaged, color='red', linestyle='--', label=f'Average: {averaged:.3f}')
@@ -68,12 +79,16 @@ def interval_plots(flow_df: pd.DataFrame) -> None:
         ax.plot(visual['frame'], visual['traffic_flow'], label='Traffic Flow')
 
         # Set title, xlabel, and ylabel
-        ax.set_title(f"Traffic Flow vs Timestep: Interval {i}")
+        ax.set_title(f"Traffic Flow vs Timestep: Interval {interval_index}")
         ax.set_xlabel("Timestep")
         ax.set_ylabel("Traffic Flow (veh/h)")
 
         # Add legend
         ax.legend()
+
+    # Set the same y-axis range for all plots
+    for ax in axes.flatten():
+        ax.set_ylim(0, max(max_flows))
 
     # Adjust layout and spacing
     plt.tight_layout()
