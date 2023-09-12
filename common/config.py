@@ -69,7 +69,7 @@ road_params = {
 driving_params = {
     "desired_velocity": speed_conversion(70), # testing: 16.6 real: 70
     "safety_threshold": length_conversion(1.5), # testing: 20px 1.5
-    "max_acceleration": length_conversion(0.73), # IDM Paper # was 0.73 # Testing:50
+    "max_acceleration": length_conversion(50), # IDM Paper # was 0.73 # Testing:50
     "comfortable_deceleration": length_conversion(1.67), # IDM Paper # was 1.67 # Testing: 4.61
     "acceleration_component": 4, # IDM Paper
     "left_bias": length_conversion(0.3), # MOBIL Paper
@@ -101,7 +101,7 @@ baseline = f"ACCNo_SHC{driving_params['shc_logic']}_Road{road_params['road_close
 # Min ts = 0.01, playback_speed = 1
 simulation_params = {
     "ts": 0.01, # was 0.001  testing: 1/60 # Ts < 0.5 same results
-    "playback_speed": 3, # realtime = 1
+    "playback_speed": 1, # realtime = 1
     "folderpath": "data/no_acc",
     "filename": f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_Road{road_params['road_closed']}_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}",
     "record": True, # Default False
