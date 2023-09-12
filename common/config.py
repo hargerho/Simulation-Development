@@ -116,6 +116,6 @@ simulation_params = {
     "folderpath": "data",
     "num_vehicles": 1000,
     "filename": f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}",
-    "record": False, # Default False
-    "testing": False # Default False
+    "record": True, # Default False
+    "testing": True # Default False
 }

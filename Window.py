@@ -416,6 +416,7 @@ class Window:
         if not self.is_recording:
             if self.record_button.draw(self.win):
                 self.is_recording = not self.is_recording
+                self.has_recorded = True
                 print(" Start Recording")
         elif self.record_stop.draw(self.win):
             self.is_recording = not self.is_recording
