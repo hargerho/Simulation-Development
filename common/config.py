@@ -90,7 +90,7 @@ driving_params = {
     "comfortable_deceleration": length_conversion(1.67), # IDM Paper
     "acceleration_component": 4, # IDM Paper
     "left_bias": length_conversion(0.3), # MOBIL Paper
-    "lane_change_threshold": length_conversion(0.3), # MOBIL Paper
+    "lane_change_threshold": length_conversion(0.1), # MOBIL Paper
     "acc_logic": "normal", # toggle normal/irrational
     "shc_logic": "normal", # toggle normal/cautious
 }
@@ -114,7 +114,7 @@ simulation_params = {
     "ts": 0.1,
     "playback_speed": 2,
     "folderpath": "data",
-    "num_vehicles": 1000,
+    "num_vehicles": 100,
     "filename": f"ACC{driving_params['acc_logic']}_SHC{driving_params['shc_logic']}_RoadNo_RampIn{road_params['onramp_inflow']}_VehIn{road_params['vehicle_inflow']}",
     "record": True, # Default False
     "testing": True # Default False

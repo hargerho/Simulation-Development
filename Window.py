@@ -457,7 +457,6 @@ class Window:
 
         clock = pygame.time.Clock()
         frame = 0
-        self.minimap_value = 0
         self.create_buttons()
 
         while self.is_running:

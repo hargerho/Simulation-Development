@@ -43,16 +43,6 @@ class Objects:
         surface.blit(self.image, (center_x, center_y))
 
 
-    def draw_special(self, surface: pygame.Surface) -> None:
-
-        """Drawing a type of object position about its center
-
-        Args:
-            surface (pygame.Surface): pygame surface
-        """
-
-        surface.blit(self.image, (self.x, self.y))
-
 class Button(Objects):
 
     """Creating a Button class, child of Object class
@@ -396,14 +386,12 @@ class Background():
         self.road_image = pygame.transform.scale(road_image, (road_length, road_width))
         self.road_width = self.road_image.get_width()
         self.road_height = self.road_image.get_height()
-        self.road_rect = self.road_image.get_rect()
         self.road_y = y
 
         # Road around onramp
         crop_rect = pygame.Rect(0, 10, self.road_width - 488, self.road_height - 10)
         self.cropped_road = self.road_image.subsurface(crop_rect)
         self.crop_width = self.cropped_road.get_width()
-        self.crop_height = self.cropped_road.get_height()
         self.crop_y = crop_y
 
 
@@ -420,10 +408,8 @@ class Background():
         """
 
         onramp_image = pygame.image.load(road_file).convert_alpha()
-        self.onramp_height = onramp_image.get_height()
         self.onramp_image = pygame.transform.scale(onramp_image, (onramp_length, onramp_width))
         self.onramp_width = self.onramp_image.get_width()
-        self.onramp_rect = self.onramp_image.get_rect()
         self.onramp_x = x
         self.onramp_y = y
 
