@@ -19,7 +19,6 @@ class SimulationManager:
         """
 
         self.road = Road() # Create Road class
-        self.display_vehicles = {}
         self.record_dict = {} # Dict of vehicle_list, key = iteration, value = vehicle_list
 
 

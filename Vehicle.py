@@ -500,7 +500,7 @@ class Vehicle:
 
         # Right change
         if (surrounding['front'] is not None
-            and (surrounding['front'].v == 0)
+            and (surrounding['front'].v < self.v_0)
             and self.loc[1] in [self.leftlane, self.middlelane]
             ):
             change_flag = self.calc_lane_change(change_dir='right', current_front=surrounding['front'],
