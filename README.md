@@ -1,7 +1,7 @@
 # Motorway Traffic Simulator with AI-Controlled Convoys
 A microscopic traffic simulator using Pygame that is build on the Intelligent Driver Model [[1](#reference)] and Minimizing Overall Braking Induced by Lane change (MOBIL) model [[2](#reference)]
 
-There are 2 types of vehicles simulated, a AI-Controlled Convoy (ACC) and a Simulated Human Driver (SHC) vehicle. The ACC  models a 3-vehicle light goods vehicle convoy that drives on the left lane by default.
+There are 2 types of vehicles simulated, a AI-Controlled Convoy (ACC) and a Simulated Human Controlled (SHC) vehicle. The ACC  models a 3-vehicle light goods vehicle convoy that drives on the left lane by default.
 
 A 16km motorway was created with a 140m on-ramp placed at the 2050m mark of the motorway.
 
