@@ -1,8 +1,8 @@
 import random
 import numpy as np
 
-from ACC import Convoy
-from Vehicle import Vehicle
+from src.ACC import Convoy
+from src.Vehicle import Vehicle
 from common.config import road_params, driving_params, vehicle_models, simulation_params
 from tqdm import tqdm
 from typing import List, Type, Any, Tuple

@@ -2,9 +2,9 @@ import sys
 import time
 import pygame
 
-from Visual import *
-from ACC import Convoy
-from Simulation import SimulationManager
+from src.Visual import *
+from src.ACC import Convoy
+from src.Simulation import SimulationManager
 from statistics import harmonic_mean
 from common.config import window_params, road_params, simulation_params
 

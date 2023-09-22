@@ -1,7 +1,7 @@
 import time
 
-from Window import Window
-from Test import Test
+from src.Window import Window
+from src.Test import Test
 from common.config import *
 from typing import List, Dict, Union
 

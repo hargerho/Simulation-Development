@@ -3,7 +3,7 @@ import time
 import math
 import numpy as np
 
-from DriverModel import DriverModel as DM
+from src.DriverModel import DriverModel as DM
 from common.config import driving_params, window_params, road_params, simulation_params
 from typing import List, Dict, Any, Tuple
 

@@ -1,4 +1,4 @@
-from Vehicle import Vehicle
+from src.Vehicle import Vehicle
 from common.config import simulation_params, driving_params, window_params
 from typing import List, Dict, Any
 

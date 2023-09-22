@@ -1,4 +1,4 @@
-from Simulation import SimulationManager
+from src.Simulation import SimulationManager
 
 
 class Test:

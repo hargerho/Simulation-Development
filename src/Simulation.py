@@ -1,8 +1,8 @@
 import json
 import os
 
-from Road import Road
-from Vehicle import Vehicle
+from src.Road import Road
+from src.Vehicle import Vehicle
 from common.config import simulation_params
 from typing import Dict, List, Any, Tuple
 
