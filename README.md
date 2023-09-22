@@ -25,7 +25,7 @@ The playback speed slider controls the simulation speed. Do note that the extend
 
 To pan the camera through the background, use the following controls:
 - `Left` keyboard button to pan **left**
-- `Down` keyboard button to pan *left* at a greater speed
+- `Down` keyboard button to pan **left** at a greater speed
 - `Right` keyboard to pan **right**
 - `Up` keyboard button to pan **right** at a greater speed
 
