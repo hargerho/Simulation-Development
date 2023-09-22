@@ -9,7 +9,7 @@ from tqdm import tqdm
 from common.config import road_params
 from typing import Dict, List
 
-pd.options.mode.chained_assignment = None  # default='warn'
+pd.options.mode.chained_assignment = None
 
 
 def loc_conversion(value: float) -> float:
@@ -325,7 +325,7 @@ def saving_csv(csv_name: str, data: List[Dict[int, List[float]]]) -> None:
 
 
 # Main executing section
-folderpath = "data/vehicle_data/"
+folderpath = "data/"
 average_data = []
 print("Getting metrics")
 
